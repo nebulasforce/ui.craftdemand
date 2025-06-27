@@ -18,10 +18,10 @@ export default function Home() {
         <Group className="h-full px-md">
           <Image
             className="dark:invert"
-            src="https://nextjs.org/icons/next.svg"
+            src="/favicon.svg"
             alt="logo"
-            width={100}
-            height={100}
+            width={40}
+            height={40}
           />
         </Group>
       </AppShellHeader>
