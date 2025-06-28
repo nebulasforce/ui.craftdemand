@@ -3779,6 +3779,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@mantine/utils@npm:^6.0.22":
+  version: 6.0.22
+  resolution: "@mantine/utils@npm:6.0.22"
+  peerDependencies:
+    react: ">=16.8.0"
+  checksum: 10c0/ac7ec0022f35d6752f198c013b44009d1c24eaeb7f84979a9e08cc078effa05834112c4595962553580b89e8dfddb6d3dc969b9d8e3dbf08fafed065cd636eaa
+  languageName: node
+  linkType: hard
+
 "@mantinex/mantine-logo@npm:^2.0.0":
   version: 2.0.0
   resolution: "@mantinex/mantine-logo@npm:2.0.0"
@@ -12155,6 +12164,7 @@ __metadata:
     "@ianvs/prettier-plugin-sort-imports": "npm:^4.4.2"
     "@mantine/core": "npm:8.1.2"
     "@mantine/hooks": "npm:8.1.2"
+    "@mantine/utils": "npm:^6.0.22"
     "@mantinex/mantine-logo": "npm:^2.0.0"
     "@next/bundle-analyzer": "npm:^15.3.3"
     "@storybook/nextjs": "npm:^8.6.8"

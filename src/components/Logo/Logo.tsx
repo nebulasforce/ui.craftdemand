@@ -15,14 +15,17 @@ interface LogoProps {
   radius?: string | number;
   isSvg?: boolean; // 允许手动覆盖检测结果
   wrap?: React.CSSProperties['flexWrap'];
-  textProps?: Omit<TextProps, 'children' | 'size'>; // 新增：允许自定义Text组件属性
+  textProps?: Omit<TextProps, 'children' | 'size'>& { // 扩展textProps
+    gradient?: { from: string; to: string; direction?: number };
+    verticalAlign?: 'top' | 'center' | 'bottom';
+  }; // 新增：允许自定义Text组件属性
   imageProps?: React.ComponentPropsWithoutRef<typeof Image>; // 新增：自定义Image属性
 }
 
 export const Logo = ({
                        src = 'https://picsum.photos/200/200',
-                       alt = 'Custom logo',
-                       text = 'Custom',
+                       alt = 'CraftDemand',
+                       text = 'craftdemand',
                        size = 32,
                        color = 'dimmed.6',
                        gap = 8,
@@ -55,9 +58,20 @@ export const Logo = ({
       }}
     />
   ) : null;
+// 提取自定义属性
+  const { gradient, verticalAlign, ...validTextProps } = textProps;
+  // 根据textAlign调整flex对齐方式
+  const getVerticalAlign = () => {
+    switch(verticalAlign) {
+      case 'top': return 'flex-start';
+      case 'center': return 'center';
+      case 'bottom': return 'flex-end';
+      default: return 'center';
+    }
+  };
 
   return (
-    <Group gap={gap} align="center" wrap={wrap}>
+    <Group gap={gap} align={getVerticalAlign()} wrap={wrap}>
       {isSvgSource ? (
         svgContent
       ) : (
@@ -78,9 +92,12 @@ export const Logo = ({
       )}
       {text && (
         <Text
-          size={typeof size === 'number' ? rem(size * 0.6) : size}
+          size={typeof size === 'number' ? rem(size * 0.8) : size}
           c={color} // 使用c属性设置颜色
-          {...textProps} // 展开用户自定义属性
+          {...validTextProps} // 展开用户自定义属性
+          // 当设置gradient时，使用Mantine的内置渐变功能
+          variant={gradient? 'gradient' : undefined}
+          gradient={gradient}
           style={{
             fontWeight: 800, // 通过style属性设置字体粗细
             ...textProps.style, // 保留用户可能传入的style

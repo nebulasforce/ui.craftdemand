@@ -4,4 +4,4 @@ export default {
   title: 'Logo',
 };
 
-export const Usage = () => <Logo />;
+export const Usage = () => <Logo size={40} textProps={{gradient: { from: 'pink', to: 'yellow' },verticalAlign:"bottom"}} />;

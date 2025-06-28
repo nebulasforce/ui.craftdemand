@@ -8,7 +8,7 @@ import {
   Text,
   Title,
 } from "@mantine/core";
-import Image from "next/image";
+import { Logo } from '@/components/Logo/Logo';
 
 
 export default function Home() {
@@ -16,14 +16,8 @@ export default function Home() {
     <AppShell header={{ height: 60 }} padding="md">
       <AppShellHeader>
         <Group className="h-full px-md items-center">
-          <div className="transform rotate-90">
-            <Image
-              className="dark:invert"
-              src="/favicon.svg"
-              alt="logo"
-              width={40}
-              height={40}
-            />
+          <div className="transform">
+            <Logo size={32} textProps={{gradient: { from: 'pink', to: 'yellow' },verticalAlign:"bottom"}} />
           </div>
         </Group>
       </AppShellHeader>
