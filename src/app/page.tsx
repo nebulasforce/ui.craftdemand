@@ -15,14 +15,16 @@ export default function Home() {
   return (
     <AppShell header={{ height: 60 }} padding="md">
       <AppShellHeader>
-        <Group className="h-full px-md">
-          <Image
-            className="dark:invert"
-            src="/favicon.svg"
-            alt="logo"
-            width={40}
-            height={40}
-          />
+        <Group className="h-full px-md items-center">
+          <div className="transform rotate-90">
+            <Image
+              className="dark:invert"
+              src="/favicon.svg"
+              alt="logo"
+              width={40}
+              height={40}
+            />
+          </div>
         </Group>
       </AppShellHeader>
       <AppShellMain>

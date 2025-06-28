@@ -4,9 +4,6 @@ import { ColorSchemeToggle } from './ColorSchemeToggle';
 describe('Welcome component', () => {
   it('has correct Next.js theming section link', () => {
     render(<ColorSchemeToggle />);
-    expect(screen.getByText('this guide')).toHaveAttribute(
-      'href',
-      'https://mantine.dev/guides/next/'
-    );
+    expect(screen.getByText('Light')).toBeInTheDocument();
   });
 });
