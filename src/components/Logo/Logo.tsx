@@ -60,18 +60,18 @@ export const Logo = ({
   ) : null;
 // 提取自定义属性
   const { gradient, verticalAlign, ...validTextProps } = textProps;
-  // 根据textAlign调整flex对齐方式
-  const getVerticalAlign = () => {
-    switch(verticalAlign) {
-      case 'top': return 'flex-start';
-      case 'center': return 'center';
-      case 'bottom': return 'flex-end';
-      default: return 'center';
-    }
+  // 修改文字容器样式
+  const textVerticalStyles = {
+    height: sizeValue, // 添加明确的高度
+    display: 'flex',
+    alignItems: verticalAlign === 'top'
+      ? 'flex-start'
+      : verticalAlign === 'bottom'
+        ? 'flex-end'
+        : 'center',
   };
-
   return (
-    <Group gap={gap} align={getVerticalAlign()} wrap={wrap}>
+    <Group gap={gap} align="center" wrap={wrap}>
       {isSvgSource ? (
         svgContent
       ) : (
@@ -91,20 +91,22 @@ export const Logo = ({
         />
       )}
       {text && (
-        <Text
-          size={typeof size === 'number' ? rem(size * 0.8) : size}
-          c={color} // 使用c属性设置颜色
-          {...validTextProps} // 展开用户自定义属性
-          // 当设置gradient时，使用Mantine的内置渐变功能
-          variant={gradient? 'gradient' : undefined}
-          gradient={gradient}
-          style={{
-            fontWeight: 800, // 通过style属性设置字体粗细
-            ...textProps.style, // 保留用户可能传入的style
-          }}
-        >
-          {text}
-        </Text>
+        <div style={textVerticalStyles}>  {/* 包裹文字的容器 */}
+          <Text
+            size={typeof size === 'number' ? rem(size * 0.8) : size}
+            c={color} // 使用c属性设置颜色
+            {...validTextProps} // 展开用户自定义属性
+            // 当设置gradient时，使用Mantine的内置渐变功能
+            variant={gradient? 'gradient' : undefined}
+            gradient={gradient}
+            style={{
+              fontWeight: 800, // 通过style属性设置字体粗细
+              ...textProps.style, // 保留用户可能传入的style
+            }}
+          >
+            {text}
+          </Text>
+        </div>
       )}
     </Group>
   );
