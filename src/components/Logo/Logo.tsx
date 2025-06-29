@@ -101,6 +101,7 @@ export const Logo = ({
             gradient={gradient}
             style={{
               fontWeight: 800, // 通过style属性设置字体粗细
+              overflow:"hidden",
               ...textProps.style, // 保留用户可能传入的style
             }}
           >
