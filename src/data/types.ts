@@ -13,10 +13,10 @@ export interface CanvasAttributes {
   responsive?: boolean;
   withColor?: boolean;
   dimmed?: boolean;
-  author: string;
+  author?: string;
   canvas: { center: boolean; maxWidth?: number };
   category: string;
-  dependencies: string[];
+  dependencies?: string[];
   title: string;
   props?: Record<string, any>;
 }
