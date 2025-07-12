@@ -4,6 +4,8 @@ import {
   mantineHtmlProps,
   MantineProvider,
 } from "@mantine/core";
+import { DoubleHeader } from '../components/DoubleHeader/DoubleHeader';
+import { Footer } from '../components/Footer/Footer';
 import theme from "@/app/theme";
 import "./globals.css";
 import '@mantine/core/styles.css';
@@ -14,9 +16,7 @@ export const metadata: Metadata = {
 };
 
 
-export default function RootLayout({
-                                     children,
-                                   }: Readonly<{
+export default function RootLayout({children,}: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
@@ -25,7 +25,11 @@ export default function RootLayout({
       <ColorSchemeScript />
     </head>
     <body className="antialiased">
-    <MantineProvider theme={theme}>{children}</MantineProvider>
+    <MantineProvider theme={theme}>
+      <DoubleHeader />
+      {children}
+      <Footer />
+    </MantineProvider>
     </body>
     </html>
   );
