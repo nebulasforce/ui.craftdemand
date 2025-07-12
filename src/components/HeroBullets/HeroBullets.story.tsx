@@ -1,4 +1,4 @@
-import { StoryWrapper } from '../../components/StoryWrapper/StoryWrapper';
+import { StoryWrapper } from '../StoryWrapper/StoryWrapper';
 import attributes from './attributes.json';
 import { HeroBullets } from './HeroBullets';
 
