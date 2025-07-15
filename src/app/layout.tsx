@@ -3,6 +3,9 @@ import {
   ColorSchemeScript,
   mantineHtmlProps,
   MantineProvider,
+  AppShell,
+  AppShellHeader,
+  AppShellMain,
 } from "@mantine/core";
 import theme from "@/app/theme";
 import "./globals.css";
@@ -17,11 +20,7 @@ export const metadata: Metadata = {
 };
 
 
-export default function RootLayout({
-                                     children,
-                                   }: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode; }>) {
   return (
     <html lang="en" {...mantineHtmlProps}>
     <head>
@@ -29,9 +28,15 @@ export default function RootLayout({
     </head>
     <body className="antialiased">
     <MantineProvider theme={theme}>
-      <DoubleHeader />
-      {children}
-      <FooterLinks />
+      <AppShell header={{ height: 85 }} padding="md">
+        <AppShellHeader>
+          <DoubleHeader />
+        </AppShellHeader>
+        <AppShellMain>
+          {children}
+        </AppShellMain>
+        <FooterLinks />
+      </AppShell>
     </MantineProvider>
     </body>
     </html>

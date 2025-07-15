@@ -6,7 +6,6 @@ import { DoubleHeader } from '@/components/DoubleHeader/DoubleHeader';
 const AboutPage = () => {
   return (
     <>
-      <DoubleHeader />
       <Title ta="center" mt={50}>
         关于我们
       </Title>
