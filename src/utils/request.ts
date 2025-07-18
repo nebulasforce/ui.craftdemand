@@ -6,11 +6,13 @@ import axios, {
   InternalAxiosRequestConfig,
 } from 'axios';
 
+import apiConfig from '@/config/api.config';
+
 // 创建 axios 实例
 const instance = axios.create({
-  baseURL: '', // 空字符串，url 参数需要完整路径
   timeout: 10000,
   withCredentials: true,
+  ...apiConfig,
 });
 
 // 请求拦截器

@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+// /src/app/layout.tsx
 import {
   ColorSchemeScript,
   mantineHtmlProps,
@@ -13,11 +13,12 @@ import '@mantine/core/styles.css';
 
 import {DoubleHeader} from '@/components/DoubleHeader/DoubleHeader'
 import {FooterLinks} from '@/components/FooterLinks/FooterLinks'
+import React from 'react';
 
-export const metadata: Metadata = {
-  title: "Next App Mantine Tailwind Template",
-  description: "Next App Mantine Tailwind Template",
-};
+import appConfig from "../../config/app.config"
+
+
+export const metadata= appConfig.metadata
 
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode; }>) {
