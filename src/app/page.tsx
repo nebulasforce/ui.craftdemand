@@ -9,6 +9,7 @@ import {
 export default function Home() {
   return (
     <>
+
       <Title className="text-center mt-20">
         Welcome to{" "}
         <Text
@@ -29,11 +30,6 @@ export default function Home() {
           TailwindCSS
         </Text>
       </Title>
-
-      <div className="bg-red-500 h-20 w-20 rounded-full flex items-center justify-center text-white font-bold">
-        Tailwind Test
-      </div>
-
       <Text
         className="text-center text-gray-700 dark:text-gray-300 max-w-[500px] mx-auto mt-xl"
         ta="center"
