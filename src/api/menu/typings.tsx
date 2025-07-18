@@ -5,6 +5,7 @@ export interface MenuSummary {
   route: string;
   target: string;
   sort: number;
+  children?: MenuSummary[];
 }
 
 export interface Menu {}

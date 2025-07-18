@@ -1,7 +1,7 @@
 // postcss.config.js
 module.exports = {
-  plugins: [
-    require('postcss-preset-mantine'),
-    require('postcss-simple-vars')
-  ]
-};
+  plugins: {
+    tailwindcss: {}, // 引入 Tailwind
+    autoprefixer: {}, // 自动添加浏览器前缀
+  },
+}

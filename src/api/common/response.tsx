@@ -7,7 +7,11 @@ export interface Pagination<T> {
 }
 
 export interface Response<T> {
+  success: boolean;
   code: number;
   message?: string;
+  meta?: {
+    requestId?: string;
+  };
   data?: T;
 }

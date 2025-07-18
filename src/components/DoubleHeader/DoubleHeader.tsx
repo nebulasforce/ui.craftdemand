@@ -1,10 +1,13 @@
 "use client"
 
-import { useState } from 'react';
+import { useState,useEffect } from 'react';
 import { Anchor, Box, Burger, Container, Group } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { MantineLogo } from '@mantinex/mantine-logo';
 import classes from './DoubleHeader.module.css';
+
+import {listFront } from '@/api/menu/api';
+import {listFrontResponse} from '@/api/menu/response';
 
 const userLinks = [
   { link: '#', label: 'Privacy & Security' },
@@ -20,9 +23,28 @@ const mainLinks = [
   { link: '#', label: 'Forums' },
 ];
 
+
+
 export function DoubleHeader() {
   const [opened, { toggle }] = useDisclosure(false);
   const [active, setActive] = useState(0);
+
+  // 新增从接口获取菜单
+  const [ ,setMenuData] = useState<listFrontResponse | null>(null);
+
+  const fetchMenu = async (): Promise<void> => {
+    try {
+      const response = await listFront();
+      setMenuData(response);
+    }catch (error) {
+      console.error(error);
+    }
+  }
+
+  useEffect(() => {
+    fetchMenu();
+  }, []);
+
 
   const mainItems = mainLinks.map((item, index) => (
     <Anchor<'a'>
