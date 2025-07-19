@@ -3,6 +3,11 @@ import {Response} from '@/api/common/response';
 
 export interface frontItem  extends  MenuSummary{}
 
-export interface listFrontResponse  extends  Response<frontItem[]> {
+export interface listFrontData {
+  headings: frontItem[];
+  subheadings: frontItem[];
+}
+
+export interface listFrontResponse  extends  Response<listFrontData> {
 
 }

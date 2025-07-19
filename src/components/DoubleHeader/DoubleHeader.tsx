@@ -6,8 +6,8 @@ import { useDisclosure } from '@mantine/hooks';
 import { MantineLogo } from '@mantinex/mantine-logo';
 import classes from './DoubleHeader.module.css';
 
-import {listFront } from '@/api/menu/api';
-import {listFrontResponse} from '@/api/menu/response';
+import { listFront } from '@/api/menu/api';
+import { listFrontData } from '@/api/menu/response';
 
 const userLinks = [
   { link: '#', label: 'Privacy & Security' },
@@ -30,26 +30,33 @@ export function DoubleHeader() {
   const [active, setActive] = useState(0);
 
   // 新增从接口获取菜单
-  const [ ,setMenuData] = useState<listFrontResponse | null>(null);
+  const [menuData ,setMenuData] = useState<listFrontData>();
+  const [loading, setLoading] = useState(true);
 
   const fetchMenu = async (): Promise<void> => {
     try {
       const response = await listFront();
-      setMenuData(response);
-    }catch (error) {
+      if (response.code === 0) {
+        setMenuData(response.data);
+      }
+    }catch(error) {
       console.error(error);
+    }finally {
+      setLoading(false);
     }
+
+
   }
 
   useEffect(() => {
-    fetchMenu();
+    fetchMenu().then(() =>{} );
   }, []);
 
 
-  const mainItems = mainLinks.map((item, index) => (
+  const mainItems = menuData?.headings.map((item, index) => (
     <Anchor<'a'>
-      href={item.link}
-      key={item.label}
+      href={item.url}
+      key={item.name}
       className={classes.mainLink}
       data-active={index === active || undefined}
       onClick={(event) => {
@@ -57,18 +64,18 @@ export function DoubleHeader() {
         setActive(index);
       }}
     >
-      {item.label}
+      {item.name}
     </Anchor>
   ));
 
-  const secondaryItems = userLinks.map((item) => (
+  const secondaryItems = menuData?.subheadings.map((item) => (
     <Anchor
-      href={item.link}
-      key={item.label}
+      href={item.url}
+      key={item.name}
       onClick={(event) => event.preventDefault()}
       className={classes.secondaryLink}
     >
-      {item.label}
+      {item.name}
     </Anchor>
   ));
 
