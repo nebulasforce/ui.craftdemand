@@ -1,7 +1,6 @@
 // /src/app/docs/about/page.tsx
 "use client"
 import { Text, Title } from '@mantine/core';
-import { DoubleHeader } from '@/components/DoubleHeader/DoubleHeader';
 
 const AboutPage = () => {
   return (

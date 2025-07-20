@@ -1,2 +1,4 @@
 @import "tailwind-preset-mantine";
 @import "./theme.css";
+@import '@mantine/notifications/styles.css';
+@mport '@mantine/core/styles.css';
