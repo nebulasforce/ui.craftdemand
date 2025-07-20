@@ -7,9 +7,14 @@ import {
   AppShellHeader,
   AppShellMain,
 } from "@mantine/core";
+
+
 import theme from "@/app/theme";
 import "./globals.css";
 import '@mantine/core/styles.css';
+
+import { Notifications } from '@mantine/notifications';
+
 
 import {FooterLinks} from '@/components/FooterLinks/FooterLinks'
 import React from 'react';
@@ -29,6 +34,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     </head>
     <body className="antialiased">
     <MantineProvider theme={theme}>
+      <Notifications />
       <AppShell header={{ height: 60 }} padding="md">
         <AppShellHeader>
           <HeaderMegaMenu />

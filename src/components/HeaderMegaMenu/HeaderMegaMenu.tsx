@@ -1,34 +1,16 @@
-"use client"
-import {
-  IconBook,
-  IconChartPie3,
-  IconChevronDown,
-  IconCode,
-  IconCoin,
-  IconFingerprint,
-  IconNotification,
-} from '@tabler/icons-react';
-import {
-  Anchor,
-  Box,
-  Burger,
-  Button,
-  Center,
-  Collapse,
-  Divider,
-  Drawer,
-  Group,
-  HoverCard,
-  ScrollArea,
-  SimpleGrid,
-  Text,
-  ThemeIcon,
-  UnstyledButton,
-  useMantineTheme,
-} from '@mantine/core';
+"use client";
+
+import { useEffect, useState } from 'react';
+import { IconBook, IconChartPie3, IconChevronDown, IconCode, IconCoin, IconFingerprint, IconNotification, IconAlertCircle } from '@tabler/icons-react';
+import { Anchor, Box, Burger, Button, Center, Collapse, Divider, Drawer, Group, HoverCard, ScrollArea, SimpleGrid, Text, ThemeIcon, UnstyledButton, useMantineTheme  } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { MantineLogo } from '@mantinex/mantine-logo';
+import { listFront } from '@/api/menu/api';
+import { listFrontData } from '@/api/menu/response';
 import classes from './HeaderMegaMenu.module.css';
+import { showNotification } from '@mantine/notifications';
+
+
 
 const mockdata = [
   {
@@ -63,10 +45,43 @@ const mockdata = [
   },
 ];
 
+
+
+
 export function HeaderMegaMenu() {
   const [drawerOpened, { toggle: toggleDrawer, close: closeDrawer }] = useDisclosure(false);
   const [linksOpened, { toggle: toggleLinks }] = useDisclosure(false);
+  const [ ,setMenuData] = useState<listFrontData>();
+  const [, setLoading] = useState(true);
+
   const theme = useMantineTheme();
+
+  const handleError = (error) => {
+    showNotification({
+      title: '加载失败',
+      message: error.Error,
+      color: 'red',
+      autoClose: 5000,
+      icon: <IconAlertCircle size={18} />,
+    });
+  };
+
+  const fetchMenu = async (): Promise<void> => {
+    try {
+      const response = await listFront();
+      if (response.code === 0) {
+        setMenuData(response.data);
+      }
+    }catch(err) {
+      handleError(err)
+    }
+  }
+
+  useEffect(() => {
+    fetchMenu().then(() =>{
+      setLoading(false);
+    } );
+  }, []);
 
   const links = mockdata.map((item) => (
     <UnstyledButton className={classes.subLink} key={item.title}>

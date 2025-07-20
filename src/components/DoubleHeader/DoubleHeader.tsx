@@ -44,8 +44,6 @@ export function DoubleHeader() {
     }finally {
       setLoading(false);
     }
-
-
   }
 
   useEffect(() => {
