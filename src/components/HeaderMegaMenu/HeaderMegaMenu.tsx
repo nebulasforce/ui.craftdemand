@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { IconBook, IconAlertCircle,IconChartPie3, IconChevronDown, IconCode, IconCoin, IconFingerprint, IconNotification } from '@tabler/icons-react';
+import { IconBook, IconChartPie3, IconChevronDown, IconCode, IconCoin, IconFingerprint, IconNotification } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
 import { Anchor, Box, Burger, Button, Center, Collapse, Divider, Drawer, Group, HoverCard, ScrollArea, SimpleGrid, Text, ThemeIcon, UnstyledButton, useMantineTheme  } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
@@ -65,7 +65,10 @@ export function HeaderMegaMenu() {
       }
     }catch(err) {
       if (err instanceof Error) {
-        notifications.show({message: err.message});
+        notifications.show({
+          message: err.message,
+          color: 'red',
+        });
       }
     }
   }
