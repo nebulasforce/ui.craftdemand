@@ -11,11 +11,11 @@ import theme from "@/app/theme";
 import "./globals.css";
 import '@mantine/core/styles.css';
 
-import {DoubleHeader} from '@/components/DoubleHeader/DoubleHeader'
 import {FooterLinks} from '@/components/FooterLinks/FooterLinks'
 import React from 'react';
 
 import appConfig from "../../config/app.config"
+import { HeaderMegaMenu } from '@/components/HeaderMegaMenu/HeaderMegaMenu';
 
 
 export const metadata= appConfig.metadata
@@ -29,9 +29,9 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     </head>
     <body className="antialiased">
     <MantineProvider theme={theme}>
-      <AppShell header={{ height: 85 }} padding="md">
+      <AppShell header={{ height: 60 }} padding="md">
         <AppShellHeader>
-          <DoubleHeader />
+          <HeaderMegaMenu />
         </AppShellHeader>
         <AppShellMain>
           {children}
