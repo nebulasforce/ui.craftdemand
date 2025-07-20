@@ -1,14 +1,14 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { IconBook, IconChartPie3, IconChevronDown, IconCode, IconCoin, IconFingerprint, IconNotification, IconAlertCircle } from '@tabler/icons-react';
+import { IconBook, IconAlertCircle,IconChartPie3, IconChevronDown, IconCode, IconCoin, IconFingerprint, IconNotification } from '@tabler/icons-react';
+import { notifications } from '@mantine/notifications';
 import { Anchor, Box, Burger, Button, Center, Collapse, Divider, Drawer, Group, HoverCard, ScrollArea, SimpleGrid, Text, ThemeIcon, UnstyledButton, useMantineTheme  } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { MantineLogo } from '@mantinex/mantine-logo';
 import { listFront } from '@/api/menu/api';
 import { listFrontData } from '@/api/menu/response';
 import classes from './HeaderMegaMenu.module.css';
-import { showNotification } from '@mantine/notifications';
 
 
 
@@ -56,15 +56,6 @@ export function HeaderMegaMenu() {
 
   const theme = useMantineTheme();
 
-  const handleError = (error) => {
-    showNotification({
-      title: '加载失败',
-      message: error.Error,
-      color: 'red',
-      autoClose: 5000,
-      icon: <IconAlertCircle size={18} />,
-    });
-  };
 
   const fetchMenu = async (): Promise<void> => {
     try {
@@ -73,7 +64,9 @@ export function HeaderMegaMenu() {
         setMenuData(response.data);
       }
     }catch(err) {
-      handleError(err)
+      if (err instanceof Error) {
+        notifications.show({message: err.message});
+      }
     }
   }
 

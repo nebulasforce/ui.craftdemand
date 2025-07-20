@@ -10,6 +10,7 @@ import {
 
 
 import theme from "@/app/theme";
+import '@mantine/notifications/styles.css';
 import "./globals.css";
 import '@mantine/core/styles.css';
 
@@ -33,8 +34,9 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <ColorSchemeScript />
     </head>
     <body className="antialiased">
+
     <MantineProvider theme={theme}>
-      <Notifications />
+      <Notifications position="top-right" />
       <AppShell header={{ height: 60 }} padding="md">
         <AppShellHeader>
           <HeaderMegaMenu />
