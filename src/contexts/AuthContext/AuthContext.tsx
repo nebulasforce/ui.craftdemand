@@ -3,6 +3,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { notifications } from '@mantine/notifications';
 import {login ,register} from '@/api/auth/api';
+import {loginRequest,registerRequest} from '@/api/auth/request';
 
 interface User {
   id: string; // id
