@@ -101,7 +101,7 @@ export function HeaderMegaMenu() {
     <Box pb={120}>
       <header className={classes.header}>
         <Group justify="flex-start" h="100%">
-          <Logo size={30} />
+          <Logo size={30} src="/avatar.png" />
 
           <Group h="100%"  gap={0} visibleFrom="sm" ml="md" >
             <a href="#" className={classes.link}>

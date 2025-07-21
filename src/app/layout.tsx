@@ -10,7 +10,7 @@ import {
 
 
 import theme from "@/app/theme";
-import "./globals.css";
+import "@/app/globals.css";
 
 import { Notifications } from '@mantine/notifications';
 
