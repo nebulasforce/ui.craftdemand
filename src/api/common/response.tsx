@@ -15,3 +15,7 @@ export interface Response<T> {
   };
   data?: T;
 }
+
+export interface Result {
+  result: boolean;
+}

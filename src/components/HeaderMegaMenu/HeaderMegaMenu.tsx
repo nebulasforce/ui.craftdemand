@@ -104,7 +104,7 @@ export function HeaderMegaMenu() {
           <Logo size={30} src="/avatar.png" />
 
           <Group h="100%"  gap={0} visibleFrom="sm" ml="md" >
-            <a href="#" className={classes.link}>
+            <a href="/" className={classes.link}>
               Home
             </a>
             <HoverCard width={600} position="bottom" radius="md" shadow="md" withinPortal>
@@ -153,6 +153,9 @@ export function HeaderMegaMenu() {
             </a>
             <a href="#" className={classes.link}>
               Academy
+            </a>
+            <a href="/docs/about" className={classes.link}>
+              About
             </a>
           </Group>
 

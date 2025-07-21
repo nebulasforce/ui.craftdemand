@@ -4,3 +4,6 @@ export interface Pager {
   pageSize: number;
 }
 
+export interface Options {
+  [key: string]: any
+}

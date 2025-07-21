@@ -8,6 +8,4 @@ export interface listFrontData {
   subheadings: frontItem[];
 }
 
-export interface listFrontResponse  extends  Response<listFrontData> {
-
-}
+export interface listFrontResponse  extends  Response<listFrontData> {}
