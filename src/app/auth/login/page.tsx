@@ -4,7 +4,7 @@ import { Container } from '@mantine/core';
 
 const LoginPage = () => {
   return (
-    <Container size={500} my={80}>
+    <Container size={460} my={80}>
       <AuthenticationForm />
     </Container>
   )
