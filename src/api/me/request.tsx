@@ -14,3 +14,4 @@ export interface registerRequest {
   authCode?: string;
 }
 
+export interface meRequest {}

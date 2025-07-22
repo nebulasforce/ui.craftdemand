@@ -4,46 +4,23 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 import { notifications } from '@mantine/notifications';
 import {login ,register} from '@/api/auth/api';
 import {loginRequest,registerRequest} from '@/api/auth/request';
+import {AccountDisplay} from '@/api/auth/typings';
 
-interface User {
-  id: string; // id
-  username: string; // 用户名
-  name?: string; // 昵称
-  email: string; // 邮箱
-  mobile: string; // 手机号
-  avatar?: string; // 头像
-}
-
-interface LoginParams {
-  username?: string;
-  mobile?: string;
-  email?: string;
-  password?: string;
-  captcha?: string;
-}
-
-interface RegisterParams {
-  mobile: string;
-  email: string;
-  password: string;
-  captcha: string;
-  authCode: string;
-}
 
 
 interface AuthContextValue {
-  user: User | null;
+  user: AccountDisplay | null;
   isLoading: boolean;
   isAuthenticated: boolean;
-  login: (params: LoginParams) => Promise<string>;
+  login: (params: loginRequest) => Promise<boolean>;
   logout: () => void;
-  register: (params: RegisterParams) => Promise<string>;
+  register: (params: registerRequest) => Promise<boolean>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<AccountDisplay | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
@@ -53,28 +30,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (storedUser) {
       try {
         setUser(JSON.parse(storedUser));
+        setIsAuthenticated(true);
       } catch (error) {
-        console.error('Failed to parse user data', error);
+        notifications.show({ message: 'Login failed', color: 'red' });
       }
     }
     setIsLoading(false);
   }, []);
 
-  const login = async (params:LoginParams) => {
+  const loginFunc = async (params:loginRequest) => {
     try {
-      // 模拟登录API调用
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      // 实际项目中应替换为真实的API调用
-      const mockUser: User = {
-        id: '1',
-        username,
-        avatar: 'https://picsum.photos/id/237/40/40'
-      };
-
-      setUser(mockUser);
-      localStorage.setItem('user', JSON.stringify(mockUser));
-      notifications.show({ message: 'Login successful', color: 'green' });
+     const response = await login(params);
+     if (response.success) {
+       //
+     }
+     // TODO
       return true;
     } catch (error) {
       notifications.show({ message: 'Login failed', color: 'red' });
@@ -82,23 +52,40 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const logout = () => {
+  const logoutFunc = () => {
     setUser(null);
     localStorage.removeItem('user');
     notifications.show({ message: 'Logged out', color: 'blue' });
   };
 
-  const register = (params:RegisterParams) => {
-
+  const registerFunc = async (params:registerRequest) => {
+    try {
+      const response = await register(params);
+      if (response.success) {
+        //
+      }
+      // TODO
+      return true;
+    } catch (error) {
+      notifications.show({ message: 'register failed', color: 'red' });
+      return false;
+    }
   }
 
   const value = {
     user,
     isLoading,
     isAuthenticated,
-    login,
-    logout
+    login: loginFunc,
+    logout: logoutFunc,
+    register: registerFunc
   };
+  // user: AccountDisplay | null;
+  // isLoading: boolean;
+  // isAuthenticated: boolean;
+  // login: (params: loginRequest) => Promise<string>;
+  // logout: () => void;
+  // register: (params: registerRequest) => Promise<string>;
 
   return (
     <AuthContext.Provider value={value}>
