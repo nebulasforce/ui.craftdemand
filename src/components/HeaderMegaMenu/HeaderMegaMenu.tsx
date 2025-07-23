@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { IconBook, IconChartPie3, IconChevronDown, IconCode, IconCoin, IconFingerprint, IconNotification } from '@tabler/icons-react';
-import { notifications } from '@mantine/notifications';
 import { Anchor, Box, Burger, Button, Center, Collapse, Divider, Drawer, Group, HoverCard, ScrollArea, SimpleGrid, Text, ThemeIcon, UnstyledButton, useMantineTheme  } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { Logo } from '@/components/Logo/Logo';
@@ -10,8 +9,6 @@ import { listFront } from '@/api/menu/api';
 import { listFrontData } from '@/api/menu/response';
 import classes from './HeaderMegaMenu.module.css';
 import notify from '@/utils/notify';
-
-
 
 const mockdata = [
   {

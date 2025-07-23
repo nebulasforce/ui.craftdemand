@@ -1,8 +1,7 @@
 import request from '@/utils/request';
 import { loginRequest, registerRequest,logoutRequest } from '@/api/auth/request';
-import { loginResponse, registerResponse ,logoutResponse} from '@/api/auth/response';
+import { loginResponse, registerResponse } from '@/api/auth/response';
 import { Options } from '@/api/common/request';
-
 
 // login 登录
 export async function login(req: loginRequest,options?:Options) {

@@ -8,8 +8,6 @@ import {loginRequest,registerRequest} from '@/api/auth/request';
 import {User} from '@/api/me/typings';
 import notify from '@/utils/notify';
 
-
-
 interface AuthContextValue {
   user: User | null;
   isLoading: boolean;

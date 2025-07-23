@@ -9,29 +9,13 @@ import classes from './DoubleHeader.module.css';
 import { listFront } from '@/api/menu/api';
 import { listFrontData } from '@/api/menu/response';
 
-const userLinks = [
-  { link: '#', label: 'Privacy & Security' },
-  { link: '#', label: 'Account settings' },
-  { link: '#', label: 'Support options' },
-];
-
-const mainLinks = [
-  { link: '#', label: 'Book a demo' },
-  { link: '#', label: 'Documentation' },
-  { link: '#', label: 'Community' },
-  { link: '#', label: 'Academy' },
-  { link: '#', label: 'Forums' },
-];
-
-
-
 export function DoubleHeader() {
   const [opened, { toggle }] = useDisclosure(false);
   const [active, setActive] = useState(0);
 
   // 新增从接口获取菜单
   const [menuData ,setMenuData] = useState<listFrontData>();
-  const [loading, setLoading] = useState(true);
+  const [, setLoading] = useState(true);
 
   const fetchMenu = async (): Promise<void> => {
     try {
@@ -49,7 +33,6 @@ export function DoubleHeader() {
   useEffect(() => {
     fetchMenu().then(() =>{} );
   }, []);
-
 
 
   const mainItems = menuData?.headings.map((item, index) => (
