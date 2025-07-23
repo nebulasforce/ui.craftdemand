@@ -1,6 +1,6 @@
 import request from '@/utils/request';
-import { loginRequest, registerRequest } from '@/api/auth/request';
-import { loginResponse, registerResponse } from '@/api/auth/response';
+import { loginRequest, registerRequest,logoutRequest } from '@/api/auth/request';
+import { loginResponse, registerResponse ,logoutResponse} from '@/api/auth/response';
 import { Options } from '@/api/common/request';
 
 
@@ -21,6 +21,19 @@ export async function login(req: loginRequest,options?:Options) {
 export async function register(req: registerRequest,options?:Options) {
   return request<registerResponse>({
     url: '/api/v1/auth/register',
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: req,
+    ...(options || {}),
+  });
+}
+
+// logout  退出
+export async function logout(req?: logoutRequest,options?:Options) {
+  return request<loginResponse>({
+    url: '/api/v1/auth/logout',
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

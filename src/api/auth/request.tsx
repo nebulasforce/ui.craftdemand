@@ -6,6 +6,8 @@ export interface loginRequest {
   authCode?: string;
 }
 
+export interface logoutRequest {}
+
 export interface registerRequest {
   mobile: string;
   email: string;

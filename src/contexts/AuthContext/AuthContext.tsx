@@ -2,25 +2,27 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { notifications } from '@mantine/notifications';
-import {login ,register} from '@/api/auth/api';
+import {login ,register,logout} from '@/api/auth/api';
+import {me} from '@/api/me/api'
 import {loginRequest,registerRequest} from '@/api/auth/request';
-import {AccountDisplay} from '@/api/auth/typings';
+import {User} from '@/api/me/typings';
+import notify from '@/utils/notify';
 
 
 
 interface AuthContextValue {
-  user: AccountDisplay | null;
+  user: User | null;
   isLoading: boolean;
   isAuthenticated: boolean;
   login: (params: loginRequest) => Promise<boolean>;
-  logout: () => void;
+  logout: () => Promise<void>;
   register: (params: registerRequest) => Promise<boolean>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<AccountDisplay | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
@@ -32,42 +34,93 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUser(JSON.parse(storedUser));
         setIsAuthenticated(true);
       } catch (error) {
-        notifications.show({ message: 'Login failed', color: 'red' });
+        if (error instanceof Error) {
+          notify(error.message, 'error');
+        } else {
+          notify('Login failed', 'error');
+        }
       }
     }
     setIsLoading(false);
   }, []);
 
+  // loginFunc 登录方法
   const loginFunc = async (params:loginRequest) => {
     try {
-     const response = await login(params);
-     if (response.success) {
-       //
-     }
-     // TODO
-      return true;
+      const response = await login(params);
+      if (response.success) {
+        const accessToken = response.data.accessToken;
+        localStorage.setItem('token', accessToken); // 在请求拦截器中会使用
+        // 获取当前用户信息
+        const resp = await me();
+        if (resp.success) {
+          const loggingInUser = resp.data
+          setUser(loggingInUser)
+          localStorage.setItem('user', JSON.stringify(loggingInUser));
+          setIsAuthenticated(true);
+          notify('Login successfully');
+          return true;
+        }
+        notify('Login failed', 'error');
+        return false;
+      }
+      notify('Login failed', 'error');
+      return false;
     } catch (error) {
-      notifications.show({ message: 'Login failed', color: 'red' });
+      if (error instanceof Error) {
+        notify(error.message, 'error');
+      } else {
+        notify('Login failed', 'error');
+      }
       return false;
     }
   };
 
-  const logoutFunc = () => {
-    setUser(null);
-    localStorage.removeItem('user');
-    notifications.show({ message: 'Logged out', color: 'blue' });
+  // logoutFunc 退出方法
+  const logoutFunc = async () => {
+    try {
+      // 异步执行，忽略执行结果
+      logout().catch((err) => {
+        if (err instanceof Error) {
+          notify(err.message, 'error');
+        }
+      });
+      setUser(null);
+      setIsAuthenticated(false);
+      localStorage.removeItem('user');
+      localStorage.removeItem('token');
+      notifications.show({ message: 'Logged out', color: 'green' });
+      notify('Logged out');
+    } catch (error) {
+      if (error instanceof Error) {
+        notify(error.message, 'error');
+      } else {
+        notify('Logout failed', 'error');
+      }
+    }
   };
 
+  // registerFunc 注册方法
   const registerFunc = async (params:registerRequest) => {
     try {
       const response = await register(params);
       if (response.success) {
-        //
+        const result = response.data.result;
+        if (result) {
+          notify('Register successfully');
+        } else {
+          notify('Register failed', 'error');
+        }
+        return result;
       }
-      // TODO
-      return true;
+      notify('Register failed', 'error');
+      return false;
     } catch (error) {
-      notifications.show({ message: 'register failed', color: 'red' });
+      if (error instanceof Error) {
+        notify(error.message, 'error');
+      } else {
+        notify('Register failed', 'error');
+      }
       return false;
     }
   }
@@ -80,12 +133,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     logout: logoutFunc,
     register: registerFunc
   };
-  // user: AccountDisplay | null;
-  // isLoading: boolean;
-  // isAuthenticated: boolean;
-  // login: (params: loginRequest) => Promise<string>;
-  // logout: () => void;
-  // register: (params: registerRequest) => Promise<string>;
 
   return (
     <AuthContext.Provider value={value}>

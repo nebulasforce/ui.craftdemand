@@ -1,4 +1,4 @@
 import {Response} from '@/api/common/response';
-import { AccountMe } from '@/api/me/typings';
+import { User } from '@/api/me/typings';
 
-export interface meResponse extends  Response<AccountMe>{}
+export interface meResponse extends  Response<User>{}

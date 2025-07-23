@@ -9,6 +9,7 @@ import { Logo } from '@/components/Logo/Logo';
 import { listFront } from '@/api/menu/api';
 import { listFrontData } from '@/api/menu/response';
 import classes from './HeaderMegaMenu.module.css';
+import notify from '@/utils/notify';
 
 
 
@@ -65,10 +66,9 @@ export function HeaderMegaMenu() {
       }
     }catch(err) {
       if (err instanceof Error) {
-        notifications.show({
-          message: err.message,
-          color: 'red',
-        });
+        notify(err.message, 'error');
+      } else {
+        notify('系统错误', 'error');
       }
     }
   }
