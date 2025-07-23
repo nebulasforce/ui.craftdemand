@@ -1,5 +1,5 @@
 // src/contexts/AuthContext/AuthContext.tsx
-
+"use client"
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { notifications } from '@mantine/notifications';
 import {login ,register,logout} from '@/api/auth/api';
