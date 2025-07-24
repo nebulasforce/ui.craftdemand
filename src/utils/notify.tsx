@@ -12,7 +12,7 @@ const notify = (message: ReactNode, type: NotificationType = 'success') => {
   const baseConfig: NotificationData = {
     message,
     autoClose: 3000,
-    position: 'top-right',
+    position: 'top-center',
   };
 
   const colorMap: Record<NotificationType, NotificationColor> = {

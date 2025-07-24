@@ -56,13 +56,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           setUser(loggingInUser)
           localStorage.setItem('user', JSON.stringify(loggingInUser));
           setIsAuthenticated(true);
-          notify('Login successfully');
           return true;
         }
-        notify('Login failed', 'error');
         return false;
       }
-      notify('Login failed', 'error');
       return false;
     } catch (error) {
       if (error instanceof Error) {
@@ -88,7 +85,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       localStorage.removeItem('user');
       localStorage.removeItem('token');
       notifications.show({ message: 'Logged out', color: 'green' });
-      notify('Logged out');
     } catch (error) {
       if (error instanceof Error) {
         notify(error.message, 'error');
@@ -103,15 +99,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       const response = await register(params);
       if (response.success) {
-        const result = response.data.result;
-        if (result) {
-          notify('Register successfully');
-        } else {
-          notify('Register failed', 'error');
-        }
-        return result;
+        return response.data.result;
       }
-      notify('Register failed', 'error');
       return false;
     } catch (error) {
       if (error instanceof Error) {

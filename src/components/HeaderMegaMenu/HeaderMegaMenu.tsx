@@ -158,7 +158,7 @@ export function HeaderMegaMenu() {
           </Group>
 
           <Group visibleFrom="sm" ml="auto">
-            <Link href="/auth/login" passHref>
+            <Link href="/auth" passHref>
               <Button variant="default">Log in</Button>
             </Link>
             <Button>Sign up</Button>
