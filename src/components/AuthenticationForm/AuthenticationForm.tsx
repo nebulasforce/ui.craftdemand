@@ -46,8 +46,11 @@ export function AuthenticationForm(props: PaperProps) {
   const [type, toggle] = useToggle(['login', 'register']);
   const [loading, setLoading] = useState(false);
   const [countdown, setCountdown] = useState(()=>{
-    const cd = localStorage.getItem('countdown')
-    return cd ? Math.max(0, Number(cd)) : 0;
+    if (typeof window !== 'undefined') {
+      const cd = localStorage.getItem('countdown')
+      return cd ? Math.max(0, Number(cd)) : 0;
+    }
+    return 0;
   });
   const { login, register } = useAuth();
   const router = useRouter();
