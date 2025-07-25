@@ -21,7 +21,7 @@ import { upperFirst, useToggle, useInterval } from '@mantine/hooks';
 import { GoogleButton } from './GoogleButton';
 import { TwitterButton } from './TwitterButton';
 import { useAuth } from '@/contexts/AuthContext/AuthContext';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useState, useRef, useEffect } from 'react';
 import notify from '@/utils/notify';
 
@@ -39,9 +39,16 @@ const sendVerificationCode = async (mobile: string) => {
 
 
 export function AuthenticationForm(props: PaperProps) {
+
+  const searchParams = useSearchParams();
+  const action = searchParams.get("action") === "register" ? "register" : "login";
+
   const [type, toggle] = useToggle(['login', 'register']);
   const [loading, setLoading] = useState(false);
-  const [countdown, setCountdown] = useState(0);
+  const [countdown, setCountdown] = useState(()=>{
+    const cd = localStorage.getItem('countdown')
+    return cd ? Math.max(0, Number(cd)) : 0;
+  });
   const { login, register } = useAuth();
   const router = useRouter();
 
@@ -133,9 +140,19 @@ export function AuthenticationForm(props: PaperProps) {
   // 倒计时逻辑
   useInterval(() => {
     if (countdown > 0) {
-      setCountdown(countdown - 1);
+      setCountdown(c => c - 1); // 使用函数式更新确保拿到最新值
+      localStorage.setItem("countdown",countdown.toString());
+    } else {
+      localStorage.removeItem("countdown");
     }
-  }, 1000);
+  }, 1000, { autoInvoke:true }); // 固定1000ms间隔
+
+    // 通过 useEffect 设置初始值
+    useEffect(() => {
+      if (action) {
+        toggle(action); // 设置初始值
+      }
+    }, [action]);
 
   // 焦点自动获取逻辑
   useEffect(() => {
@@ -160,6 +177,7 @@ export function AuthenticationForm(props: PaperProps) {
           notify('Login successfully', 'success');
           router.push('/'); // 登录成功后跳转到首页
         } else {
+          // 根据响应结果判断，如果需要显示图形验证码则显示图形验证码
           notify(result.message||'Login failed', 'error');
         }
       } else if (type === 'register') {

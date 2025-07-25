@@ -1,3 +1,5 @@
+// src/components/HeaderMegaMenu/HeaderMegaMenu.tsx
+
 "use client";
 
 import Link from 'next/link';
@@ -158,10 +160,12 @@ export function HeaderMegaMenu() {
           </Group>
 
           <Group visibleFrom="sm" ml="auto">
-            <Link href="/auth" passHref>
+            <Link href="/auth?action=login" passHref>
               <Button variant="default">Log in</Button>
             </Link>
-            <Button>Sign up</Button>
+            <Link href="/auth?action=register" passHref>
+              <Button>Sign up</Button>
+            </Link>
           </Group>
 
           <Burger opened={drawerOpened} onClick={toggleDrawer} hiddenFrom="sm" />
@@ -204,10 +208,12 @@ export function HeaderMegaMenu() {
           <Divider my="sm" />
 
           <Group justify="center" grow pb="xl" px="md">
-            <Link href="/auth/login" passHref>
+            <Link href="/auth?action=login" passHref>
               <Button variant="default">Log in</Button>
             </Link>
-            <Button>Sign up</Button>
+            <Link href="/auth?action=register" passHref>
+              <Button>Sign up</Button>
+            </Link>
           </Group>
         </ScrollArea>
       </Drawer>
