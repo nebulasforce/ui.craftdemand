@@ -2,7 +2,7 @@
 import { AuthenticationForm } from '@/components/AuthenticationForm/AuthenticationForm';
 import { Container } from '@mantine/core';
 
-const LoginPage = () => {
+const AuthPage = () => {
   return (
     <Container size={460} my={60}>
       <AuthenticationForm />
@@ -10,4 +10,4 @@ const LoginPage = () => {
   )
 }
 
-export default LoginPage;
+export default AuthPage;
