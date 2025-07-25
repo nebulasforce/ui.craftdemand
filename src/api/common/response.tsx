@@ -13,7 +13,7 @@ export interface Response<T> {
   meta?: {
     requestId?: string;
   };
-  data: T;
+  data?: T;
 }
 
 export interface Result {

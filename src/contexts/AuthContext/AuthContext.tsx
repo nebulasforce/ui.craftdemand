@@ -1,21 +1,36 @@
 // src/contexts/AuthContext/AuthContext.tsx
-"use client"
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { notifications } from '@mantine/notifications';
-import {login ,register,logout} from '@/api/auth/api';
-import {me} from '@/api/me/api'
-import {loginRequest,registerRequest} from '@/api/auth/request';
-import {User} from '@/api/me/typings';
+'use client';
+
+import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
+import { login, logout, register } from '@/api/auth/api';
+import { loginRequest, registerRequest } from '@/api/auth/request';
+import { loginResponse, registerResponse } from '@/api/auth/response';
+import { me } from '@/api/me/api';
+import { User } from '@/api/me/typings';
 import notify from '@/utils/notify';
+
 
 interface AuthContextValue {
   user: User | null;
   isLoading: boolean;
   isAuthenticated: boolean;
-  login: (params: loginRequest) => Promise<boolean>;
+  login: (params: loginRequest) => Promise<loginResponse>;
   logout: () => Promise<void>;
-  register: (params: registerRequest) => Promise<boolean>;
+  register: (params: registerRequest) => Promise<registerResponse>;
 }
+
+// baseErrLoginResponse 默认错误响应
+const baseErrLoginResponse: loginResponse = {
+  success: false,
+  code: 500500,
+  message: 'Login failed',
+};
+
+const baseErrRegisterResponse: registerResponse = {
+  success: false,
+  code: 500400,
+  message: 'Register failed',
+};
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
@@ -46,28 +61,36 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const loginFunc = async (params:loginRequest) => {
     try {
       const response = await login(params);
-      if (response.success) {
-        const accessToken = response.data.accessToken;
+      if (response.success && response.data?.accessToken) {
+        const accessToken = response.data?.accessToken;
         localStorage.setItem('token', accessToken); // 在请求拦截器中会使用
         // 获取当前用户信息
         const resp = await me();
-        if (resp.success) {
+        if (resp.success && resp.data) {
           const loggingInUser = resp.data
           setUser(loggingInUser)
           localStorage.setItem('user', JSON.stringify(loggingInUser));
           setIsAuthenticated(true);
-          return true;
+          return response;
         }
-        return false;
+        localStorage.removeItem('token');
+        return {
+          ...baseErrLoginResponse,
+          message: resp.message,
+        };
       }
-      return false;
+      return {
+        ...baseErrLoginResponse,
+        message: response.message,
+      };
     } catch (error) {
       if (error instanceof Error) {
-        notify(error.message, 'error');
-      } else {
-        notify('Login failed', 'error');
+        return {
+          ...baseErrLoginResponse,
+          message: error.message
+        };
       }
-      return false;
+      return baseErrLoginResponse;
     }
   };
 
@@ -84,31 +107,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setIsAuthenticated(false);
       localStorage.removeItem('user');
       localStorage.removeItem('token');
-      notifications.show({ message: 'Logged out', color: 'green' });
     } catch (error) {
       if (error instanceof Error) {
         notify(error.message, 'error');
-      } else {
-        notify('Logout failed', 'error');
       }
+      notify('Logout Failed', 'error');
     }
   };
 
   // registerFunc 注册方法
   const registerFunc = async (params:registerRequest) => {
     try {
-      const response = await register(params);
-      if (response.success) {
-        return response.data.result;
-      }
-      return false;
+      return await register(params);
     } catch (error) {
       if (error instanceof Error) {
-        notify(error.message, 'error');
-      } else {
-        notify('Register failed', 'error');
+        return {
+          ...baseErrRegisterResponse,
+          message: error.message
+        }
       }
-      return false;
+      return baseErrRegisterResponse
     }
   }
 

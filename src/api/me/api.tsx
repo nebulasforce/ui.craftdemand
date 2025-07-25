@@ -7,7 +7,7 @@ import { Options } from '@/api/common/request';
 export async function me(req?:meRequest,options?:Options) {
   return request<meResponse>({
     url: '/api/v1/me',
-    method: 'POST',
+    method: 'GET',
     headers: {
       'Content-Type': 'application/json',
     },

@@ -22,7 +22,7 @@ import { GoogleButton } from './GoogleButton';
 import { TwitterButton } from './TwitterButton';
 import { useAuth } from '@/contexts/AuthContext/AuthContext';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import notify from '@/utils/notify';
 
 
@@ -44,6 +44,11 @@ export function AuthenticationForm(props: PaperProps) {
   const [countdown, setCountdown] = useState(0);
   const { login, register } = useAuth();
   const router = useRouter();
+
+  // 创建 ref 用于存储输入框引用
+  const loginIdRef = useRef<HTMLInputElement>(null);
+  const usernameRef = useRef<HTMLInputElement>(null);
+
   const form = useForm({
     initialValues: {
       loginId: '',  // 统一的登录id字段
@@ -57,20 +62,47 @@ export function AuthenticationForm(props: PaperProps) {
 
     validate: {
       loginId: (val) => {
-        if (!val) { return 'This field is required'; }
-        const isEmail = /^\S+@\S+$/.test(val);
-        const isMobile = /^1[3-9]\d{9}$/.test(val);
-        if (!isEmail && !isMobile) {
-          return 'Please enter a valid email or mobile number';
+        if (type === 'login') {
+          if (!val) {
+            return 'This field is required';
+          }
         }
         return null;
       },
-      username: (val) => (val?.length < 3 ? 'Username must be at least 3 characters' : null),
-      email: (val) => (val && !/^\S+@\S+$/.test(val) ? 'Invalid email address' : null),
-      mobile: (val) => (val && !/^1[3-9]\d{9}$/.test(val) ? 'Invalid mobile number' : null),
-      password: (val) => (val?.length < 6 ? 'Password should include at least 6 characters' : null),
-      captcha: (val) => (type === 'register' && (!val || val.length !== 6) ? 'Verification code is 6 digits' : null),
-      terms: (val) => (type === 'register' && !val ? 'You must accept the terms and conditions' : null),
+      username: (val) =>
+        type === 'register' && val?.length < 3
+          ? 'Username must be at least 3 characters'
+          : null,
+
+      email: (val) =>
+        type === 'register' && val && !/^\S+@\S+$/.test(val)
+          ? 'Invalid email address'
+          : null,
+
+      mobile: (val) =>
+        type === 'register' && val && !/^1[3-9]\d{9}$/.test(val)
+          ? 'Invalid mobile number'
+          : null,
+
+      password: (val) => {
+        if (!val) {
+          return 'Password is required';
+        }
+        if (val.length < 6) {
+          return 'Password should include at least 6 characters';
+        }
+        return null;
+      },
+
+      captcha: (val) =>
+        type === 'register' && (!val || val.length !== 6)
+          ? 'Verification code is 6 digits'
+          : null,
+
+      terms: (val) =>
+        type === 'register' && !val
+          ? 'You must accept the terms and conditions'
+          : null,
     },
   });
 
@@ -105,6 +137,15 @@ export function AuthenticationForm(props: PaperProps) {
     }
   }, 1000);
 
+  // 焦点自动获取逻辑
+  useEffect(() => {
+    if (type === 'login' && loginIdRef.current) {
+      loginIdRef.current.focus();
+    } else if (type === 'register' && usernameRef.current) {
+      usernameRef.current.focus();
+    }
+  }, [type]);
+
   // handleSubmit 表单处理
   const handleSubmit = async (): Promise<void> => {
     setLoading(true);
@@ -115,9 +156,11 @@ export function AuthenticationForm(props: PaperProps) {
           password: form.values.password,
         };
         const result = await login(params);
-        if (result) {
+        if (result.success) {
           notify('Login successfully', 'success');
           router.push('/'); // 登录成功后跳转到首页
+        } else {
+          notify(result.message||'Login failed', 'error');
         }
       } else if (type === 'register') {
         const params = {
@@ -128,9 +171,11 @@ export function AuthenticationForm(props: PaperProps) {
           captcha: form.values.captcha,
         };
         const result = await register(params);
-        if (result) {
+        if (result.success) {
           notify('Register successfully', 'success');
-          router.push('/auth/login'); // 注册成功后跳转到登录页
+          router.push('/auth'); // 注册成功后跳转到登录页
+        } else {
+          notify(result.message||'Register failed', 'error');
         }
       }
     } catch (error) {
@@ -162,11 +207,14 @@ export function AuthenticationForm(props: PaperProps) {
         <Stack>
           {type === 'login' && (
             <TextInput
+              required
               label="Email/Mobile/Username"
               placeholder="Enter your email, mobile or username"
               value={form.values.loginId}
               onChange={(event) => form.setFieldValue('loginId', event.currentTarget.value)}
+              error={form.errors.loginId} // 显示验证错误
               radius="md"
+              ref={loginIdRef} // 添加 ref
             />
           )}
 
@@ -180,6 +228,7 @@ export function AuthenticationForm(props: PaperProps) {
                 onChange={(event) => form.setFieldValue('username', event.currentTarget.value)}
                 error={form.errors.username}
                 radius="md"
+                ref={usernameRef} // 添加 ref
               />
 
               <TextInput
@@ -237,7 +286,7 @@ export function AuthenticationForm(props: PaperProps) {
             placeholder="Your password"
             value={form.values.password}
             onChange={(event) => form.setFieldValue('password', event.currentTarget.value)}
-            error={form.errors.password && 'Password should include at least 6 characters'}
+            error={form.errors.password}
             radius="md"
           />
 
