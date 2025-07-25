@@ -21,7 +21,7 @@ import { upperFirst, useToggle, useInterval } from '@mantine/hooks';
 import { GoogleButton } from './GoogleButton';
 import { TwitterButton } from './TwitterButton';
 import { useAuth } from '@/contexts/AuthContext/AuthContext';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useState, useRef, useEffect } from 'react';
 import notify from '@/utils/notify';
 
@@ -39,9 +39,6 @@ const sendVerificationCode = async (mobile: string) => {
 
 
 export function AuthenticationForm(props: PaperProps) {
-
-  const searchParams = useSearchParams();
-  const action = searchParams.get("action") === "register" ? "register" : "login";
 
   const [type, toggle] = useToggle(['login', 'register']);
   const [loading, setLoading] = useState(false);
@@ -149,13 +146,6 @@ export function AuthenticationForm(props: PaperProps) {
       localStorage.removeItem("countdown");
     }
   }, 1000, { autoInvoke:true }); // 固定1000ms间隔
-
-    // 通过 useEffect 设置初始值
-    useEffect(() => {
-      if (action) {
-        toggle(action); // 设置初始值
-      }
-    }, [action]);
 
   // 焦点自动获取逻辑
   useEffect(() => {

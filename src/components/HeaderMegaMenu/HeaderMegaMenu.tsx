@@ -160,10 +160,10 @@ export function HeaderMegaMenu() {
           </Group>
 
           <Group visibleFrom="sm" ml="auto">
-            <Link href="/auth?action=login" passHref>
+            <Link href="/auth/login" passHref>
               <Button variant="default">Log in</Button>
             </Link>
-            <Link href="/auth?action=register" passHref>
+            <Link href="/auth/register" passHref>
               <Button>Sign up</Button>
             </Link>
           </Group>
@@ -208,10 +208,10 @@ export function HeaderMegaMenu() {
           <Divider my="sm" />
 
           <Group justify="center" grow pb="xl" px="md">
-            <Link href="/auth?action=login" passHref>
+            <Link href="/auth/login" passHref>
               <Button variant="default">Log in</Button>
             </Link>
-            <Link href="/auth?action=register" passHref>
+            <Link href="/auth/register" passHref>
               <Button>Sign up</Button>
             </Link>
           </Group>
