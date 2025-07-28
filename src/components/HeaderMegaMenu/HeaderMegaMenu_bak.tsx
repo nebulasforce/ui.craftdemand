@@ -4,16 +4,7 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import {
-  IconBook,
-  IconChartPie3,
-  IconChevronDown,
-  IconCode,
-  IconCoin,
-  IconFingerprint,
-  IconNotification,
-  IconUser,
-} from '@tabler/icons-react';
+import { IconBook, IconChartPie3, IconChevronDown, IconCode, IconCoin, IconFingerprint, IconNotification, IconUser } from '@tabler/icons-react';
 import {
   Anchor,
   Box,
@@ -31,7 +22,6 @@ import {
   ThemeIcon,
   UnstyledButton,
   useMantineTheme,
-  Loader,
   Menu,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
@@ -84,9 +74,8 @@ export function HeaderMegaMenu() {
   const [linksOpened, { toggle: toggleLinks }] = useDisclosure(false);
   const [ ,setMenuData] = useState<listFrontData>();
   const [, setLoading] = useState(true);
-
   const theme = useMantineTheme();
-  const { user,isLoading:authLoading , logout } = useAuth();
+  const { user,  logout } = useAuth();
 
 
   const fetchMenu = async (): Promise<void> => {
@@ -191,55 +180,50 @@ export function HeaderMegaMenu() {
           </Group>
 
           <Group visibleFrom="sm" ml="auto">
+            <Box>
             {
-              authLoading ?
-                (
-                  <Group variant="dots"  justify="center">
-                    <Loader size={30} variant="dots" />
-                  </Group>
-                ):(
-                  user ? (
-                    <>
-                      <Menu
-                        trigger="hover"
-                        withinPortal
-                      >
-                        <Menu.Target>
-                          <UnstyledButton className={`${classes.link} ${classes.noHoverEffect}`}>
-                            <Group align="center">
-                              <img
-                                src={user.profile.avatar || '/avatar_default.png'}
-                                alt={user.account.username}
-                                style={{ width: 30, height: 30, borderRadius: '50%' }}
-                              />
-                              <Text size="sm" fw={500} >
-                                {user.account.username}
-                              </Text>
-                            </Group>
-                          </UnstyledButton>
-                        </Menu.Target>
-                        <Menu.Dropdown>
-                          <Menu.Item leftSection={<IconUser />}>个人中心</Menu.Item>
-                          <Menu.Item leftSection={<IconUser />}>个人设置</Menu.Item>
-                          <Divider />
-                          <Menu.Item leftSection={<IconUser />} onClick={logout}>
-                            退出登录
-                          </Menu.Item>
-                        </Menu.Dropdown>
-                      </Menu>
-                    </>
-                  ):(
-                    <>
-                      <Link href="/auth/login" passHref>
-                        <Button variant="default">Log in</Button>
-                      </Link>
-                      <Link href="/auth/register" passHref>
-                        <Button>Sign up</Button>
-                      </Link>
-                    </>
-                  )
-                )
+              user ? (
+                <>
+                  <Menu
+                    trigger="hover"
+                    withinPortal
+                  >
+                    <Menu.Target>
+                      <UnstyledButton className={`${classes.link} ${classes.noHoverEffect}`}>
+                        <Group align="center">
+                          <img
+                            src={user.profile.avatar || '/avatar_default.png'}
+                            alt={user.account.username}
+                            style={{ width: 30, height: 30, borderRadius: '50%' }}
+                          />
+                          <Text size="sm" fw={500} >
+                            {user.account.username}
+                          </Text>
+                        </Group>
+                      </UnstyledButton>
+                    </Menu.Target>
+                    <Menu.Dropdown>
+                      <Menu.Item leftSection={<IconUser />}>个人中心</Menu.Item>
+                      <Menu.Item leftSection={<IconUser />}>个人设置</Menu.Item>
+                      <Divider />
+                      <Menu.Item leftSection={<IconUser />} onClick={logout}>
+                        退出登录
+                      </Menu.Item>
+                    </Menu.Dropdown>
+                  </Menu>
+                </>
+                ) : (
+                <>
+                  <Link href="/auth/login" passHref>
+                    <Button variant="default">Log in</Button>
+                  </Link>
+                  <Link href="/auth/register" passHref>
+                    <Button>Sign up</Button>
+                  </Link>
+                </>
+              )
             }
+            </Box>
           </Group>
 
           <Burger opened={drawerOpened} onClick={toggleDrawer} hiddenFrom="sm" />
