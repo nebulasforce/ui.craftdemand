@@ -105,7 +105,7 @@ export function LoginForm(props: PaperProps) {
   }
 
   return (
-    <Paper radius="md" p="lg" withBorder {...props}>
+    <Paper radius="md" p="lg" pos="relative"  withBorder {...props}>
       <LoadingOverlay visible={loading} />
       <Text size="lg" fw={500}>
         Welcome to Mantine, login with

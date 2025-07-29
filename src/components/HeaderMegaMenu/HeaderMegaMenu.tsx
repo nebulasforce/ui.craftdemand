@@ -258,10 +258,8 @@ export function HeaderMegaMenu() {
         <ScrollArea h="calc(100vh - 80px" mx="-md">
           <Divider my="sm" />
 
-          <Link href="/" passHref>
-            <a className={classes.link}>
-              Home
-            </a>
+          <Link href="/" className={classes.link} passHref>
+            Home
           </Link>
           <UnstyledButton className={classes.link} onClick={toggleLinks}>
             <Center inline>
@@ -282,12 +280,54 @@ export function HeaderMegaMenu() {
           <Divider my="sm" />
 
           <Group justify="center" grow pb="xl" px="md">
-            <Link href="/auth/login" passHref>
-              <Button variant="default">Log in</Button>
-            </Link>
-            <Link href="/auth/register" passHref>
-              <Button>Sign up</Button>
-            </Link>
+            {
+              authLoading ? (
+                <Group variant="dots"  justify="center">
+                  <Loader size={30} variant="dots" />
+                </Group>
+              ) : (
+                user ? (
+                  <>
+                    <Menu
+                      trigger="hover"
+                      withinPortal
+                    >
+                      <Menu.Target>
+                        <UnstyledButton className={`${classes.link} ${classes.noHoverEffect}`}>
+                          <Group align="center">
+                            <img
+                              src={user.profile.avatar || '/avatar_default.png'}
+                              alt={user.account.username}
+                              style={{ width: 30, height: 30, borderRadius: '50%' }}
+                            />
+                            <Text size="sm" fw={500} >
+                              {user.account.username}
+                            </Text>
+                          </Group>
+                        </UnstyledButton>
+                      </Menu.Target>
+                      <Menu.Dropdown>
+                        <Menu.Item leftSection={<IconUser />}>个人中心</Menu.Item>
+                        <Menu.Item leftSection={<IconUser />}>个人设置</Menu.Item>
+                        <Divider />
+                        <Menu.Item leftSection={<IconUser />} onClick={logout}>
+                          退出登录
+                        </Menu.Item>
+                      </Menu.Dropdown>
+                    </Menu>
+                  </>
+                ) : (
+                  <>
+                    <Link href="/auth/login" passHref>
+                      <Button variant="default">Log in</Button>
+                    </Link>
+                    <Link href="/auth/register" passHref>
+                      <Button>Sign up</Button>
+                    </Link>
+                  </>
+                )
+              )
+            }
           </Group>
         </ScrollArea>
       </Drawer>
