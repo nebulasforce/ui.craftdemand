@@ -13,12 +13,15 @@ import {
   IconFingerprint,
   IconNotification,
   IconUser,
+  IconSettings,
+  IconLogout,
 } from '@tabler/icons-react';
 import {
   Anchor,
   Box,
   Burger,
   Button,
+  ThemeIcon,
   Center,
   Collapse,
   Divider,
@@ -28,7 +31,6 @@ import {
   ScrollArea,
   SimpleGrid,
   Text,
-  ThemeIcon,
   UnstyledButton,
   useMantineTheme,
   Loader,
@@ -206,7 +208,7 @@ export function HeaderMegaMenu() {
                       >
                         <Menu.Target>
                           <UnstyledButton className={`${classes.link} ${classes.noHoverEffect}`}>
-                            <Group align="center">
+                            <Group align="center" gap="xs">
                               <img
                                 src={user.profile.avatar || '/avatar_default.png'}
                                 alt={user.account.username}
@@ -219,11 +221,11 @@ export function HeaderMegaMenu() {
                           </UnstyledButton>
                         </Menu.Target>
                         <Menu.Dropdown>
-                          <Menu.Item leftSection={<IconUser />}>个人中心</Menu.Item>
-                          <Menu.Item leftSection={<IconUser />}>个人设置</Menu.Item>
+                          <Menu.Item leftSection={<IconUser />}>Profile</Menu.Item>
+                          <Menu.Item leftSection={<IconSettings />}>Setting</Menu.Item>
                           <Divider />
-                          <Menu.Item leftSection={<IconUser />} onClick={logout}>
-                            退出登录
+                          <Menu.Item leftSection={<IconLogout />} onClick={logout}>
+                            Log out
                           </Menu.Item>
                         </Menu.Dropdown>
                       </Menu>
@@ -308,9 +310,9 @@ export function HeaderMegaMenu() {
                       </Menu.Target>
                       <Menu.Dropdown>
                         <Menu.Item leftSection={<IconUser />}>个人中心</Menu.Item>
-                        <Menu.Item leftSection={<IconUser />}>个人设置</Menu.Item>
+                        <Menu.Item leftSection={<IconSettings />}>个人设置</Menu.Item>
                         <Divider />
-                        <Menu.Item leftSection={<IconUser />} onClick={logout}>
+                        <Menu.Item leftSection={<IconLogout />} onClick={logout}>
                           退出登录
                         </Menu.Item>
                       </Menu.Dropdown>
