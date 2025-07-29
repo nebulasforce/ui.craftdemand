@@ -1,6 +1,7 @@
 export interface User {
-  account:Account;
-  profile:Profile;
+  account: Account;
+  profile: Profile;
+  user?: User;
 }
 
 export interface Account {
@@ -31,11 +32,11 @@ export interface Profile {
   province: {
     code: string;
     name: string;
-  },
+  };
   city: {
     code: string;
     name: string;
-  },
+  };
   deliveryAddress: Address[];
 }
 

@@ -1,0 +1,9 @@
+{
+  "title": "Header Dropdown",
+  "category": "layout",
+  "dimmed": true,
+  "canvas": {
+    "center": true,
+    "maxWidth": 420
+  }
+}

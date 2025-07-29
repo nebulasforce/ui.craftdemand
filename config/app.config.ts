@@ -7,7 +7,7 @@ export interface AppConfig {
 
 const appConfig: AppConfig = {
   metadata: {
-    title: "Next App Mantine Tailwind Template",
+    title: "CraftDemand.com",
     description: "Next App Mantine Tailwind Template",
   }
 }

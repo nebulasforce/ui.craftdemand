@@ -43,6 +43,7 @@ import { listFrontData } from '@/api/menu/response';
 import classes from './HeaderMegaMenu.module.css';
 import notify from '@/utils/notify';
 import { useAuth } from '@/contexts/AuthContext/AuthContext';
+import { HeaderDropdown } from '@/components/HeaderDropdown/HeaderDropdown';
 
 
 const mockdata = [
@@ -88,7 +89,7 @@ export function HeaderMegaMenu() {
   const [, setLoading] = useState(true);
 
   const theme = useMantineTheme();
-  const { user,isLoading:authLoading , logout } = useAuth();
+  const { user, isLoading:authLoading , logout } = useAuth();
 
 
   const fetchMenu = async (): Promise<void> => {
@@ -201,35 +202,7 @@ export function HeaderMegaMenu() {
                   </Group>
                 ):(
                   user ? (
-                    <>
-                      <Menu
-                        trigger="hover"
-                        withinPortal
-                      >
-                        <Menu.Target>
-                          <UnstyledButton className={`${classes.link} ${classes.noHoverEffect}`}>
-                            <Group align="center" gap="xs">
-                              <img
-                                src={user.profile.avatar || '/avatar_default.png'}
-                                alt={user.account.username}
-                                style={{ width: 30, height: 30, borderRadius: '50%' }}
-                              />
-                              <Text size="sm" fw={500} >
-                                {user.account.username}
-                              </Text>
-                            </Group>
-                          </UnstyledButton>
-                        </Menu.Target>
-                        <Menu.Dropdown>
-                          <Menu.Item leftSection={<IconUser />}>Profile</Menu.Item>
-                          <Menu.Item leftSection={<IconSettings />}>Setting</Menu.Item>
-                          <Divider />
-                          <Menu.Item leftSection={<IconLogout />} onClick={logout}>
-                            Log out
-                          </Menu.Item>
-                        </Menu.Dropdown>
-                      </Menu>
-                    </>
+                    <HeaderDropdown user={user} />
                   ):(
                     <>
                       <Link href="/auth/login" passHref>
