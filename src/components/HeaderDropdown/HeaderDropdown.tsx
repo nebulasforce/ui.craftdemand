@@ -10,15 +10,16 @@ import {
 import { Group, Avatar, Text, Menu, UnstyledButton } from '@mantine/core';
 import { User } from '@/api/me/typings';
 import { useAuth } from '@/contexts/AuthContext/AuthContext';
+import {Component,ReactNode } from 'react';
 
 
 // 定义菜单项类型
 interface DropdownItem {
   label: string;           // 菜单项文本
-  icon?: React.Component;  // 菜单项图标
+  icon?: Component;  // 菜单项图标
   url?: string;            // 菜单项链接
   color?: string;          // 菜单项颜色
-  rightSection?: React.ReactNode; // 菜单项右侧内容
+  rightSection?: ReactNode; // 菜单项右侧内容
   onClick?: () => void;    // 菜单项点击事件
   // 可以添加更多Mantine Menu.Item支持的属性
 }

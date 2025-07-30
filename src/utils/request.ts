@@ -39,7 +39,7 @@ instance.interceptors.response.use(
     if (error.response) {
       switch (error.response.status) {
         case 401:
-          window.location.href = '/auth';
+          window.location.href = '/auth/login';
           break;
         case 403:
           break;
