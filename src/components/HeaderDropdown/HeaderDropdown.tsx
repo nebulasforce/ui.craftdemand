@@ -65,14 +65,15 @@ export function HeaderDropdown({ user }: HeaderDropdownProps) {
       }
     }
   }
-
+  const { logout,isAuthenticated } = useAuth();
+  
   useEffect(() => {
     fetchData().then(() =>{
       setLoading(false);
     } );
-  }, []);
+  }, [isAuthenticated]);
 
-  const { logout } = useAuth();
+
 
   // 图标映射表
   const iconMap = {
