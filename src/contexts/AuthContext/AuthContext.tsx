@@ -97,7 +97,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   // logoutFunc 退出方法
   const logoutFunc = async () => {
     try {
-      await logout();
+      logout().then();
       setUser(null);
       setIsAuthenticated(false);
       localStorage.removeItem('user');

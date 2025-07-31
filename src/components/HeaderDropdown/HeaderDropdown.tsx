@@ -7,10 +7,13 @@ import {
   IconLogout,
   IconArrowsLeftRight,
 } from '@tabler/icons-react';
-import { Group, Avatar, Text, Menu, UnstyledButton } from '@mantine/core';
+import { Group, Avatar,Box, Text, Menu, UnstyledButton, LoadingOverlay } from '@mantine/core';
 import { User } from '@/api/me/typings';
 import { useAuth } from '@/contexts/AuthContext/AuthContext';
-import {Component,ReactNode } from 'react';
+import { Component, ReactNode, useState, useEffect } from 'react';
+import { listGroupData } from '@/api/headDropdown/response';
+import { listGroup } from '@/api/headDropdown/api';
+import notify from '@/utils/notify';
 
 
 // 定义菜单项类型
@@ -37,57 +40,84 @@ export interface HeaderDropdownProps {
 }
 
 export function HeaderDropdown({ user }: HeaderDropdownProps) {
+  const [data ,setData] = useState<listGroupData>();
+  const [loading, setLoading] = useState(true);
+
+  const fetchData = async (): Promise<void> => {
+    try {
+      const response = await listGroup();
+      if (response.code === 0) {
+        setData(response.data);
+      }
+    }catch(err) {
+      if (err instanceof Error) {
+        notify(err.message, 'error');
+      } else {
+        notify('系统错误', 'error');
+      }
+    }
+  }
+
+  useEffect(() => {
+    fetchData().then(() =>{
+      setLoading(false);
+    } );
+  }, []);
+
   const { logout } = useAuth();
   return (
-    <Menu withinPortal>
-      <Menu.Target>
-        <UnstyledButton>
-          <Group>
-            <Avatar src={user.profile.avatar || '/avatar_default.png'} radius="xl" alt={user.account.username} />
-            <div style={{flex:1}} >
-              <Text size="sm" fw={500}>{user.account.username}</Text>
-              <Text c="dimmed" size="xs">{user.profile.name}</Text>
-            </div>
-            <IconChevronRight size={16} />
-          </Group>
+    <Box pos="relative">
+      <Menu withinPortal trigger="hover">
+        <LoadingOverlay  visible={loading} />
+        <Menu.Target>
+          <UnstyledButton>
+            <Group>
+              <Avatar src={user.profile.avatar || '/avatar_default.png'} radius="xl" alt={user.account.username} />
+              <div style={{flex:1}} >
+                <Text size="sm" fw={500}>{user.account.username}</Text>
+                <Text c="dimmed" size="xs">{user.profile.name}</Text>
+              </div>
+              <IconChevronRight size={16} />
+            </Group>
 
-        </UnstyledButton>
-      </Menu.Target>
-      <Menu.Dropdown>
-        <Menu.Label>Application</Menu.Label>
-        <Menu.Item component="a" href="/settings" leftSection={<IconSettings size={14} />}>
-          Settings
-        </Menu.Item>
-        <Menu.Item leftSection={<IconMessageCircle size={14} />}>
-          Messages
-        </Menu.Item>
-        <Menu.Item leftSection={<IconPhoto size={14} />}>
-          Gallery
-        </Menu.Item>
-        <Menu.Item
-          leftSection={<IconSearch size={14} />}
-          rightSection={
-            <Text size="xs" c="dimmed">
-              ⌘K
-            </Text>
-          }
-        >
-          Search
-        </Menu.Item>
-        <Menu.Divider />
-        <Menu.Item
-          leftSection={<IconArrowsLeftRight size={14} />}
-        >
-          Transfer my data
-        </Menu.Item>
-        <Menu.Item
-          color="red"
-          leftSection={<IconLogout size={14} />}
-          onClick={logout}
-        >
-          Logout
-        </Menu.Item>
-      </Menu.Dropdown>
-    </Menu>
+          </UnstyledButton>
+        </Menu.Target>
+        <Menu.Dropdown>
+          <Menu.Label>Application</Menu.Label>
+          <Menu.Item component="a" href="/settings" leftSection={<IconSettings size={14} />}>
+            Settings
+          </Menu.Item>
+          <Menu.Item leftSection={<IconMessageCircle size={14} />}>
+            Messages
+          </Menu.Item>
+          <Menu.Item leftSection={<IconPhoto size={14} />}>
+            Gallery
+          </Menu.Item>
+          <Menu.Item
+            leftSection={<IconSearch size={14} />}
+            rightSection={
+              <Text size="xs" c="dimmed">
+                ⌘K
+              </Text>
+            }
+          >
+            Search
+          </Menu.Item>
+          <Menu.Divider />
+          <Menu.Item
+            leftSection={<IconArrowsLeftRight size={14} />}
+          >
+            Transfer my data
+          </Menu.Item>
+          <Menu.Item
+            color="red"
+            leftSection={<IconLogout size={14} />}
+            onClick={logout}
+          >
+            Logout
+          </Menu.Item>
+        </Menu.Dropdown>
+      </Menu>
+    </Box>
   );
 }
