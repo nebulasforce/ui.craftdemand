@@ -47,7 +47,6 @@ export interface HeaderDropdownProps {
 
 
 export function HeaderDropdown({ user }: HeaderDropdownProps) {
-  // console.error(user)
   const [data ,setData] = useState<listGroupData>();
   const [loading, setLoading] = useState(true);
 
@@ -66,7 +65,7 @@ export function HeaderDropdown({ user }: HeaderDropdownProps) {
     }
   }
   const { logout,isAuthenticated } = useAuth();
-  
+
   useEffect(() => {
     fetchData().then(() =>{
       setLoading(false);
@@ -170,39 +169,6 @@ export function HeaderDropdown({ user }: HeaderDropdownProps) {
               </Fragment>
             ))
           }
-          <Menu.Label>Application</Menu.Label>
-          <Menu.Item component="a" href="/settings" leftSection={<IconSettings size={14} />}>
-            Settings
-          </Menu.Item>
-          <Menu.Item leftSection={<IconMessageCircle size={14} />}>
-            Messages
-          </Menu.Item>
-          <Menu.Item leftSection={<IconPhoto size={14} />}>
-            Gallery
-          </Menu.Item>
-          <Menu.Item
-            leftSection={<IconSearch size={14} />}
-            rightSection={
-              <Text size="xs" c="dimmed">
-                ⌘K
-              </Text>
-            }
-          >
-            Search
-          </Menu.Item>
-          <Menu.Divider />
-          <Menu.Item
-            leftSection={<IconArrowsLeftRight size={14} />}
-          >
-            Transfer my data
-          </Menu.Item>
-          <Menu.Item
-            color="red"
-            leftSection={<IconLogout size={14} />}
-            onClick={logout}
-          >
-            Logout
-          </Menu.Item>
         </Menu.Dropdown>
       </Menu>
     </Box>
