@@ -86,7 +86,7 @@ export function HeaderMegaMenu() {
   const [drawerOpened, { toggle: toggleDrawer, close: closeDrawer }] = useDisclosure(false);
   const [linksOpened, { toggle: toggleLinks }] = useDisclosure(false);
   const [ ,setMenuData] = useState<listFrontData>();
-  const [loading, setLoading] = useState(true);
+  const [, setLoading] = useState(true);
 
   const theme = useMantineTheme();
   const { user, isLoading:authLoading , logout ,isAuthenticated} = useAuth();

@@ -22,14 +22,46 @@ import { useRouter } from 'next/navigation';
 import { useState, useRef, useEffect } from 'react';
 import notify from '@/utils/notify';
 import Link from 'next/link';
-
+import { getPublicKey } from '@/api/data/api';
+import { getPublicKeyData } from '@/api/data/response';
+import JSEncrypt from 'jsencrypt';
 
 
 export function LoginForm(props: PaperProps) {
 
   const [loading, setLoading] = useState(false);
+  const [publicKey, setPublicKey] = useState<getPublicKeyData>();
   const { login } = useAuth();
   const router = useRouter();
+
+  const fetchPublicKey = async (): Promise<void> => {
+    try {
+      const response = await getPublicKey();
+      if (response.code === 0) {
+        setPublicKey(response.data);
+      }
+    }catch(err) {
+      if (err instanceof Error) {
+        notify(err.message, 'error');
+      } else {
+        notify('系统错误', 'error');
+      }
+    }
+  }
+
+  // RSA加密函数
+  const encryptPassword =  (password: string) => {
+    const encrypt = new JSEncrypt();
+    encrypt.setPublicKey(String(publicKey));
+    return encrypt.encrypt(password) || '';
+  };
+
+  useEffect(() => {
+    setLoading(true);
+    fetchPublicKey().then(()=>{
+      setLoading(false);
+    })
+  }, []);
 
   // 创建 ref 用于存储输入框引用
   const loginIdRef = useRef<HTMLInputElement>(null);
@@ -81,9 +113,10 @@ export function LoginForm(props: PaperProps) {
   const handleSubmit = async (): Promise<void> => {
     setLoading(true);
     try {
+      const encryptedPassword = encryptPassword(form.values.password)
       const params = {
         loginId: form.values.loginId,
-        password: form.values.password,
+        password: encryptedPassword,
       };
       const result = await login(params);
       if (result.success) {
