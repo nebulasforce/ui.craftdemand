@@ -74,6 +74,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           return response;
         }
         localStorage.removeItem('token');
+        localStorage.removeItem('user');
         return {
           ...baseErrLoginResponse,
           message: resp.message,
@@ -97,11 +98,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   // logoutFunc 退出方法
   const logoutFunc = async () => {
     try {
-      logout().then();
-      setUser(null);
-      setIsAuthenticated(false);
-      localStorage.removeItem('user');
-      localStorage.removeItem('token');
+      logout().then(()=>{
+        setUser(null);
+        setIsAuthenticated(false);
+        localStorage.removeItem('user');
+        localStorage.removeItem('token');
+      });
     } catch (error) {
       if (error instanceof Error) {
         notify(error.message, 'error');

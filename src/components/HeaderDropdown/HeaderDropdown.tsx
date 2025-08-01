@@ -17,7 +17,7 @@ import { listGroupData } from '@/api/headDropdown/response';
 import { listGroup } from '@/api/headDropdown/api';
 import notify from '@/utils/notify';
 
-// 定义Tabler图标的类型（匹配实际的ForwardRef组件类型）
+// TablerIcon 定义Tabler图标的类型（匹配实际的ForwardRef组件类型）
 type TablerIcon = ForwardRefExoticComponent<
   IconProps & RefAttributes<Icon>
 >;
@@ -64,7 +64,7 @@ export function HeaderDropdown({ user }: HeaderDropdownProps) {
       }
     }
   }
-  const { logout,isAuthenticated } = useAuth();
+  const { logout, isAuthenticated } = useAuth();
 
   useEffect(() => {
     fetchData().then(() =>{
@@ -118,7 +118,7 @@ export function HeaderDropdown({ user }: HeaderDropdownProps) {
       return {
         label: groupKey === '_' ? '' : groupKey, // 特殊处理分隔线分组
         items: processedItems,
-        isDivider: groupKey === '_' || index < array.length - 1, // 最后一个分组不加分隔线
+        isDivider: index < array.length - 1, // 最后一个分组不加分隔线
       };
     });
   };
@@ -153,7 +153,7 @@ export function HeaderDropdown({ user }: HeaderDropdownProps) {
                   <Menu.Item
                     key={`item-${groupIndex}-${itemIndex}`}
                     component={item.url ? 'a' : undefined}
-                    href={item.url}
+                    href={item.url ? item.url :undefined}
                     color={item.color as any}
                     onClick={item.onClick}
                     leftSection={item.icon ? <item.icon size={14} /> : null}

@@ -40,6 +40,7 @@ instance.interceptors.response.use(
       switch (error.response.status) {
         case 401:
           if (window.location.pathname !== '/auth/login') {
+            localStorage.removeItem('user');
             localStorage.removeItem('token');
             window.location.href = '/auth/login';
           }

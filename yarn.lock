@@ -11864,6 +11864,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"jsencrypt@npm:^3.3.2":
+  version: 3.3.2
+  resolution: "jsencrypt@npm:3.3.2"
+  checksum: 10c0/4e39e100799af91c4d043011100f9500d2a05d90cb1cbd7adc94413567679ecf7679a9f0ab3d9d4c8632a1b1c0a7c56a72534d0403517646d7d1df2828fc635c
+  languageName: node
+  linkType: hard
+
 "jsesc@npm:^2.5.1":
   version: 2.5.2
   resolution: "jsesc@npm:2.5.2"
@@ -12420,6 +12427,7 @@ __metadata:
     eslint-plugin-storybook: "npm:9.0.13"
     jest: "npm:^30.0.0"
     jest-environment-jsdom: "npm:^30.0.0"
+    jsencrypt: "npm:^3.3.2"
     next: "npm:15.3.3"
     postcss: "npm:^8.5.6"
     postcss-preset-mantine: "npm:^1.17.0"

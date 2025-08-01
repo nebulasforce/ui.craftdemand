@@ -34,7 +34,7 @@ import {
   UnstyledButton,
   useMantineTheme,
   Loader,
-  Menu,
+  Menu, LoadingOverlay,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { Logo } from '@/components/Logo/Logo';
@@ -86,10 +86,10 @@ export function HeaderMegaMenu() {
   const [drawerOpened, { toggle: toggleDrawer, close: closeDrawer }] = useDisclosure(false);
   const [linksOpened, { toggle: toggleLinks }] = useDisclosure(false);
   const [ ,setMenuData] = useState<listFrontData>();
-  const [, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
 
   const theme = useMantineTheme();
-  const { user, isLoading:authLoading , logout } = useAuth();
+  const { user, isLoading:authLoading , logout ,isAuthenticated} = useAuth();
 
 
   const fetchMenu = async (): Promise<void> => {
@@ -137,7 +137,7 @@ export function HeaderMegaMenu() {
         <Group justify="flex-start" h="100%">
           <Logo size={30} src="/avatar.png" />
 
-          <Group h="100%"  gap={0} visibleFrom="sm" ml="md" >
+          <Group h="100%"  gap={0} visibleFrom="sm" ml="md" pos="relative">
             <Link href="/" passHref className={classes.link}>
               Home
             </Link>
@@ -201,7 +201,7 @@ export function HeaderMegaMenu() {
                     <Loader size={30} variant="dots" />
                   </Group>
                 ):(
-                  user ? (
+                  user && isAuthenticated ? (
                     <HeaderDropdown user={user} />
                   ):(
                     <>
