@@ -1,4 +1,3 @@
-// src/utils/request.ts
 import axios, {
   AxiosRequestConfig,
   AxiosResponse,
@@ -15,6 +14,12 @@ const instance = axios.create({
   ...apiConfig,
 });
 
+// 从当前URL中获取lang参数
+const getLangFromUrl = (): string | null => {
+  const searchParams = new URLSearchParams(window.location.search);
+  return searchParams.get('lang');
+};
+
 // 请求拦截器
 instance.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
@@ -23,6 +28,21 @@ instance.interceptors.request.use(
       config.headers = config.headers || {};
       config.headers.Authorization = `Bearer ${token}`;
     }
+
+    // 获取URL中的lang参数
+    const lang = getLangFromUrl();
+    if (lang) {
+      // 确保params对象存在
+      config.params = config.params || {};
+      // 添加lang参数
+      config.params.lang = lang;
+      localStorage.setItem('lang', lang);
+      // 通常使用Accept-Language头传递语言信息，也可以自定义X-Lang头
+      config.headers['Accept-Language'] = lang;
+      // 或者使用自定义头：
+      config.headers['X-Lang'] = lang;
+    }
+
     return config;
   },
   (error: AxiosError) => {
@@ -59,18 +79,6 @@ instance.interceptors.response.use(
   }
 );
 
-
-
-// 核心 request 方法
-// async function request<T = any>(config: AxiosRequestConfig): Promise<T> {
-//   const response = await instance.request<T>(config);
-//   return response.data;
-// }
-
-// 核心 request 方法 - 修改为返回完整的响应对象
-// async function request<T = any, R = AxiosResponse<T>>(config: AxiosRequestConfig): Promise<R> {
-//   return instance.request<T, R>(config);
-// }
 async function request<T = any>(config: AxiosRequestConfig): Promise<T> {
   // 注意这里直接返回 instance.request 的结果，由于响应拦截器的处理，实际返回的是 response.data
   return instance.request<T, T>(config);
