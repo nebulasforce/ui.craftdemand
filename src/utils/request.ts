@@ -29,19 +29,23 @@ instance.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     }
 
+    // 从本地存储获取语言（关键修正）
+    const storedLang = localStorage.getItem('lang');
+    if (storedLang) {
+      config.headers = config.headers || {}; // 确保headers存在
+      config.headers['Accept-Language'] = storedLang;
+      config.headers['X-Lang'] = storedLang;
+    }
+
     // 获取URL中的lang参数
     const lang = getLangFromUrl();
     if (lang) {
-      // 确保params对象存在
-      config.params = config.params || {};
-      // 添加lang参数
-      config.params.lang = lang;
+      config.headers = config.headers || {}; // 确保headers存在
+      config.headers['Accept-Language'] = storedLang;
+      config.headers['X-Lang'] = storedLang;
       localStorage.setItem('lang', lang);
-      // 通常使用Accept-Language头传递语言信息，也可以自定义X-Lang头
-      config.headers['Accept-Language'] = lang;
-      // 或者使用自定义头：
-      config.headers['X-Lang'] = lang;
     }
+
 
     return config;
   },
