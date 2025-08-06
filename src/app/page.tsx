@@ -9,7 +9,6 @@ import {
 export default function Home() {
   return (
     <>
-
       <Title className="text-center mt-20">
         Welcome to{" "}
         <Text
