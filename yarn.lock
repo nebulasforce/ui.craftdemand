@@ -5412,6 +5412,24 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/react-typist@npm:^2":
+  version: 2.0.6
+  resolution: "@types/react-typist@npm:2.0.6"
+  dependencies:
+    "@types/react": "npm:*"
+  checksum: 10c0/0bf2f89bb5df0eb1340ab2c7c8503714829c172fab527200d6e9e8c44a7b654470700ad07bdebfea28b80e29ed587dcc95042f69cd6ac61c537ab0616384ca5e
+  languageName: node
+  linkType: hard
+
+"@types/react@npm:*":
+  version: 19.1.9
+  resolution: "@types/react@npm:19.1.9"
+  dependencies:
+    csstype: "npm:^3.0.2"
+  checksum: 10c0/b418da4aaf18fbc6df4f1b7096dda7ee152d697cac00d729ffd855b2b44a3a9cfb2ecb017ed20979ea3a7d98a5ce5fcf01ac1a3614d4a3e4d7069a0c45e49b0f
+  languageName: node
+  linkType: hard
+
 "@types/react@npm:19.1.8":
   version: 19.1.8
   resolution: "@types/react@npm:19.1.8"
@@ -12417,6 +12435,7 @@ __metadata:
     "@types/jest": "npm:^29.5.14"
     "@types/node": "npm:^22.13.11"
     "@types/react": "npm:19.1.8"
+    "@types/react-typist": "npm:^2"
     autoprefixer: "npm:^10.4.21"
     axios: "npm:^1.10.0"
     babel-loader: "npm:^10.0.0"
@@ -12435,6 +12454,7 @@ __metadata:
     prettier: "npm:^3.5.3"
     react: "npm:19.1.0"
     react-dom: "npm:19.1.0"
+    react-typist: "npm:^2.0.5"
     storybook: "npm:^8.6.8"
     storybook-dark-mode: "npm:^4.0.2"
     stylelint: "npm:^16.20.0"
@@ -13871,7 +13891,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prop-types@npm:^15.6.2, prop-types@npm:^15.8.1":
+"prop-types@npm:^15.5.10, prop-types@npm:^15.6.2, prop-types@npm:^15.8.1":
   version: 15.8.1
   resolution: "prop-types@npm:15.8.1"
   dependencies:
@@ -14214,6 +14234,18 @@ __metadata:
     react: ">=16.6.0"
     react-dom: ">=16.6.0"
   checksum: 10c0/2ba754ba748faefa15f87c96dfa700d5525054a0141de8c75763aae6734af0740e77e11261a1e8f4ffc08fd9ab78510122e05c21c2d79066c38bb6861a886c82
+  languageName: node
+  linkType: hard
+
+"react-typist@npm:^2.0.5":
+  version: 2.0.5
+  resolution: "react-typist@npm:2.0.5"
+  dependencies:
+    prop-types: "npm:^15.5.10"
+  peerDependencies:
+    react: ^0.14 || ^15.0 || ^16.0
+    react-dom: "*"
+  checksum: 10c0/1c105a87d324e3d296f8013a2a0529857224c55aedf3c6dc179027eeb86a97b5a970c250143cb469b4911eb4a6ef6c6aef8cd5dc87b6fdedf3943557686e78f6
   languageName: node
   linkType: hard
 

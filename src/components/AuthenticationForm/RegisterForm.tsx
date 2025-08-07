@@ -25,6 +25,7 @@ import { useRouter } from 'next/navigation';
 import { useState, useRef, useEffect } from 'react';
 import notify from '@/utils/notify';
 import Link from 'next/link';
+import Typist from 'react-typist';
 
 
 // sendVerificationCode 假设这里有发送验证码的函数
@@ -182,8 +183,8 @@ export function RegisterForm(props: PaperProps) {
   return (
     <Paper radius="md" p="lg" withBorder {...props}>
       <LoadingOverlay visible={loading} />
-      <Text size="lg" fw={500}>
-        Welcome to Mantine, Register with
+      <Text size="lg" component="span" fw={500}>
+        <Typist cursor={{hideWhenDone:true}}> Welcome to Mantine, Register with</Typist>
       </Text>
 
       <Group grow mb="md" mt="md">

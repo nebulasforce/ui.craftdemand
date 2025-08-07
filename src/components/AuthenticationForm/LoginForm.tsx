@@ -25,6 +25,8 @@ import Link from 'next/link';
 import { getPublicKey } from '@/api/data/api';
 import { getPublicKeyData } from '@/api/data/response';
 import JSEncrypt from 'jsencrypt';
+import Typist from 'react-typist';
+import 'react-typist/dist/Typist.css'; // 导入默认样式
 
 
 export function LoginForm(props: PaperProps) {
@@ -140,8 +142,8 @@ export function LoginForm(props: PaperProps) {
   return (
     <Paper radius="md" p="lg" pos="relative"  withBorder {...props}>
       <LoadingOverlay visible={loading} />
-      <Text size="lg" fw={500}>
-        Welcome to Mantine, login with
+      <Text size="lg" component="span" fw={500}>
+        <Typist cursor={{hideWhenDone:true}}>Welcome to Mantine, login with </Typist>
       </Text>
 
       <Group grow mb="md" mt="md">
