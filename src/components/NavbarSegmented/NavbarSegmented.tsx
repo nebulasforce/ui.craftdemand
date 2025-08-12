@@ -69,9 +69,11 @@ export function NavbarSegmented() {
   const { isAuthenticated } = useAuth();
 
   useEffect(() => {
-    fetchData().then(() =>{
-      setLoading(false);
-    } );
+    if (isAuthenticated) {
+      fetchData().then(() =>{
+        setLoading(false);
+      } );
+    }
   }, [isAuthenticated]);
 
   const links = tabs[section].map((item) => (

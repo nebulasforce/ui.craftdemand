@@ -67,9 +67,11 @@ export function HeaderDropdown({ user }: HeaderDropdownProps) {
   const { logout, isAuthenticated } = useAuth();
 
   useEffect(() => {
-    fetchData().then(() =>{
-      setLoading(false);
-    } );
+    if (isAuthenticated) {
+      fetchData().then(() =>{
+        setLoading(false);
+      } );
+    }
   }, [isAuthenticated]);
 
 
