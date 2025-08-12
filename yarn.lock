@@ -3759,9 +3759,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mantine/core@npm:^8.1.2":
-  version: 8.1.2
-  resolution: "@mantine/core@npm:8.1.2"
+"@mantine/core@npm:^8.2.4":
+  version: 8.2.4
+  resolution: "@mantine/core@npm:8.2.4"
   dependencies:
     "@floating-ui/react": "npm:^0.26.28"
     clsx: "npm:^2.1.1"
@@ -3770,10 +3770,10 @@ __metadata:
     react-textarea-autosize: "npm:8.5.9"
     type-fest: "npm:^4.27.0"
   peerDependencies:
-    "@mantine/hooks": 8.1.2
+    "@mantine/hooks": 8.2.4
     react: ^18.x || ^19.x
     react-dom: ^18.x || ^19.x
-  checksum: 10c0/c6498676dc5a50a036778588002301717cd9e290f6e9c460702592a2d5f0da0dc19be56f781f890656ca04ea353328c9c605fdc105924544978aa39b995433d5
+  checksum: 10c0/1a71de70cda970850903c006505eed8585889d84da28ce73ba36ed1ff94867c38d27c3279b45e3ded729da2fcb21d7c7992bf96e4c466e8648f8e2f987bdd590
   languageName: node
   linkType: hard
 
@@ -3793,24 +3793,24 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mantine/form@npm:^8.1.3":
-  version: 8.1.3
-  resolution: "@mantine/form@npm:8.1.3"
+"@mantine/form@npm:^8.2.4":
+  version: 8.2.4
+  resolution: "@mantine/form@npm:8.2.4"
   dependencies:
     fast-deep-equal: "npm:^3.1.3"
     klona: "npm:^2.0.6"
   peerDependencies:
     react: ^18.x || ^19.x
-  checksum: 10c0/08e7c67bae04abd9aea41936ab34f435bac6090de6dcc9437bdba9c2cb6f903d89f55931d1e8205242a6d0e5e0ac62d9bb32c3960f80e4d4bae66df6e6e748f3
+  checksum: 10c0/6b2c4be6ea3ff50580cb220cc00e24adfda47d33abf781c353a19ede7a0dcb0f7b14521986c1c74a584164fc9b10e89bee039d5fde9a0fdfb0363f58c15886ac
   languageName: node
   linkType: hard
 
-"@mantine/hooks@npm:^8.2.1":
-  version: 8.2.1
-  resolution: "@mantine/hooks@npm:8.2.1"
+"@mantine/hooks@npm:^8.2.4":
+  version: 8.2.4
+  resolution: "@mantine/hooks@npm:8.2.4"
   peerDependencies:
     react: ^18.x || ^19.x
-  checksum: 10c0/f9b632ee8f6b669d308b5b8b66231c3f99246312631f22abd88091c5c136e7edf588c58a155557633b83aab73ad9a60cc67dd4d70527ef3a91275bdf6c3632ba
+  checksum: 10c0/5321d21256eb02ad79ae4f221ab16c449814dd411ebc849297f4928abd818a29f5453e9a0e0b40d62b6d17e3261de214e8bed722d8f4c5dfce71a9d6c364f537
   languageName: node
   linkType: hard
 
@@ -12414,10 +12414,10 @@ __metadata:
     "@babel/core": "npm:^7.27.4"
     "@eslint/js": "npm:^9.29.0"
     "@ianvs/prettier-plugin-sort-imports": "npm:^4.4.2"
-    "@mantine/core": "npm:^8.1.2"
+    "@mantine/core": "npm:^8.2.4"
     "@mantine/ds": "npm:^6.0.22"
-    "@mantine/form": "npm:^8.1.3"
-    "@mantine/hooks": "npm:^8.2.1"
+    "@mantine/form": "npm:^8.2.4"
+    "@mantine/hooks": "npm:^8.2.4"
     "@mantine/notifications": "npm:^8.1.3"
     "@mantine/utils": "npm:^6.0.22"
     "@mantinex/dev-icons": "npm:^2.0.0"

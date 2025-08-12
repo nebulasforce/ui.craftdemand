@@ -23,31 +23,39 @@ import { listGroupData } from '@/api/navbar/response';
 import { listGroup } from '@/api/navbar/api';
 import notify from '@/utils/notify';
 import { useAuth } from '@/contexts/AuthContext/AuthContext';
+import Link from 'next/link';
 
-const tabs = {
-  account: [
-    { link: '', label: 'Notifications', icon: IconBellRinging },
-    { link: '', label: 'Billing', icon: IconReceipt2 },
-    { link: '', label: 'Security', icon: IconFingerprint },
-    { link: '', label: 'SSH Keys', icon: IconKey },
-    { link: '', label: 'Databases', icon: IconDatabaseImport },
-    { link: '', label: 'Authentication', icon: Icon2fa },
-    { link: '', label: 'Other Settings', icon: IconSettings },
-  ],
-  general: [
-    { link: '', label: 'Orders', icon: IconShoppingCart },
-    { link: '', label: 'Receipts', icon: IconLicense },
-    { link: '', label: 'Reviews', icon: IconMessage2 },
-    { link: '', label: 'Messages', icon: IconMessages },
-    { link: '', label: 'Customers', icon: IconUsers },
-    { link: '', label: 'Refunds', icon: IconReceiptRefund },
-    { link: '', label: 'Files', icon: IconFileAnalytics },
-  ],
+type SectionType = Extract<keyof listGroupData, string>
+
+// 图标映射表，将接口返回的图标字符串映射到实际组件
+const iconMap = {
+  Icon2fa,
+  IconBellRinging,
+  IconDatabaseImport,
+  IconFileAnalytics,
+  IconFingerprint,
+  IconKey,
+  IconLicense,
+  IconMessage2,
+  IconMessages,
+  IconReceipt2,
+  IconReceiptRefund,
+  IconSettings,
+  IconShoppingCart,
+  IconUsers,
 };
+
+
+
+const defaultSegments = [
+  { label: 'Account', value: 'Account' },
+  { label: 'System', value: 'System' },
+];
 
 export function NavbarSegmented() {
   const [data ,setData] = useState<listGroupData>();
-  const [section, setSection] = useState<'account' | 'general'>('account');
+  const [segments, setSegments] = useState<{ label: string; value: SectionType }[]>(defaultSegments);
+  const [section, setSection] = useState<SectionType>('Account');
   const [active, setActive] = useState('Billing');
   const [loading, setLoading] = useState(true);
 
@@ -55,7 +63,23 @@ export function NavbarSegmented() {
     try {
       const response = await listGroup();
       if (response.code === 0) {
-        setData(response.data);
+        if (response.data) {
+          setData(response.data);
+          // 提取其他数据
+          // 从data的一级键生成分段控制器选项
+          const generatedSegments = generateSegments(response.data);
+          setSegments(generatedSegments);
+
+          // 设置默认选中的分段（第一个分段）
+          const defaultSection = generatedSegments[0]?.value || 'Account';
+          setSection(defaultSection);
+
+          // 设置默认激活项
+          const firstItems = response.data[defaultSection] || [];
+          if (firstItems.length > 0) {
+            setActive(firstItems[0].name);
+          }
+        }
       }
     } catch (err) {
       if (err instanceof Error) {
@@ -66,7 +90,19 @@ export function NavbarSegmented() {
     }
   }
 
-  const { isAuthenticated } = useAuth();
+  // 生成分段控制器选项：label为原始键名，value为小写形式
+  const generateSegments = (data: listGroupData) => {
+      // 获取data对象的所有一级键
+      const keys = Object.keys(data);
+
+      // 转换为分段控制器需要的格式：label保持原始键名，value转为小写
+      return keys.map(key => ({
+        label: key,               // 显示的标签（如"Account"、"System"）
+        value: key  // 分段值转为小写（如"account"、"system"）
+      }));
+  };
+
+  const { logout, isAuthenticated } = useAuth();
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -76,21 +112,32 @@ export function NavbarSegmented() {
     }
   }, [isAuthenticated]);
 
-  const links = tabs[section].map((item) => (
-    <a
-      className={classes.link}
-      data-active={item.label === active || undefined}
-      href={item.link}
-      key={item.label}
-      onClick={(event) => {
-        event.preventDefault();
-        setActive(item.label);
-      }}
-    >
-      <item.icon className={classes.linkIcon} stroke={1.5} />
-      <span>{item.label}</span>
-    </a>
-  ));
+
+  const getLinks = () => {
+    // 接口数据存在时使用接口数据
+    if (data && section && data[section]) {
+      return data[section]
+        .sort((a, b) => (a.sort || 0) - (b.sort || 0))
+        .map((item) => {
+          const IconComponent = iconMap[item.icon as keyof typeof iconMap] || (() => null);
+          return (
+            <Link
+              className={classes.link}
+              data-active={item.name === active || undefined}
+              href={item.url}
+              key={item.code}
+              onClick={(event) => {
+                event.preventDefault();
+                setActive(item.name);
+              }}
+            >
+              <IconComponent className={classes.linkIcon} stroke={1.5} />
+              <span>{item.name}</span>
+            </Link>
+          );
+        });
+    }
+  }
 
   return (
       <nav className={classes.navbar}>
@@ -106,27 +153,24 @@ export function NavbarSegmented() {
               onChange={(value: any) => setSection(value)}
               transitionTimingFunction="ease"
               fullWidth
-              data={[
-                { label: 'Account', value: 'account' },
-                { label: 'System', value: 'general' },
-              ]}
+              data={segments}
             />
           </div>
 
-          <div className={classes.navbarMain}>{links}</div>
+          <div className={classes.navbarMain}>{getLinks()}</div>
         </Box>
 
         <Box className={classes.footerContainer} >
           <div className={classes.footer}>
-            <a href="#" className={classes.link} onClick={(event) => event.preventDefault()}>
+            <Link href="#" className={classes.link} onClick={(event) => event.preventDefault()}>
               <IconSwitchHorizontal className={classes.linkIcon} stroke={1.5} />
               <span>Change account</span>
-            </a>
+            </Link>
 
-            <a href="#" className={classes.link} onClick={(event) => event.preventDefault()}>
+            <Link href="#" className={classes.link} onClick={logout}>
               <IconLogout className={classes.linkIcon} stroke={1.5} />
               <span>Logout</span>
-            </a>
+            </Link>
           </div>
         </Box>
       </nav>
