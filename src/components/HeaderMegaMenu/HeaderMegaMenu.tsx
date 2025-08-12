@@ -34,7 +34,7 @@ import {
   UnstyledButton,
   useMantineTheme,
   Loader,
-  Menu, LoadingOverlay,
+  Menu,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { Logo } from '@/components/Logo/Logo';

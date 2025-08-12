@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Icon2fa,
   IconBellRinging,
@@ -17,8 +17,12 @@ import {
   IconSwitchHorizontal,
   IconUsers,
 } from '@tabler/icons-react';
-import { SegmentedControl, Text } from '@mantine/core';
+import { Box, LoadingOverlay, SegmentedControl, Text } from '@mantine/core';
 import classes from './NavbarSegmented.module.css';
+import { listGroupData } from '@/api/navbar/response';
+import { listGroup } from '@/api/navbar/api';
+import notify from '@/utils/notify';
+import { useAuth } from '@/contexts/AuthContext/AuthContext';
 
 const tabs = {
   account: [
@@ -42,8 +46,33 @@ const tabs = {
 };
 
 export function NavbarSegmented() {
+  const [data ,setData] = useState<listGroupData>();
   const [section, setSection] = useState<'account' | 'general'>('account');
   const [active, setActive] = useState('Billing');
+  const [loading, setLoading] = useState(true);
+
+  const fetchData = async (): Promise<void> => {
+    try {
+      const response = await listGroup();
+      if (response.code === 0) {
+        setData(response.data);
+      }
+    } catch (err) {
+      if (err instanceof Error) {
+        notify(err.message, 'error');
+      } else {
+        notify('系统错误', 'error');
+      }
+    }
+  }
+
+  const { isAuthenticated } = useAuth();
+
+  useEffect(() => {
+    fetchData().then(() =>{
+      setLoading(false);
+    } );
+  }, [isAuthenticated]);
 
   const links = tabs[section].map((item) => (
     <a
@@ -62,37 +91,42 @@ export function NavbarSegmented() {
   ));
 
   return (
-    <nav className={classes.navbar}>
-      <div>
-        <Text fw={500} size="sm" className={classes.title} c="dimmed" mb="xs">
-          bgluesticker@mantine.dev
-        </Text>
+      <nav className={classes.navbar}>
+        <Box pos="relative" className={classes.top}>
+          <LoadingOverlay  visible={loading} />
+          <div>
+            <Text fw={500} size="sm" className={classes.title} c="dimmed" mb="xs">
+              bgluesticker@mantine.dev
+            </Text>
 
-        <SegmentedControl
-          value={section}
-          onChange={(value: any) => setSection(value)}
-          transitionTimingFunction="ease"
-          fullWidth
-          data={[
-            { label: 'Account', value: 'account' },
-            { label: 'System', value: 'general' },
-          ]}
-        />
-      </div>
+            <SegmentedControl
+              value={section}
+              onChange={(value: any) => setSection(value)}
+              transitionTimingFunction="ease"
+              fullWidth
+              data={[
+                { label: 'Account', value: 'account' },
+                { label: 'System', value: 'general' },
+              ]}
+            />
+          </div>
 
-      <div className={classes.navbarMain}>{links}</div>
+          <div className={classes.navbarMain}>{links}</div>
+        </Box>
 
-      <div className={classes.footer}>
-        <a href="#" className={classes.link} onClick={(event) => event.preventDefault()}>
-          <IconSwitchHorizontal className={classes.linkIcon} stroke={1.5} />
-          <span>Change account</span>
-        </a>
+        <Box className={classes.footerContainer} >
+          <div className={classes.footer}>
+            <a href="#" className={classes.link} onClick={(event) => event.preventDefault()}>
+              <IconSwitchHorizontal className={classes.linkIcon} stroke={1.5} />
+              <span>Change account</span>
+            </a>
 
-        <a href="#" className={classes.link} onClick={(event) => event.preventDefault()}>
-          <IconLogout className={classes.linkIcon} stroke={1.5} />
-          <span>Logout</span>
-        </a>
-      </div>
-    </nav>
+            <a href="#" className={classes.link} onClick={(event) => event.preventDefault()}>
+              <IconLogout className={classes.linkIcon} stroke={1.5} />
+              <span>Logout</span>
+            </a>
+          </div>
+        </Box>
+      </nav>
   );
 }
