@@ -8,6 +8,7 @@ import { loginResponse, registerResponse } from '@/api/auth/response';
 import { me } from '@/api/me/api';
 import { User } from '@/api/me/typings';
 import notify from '@/utils/notify';
+import Cookies from 'js-cookie';
 
 
 interface AuthContextValue {
@@ -64,6 +65,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (response.success && response.data?.accessToken) {
         const accessToken = response.data?.accessToken;
         localStorage.setItem('token', accessToken); // 在请求拦截器中会使用
+        Cookies.set('token', accessToken, {
+          expires: 7, // 7天过期
+          path: '/',
+          sameSite: 'Lax'
+        });
         // 获取当前用户信息
         const resp = await me();
         if (resp.success && resp.data) {
@@ -75,6 +81,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
         localStorage.removeItem('token');
         localStorage.removeItem('user');
+        Cookies.remove('token');
         return {
           ...baseErrLoginResponse,
           message: resp.message,
