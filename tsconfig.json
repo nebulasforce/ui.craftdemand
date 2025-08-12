@@ -39,7 +39,6 @@
     ]
   },
   "include": [
-    "middleware.ts",
     "**/*.ts",
     "**/*.tsx",
     "next-env.d.ts",
