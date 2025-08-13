@@ -1,7 +1,7 @@
 "use client"
 
 import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation'; // 用于App Router
+import { useRouter } from 'next/navigation'; // 用于App Router
 // 如果你使用Pages Router，导入方式为：
 // import { useRouter } from 'next/router';
 import { login, logout, register } from '@/api/auth/api';

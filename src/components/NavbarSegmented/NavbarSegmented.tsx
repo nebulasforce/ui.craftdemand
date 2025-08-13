@@ -46,7 +46,6 @@ const iconMap = {
 };
 
 
-
 const defaultSegments = [
   { label: 'Account', value: 'Account' },
   { label: 'System', value: 'System' },
@@ -90,15 +89,15 @@ export function NavbarSegmented() {
     }
   }
 
-  // 生成分段控制器选项：label为原始键名，value为小写形式
+  // 生成分段控制器选项：label为原始键名
   const generateSegments = (data: listGroupData) => {
       // 获取data对象的所有一级键
       const keys = Object.keys(data);
 
-      // 转换为分段控制器需要的格式：label保持原始键名，value转为小写
+      // 转换为分段控制器需要的格式：label保持原始键名
       return keys.map(key => ({
         label: key,               // 显示的标签（如"Account"、"System"）
-        value: key  // 分段值转为小写（如"account"、"system"）
+        value: key
       }));
   };
 
