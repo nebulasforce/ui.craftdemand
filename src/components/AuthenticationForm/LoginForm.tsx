@@ -18,7 +18,7 @@ import { useForm } from '@mantine/form';
 import { GoogleButton } from './GoogleButton';
 import { TwitterButton } from './TwitterButton';
 import { useAuth } from '@/contexts/AuthContext/AuthContext';
-import { useRouter } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { useState, useRef, useEffect } from 'react';
 import notify from '@/utils/notify';
 import Link from 'next/link';
@@ -34,6 +34,9 @@ export function LoginForm(props: PaperProps) {
   const [loading, setLoading] = useState(false);
   const [publicKey, setPublicKey] = useState<getPublicKeyData>();
   const { login } = useAuth();
+  const searchParams = useSearchParams(); // 获取 URL 中的查询参数
+  // 直接从查询参数中提取 redirect 值（解码后的路径）
+  const redirectPath = searchParams.get('redirect') || '/'; // 默认跳转首页
   const router = useRouter();
 
   const fetchPublicKey = async (): Promise<void> => {
@@ -123,7 +126,14 @@ export function LoginForm(props: PaperProps) {
       const result = await login(params);
       if (result.success) {
         notify('Login successfully', 'success');
-        router.push('/'); // 登录成功后跳转到首页
+        router.push(redirectPath);
+        // // 验证跳转路径的安全性，防止XSS攻击
+        // if (redirectPath.startsWith('/') && !redirectPath.startsWith('//')) {
+        //   router.push(redirectPath);
+        // } else {
+        //   console.error('redirectPath',redirectPath)
+        //   router.push('/');
+        // }
       } else {
         // 根据响应结果判断，如果需要显示图形验证码则显示图形验证码
         notify(result.message || 'Login failed', 'error');

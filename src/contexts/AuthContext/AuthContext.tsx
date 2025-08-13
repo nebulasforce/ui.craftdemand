@@ -1,7 +1,9 @@
-// src/contexts/AuthContext/AuthContext.tsx
-'use client';
+"use client"
 
 import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation'; // 用于App Router
+// 如果你使用Pages Router，导入方式为：
+// import { useRouter } from 'next/router';
 import { login, logout, register } from '@/api/auth/api';
 import { loginRequest, registerRequest } from '@/api/auth/request';
 import { loginResponse, registerResponse } from '@/api/auth/response';
@@ -39,6 +41,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const router = useRouter();
+
+  // Pages Router获取查询参数的方式不同，需要在loginFunc中使用router.query
 
   // 从本地存储加载用户信息
   useEffect(() => {
@@ -58,27 +63,27 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setIsLoading(false);
   }, []);
 
-  // loginFunc 登录方法
-  const loginFunc = async (params:loginRequest) => {
+  // loginFunc 登录方法，支持传入redirectPath或从URL参数获取 - 登录方法只设置存储以及返回响应信息【需要调用方自行做跳转以及提示】
+  const loginFunc = async (params: loginRequest) => {
     try {
       const response = await login(params);
       if (response.success && response.data?.accessToken) {
         const accessToken = response.data?.accessToken;
-        localStorage.setItem('token', accessToken); // 在请求拦截器中会使用
-        Cookies.set('token', accessToken, {
-          expires: 7, // 7天过期
-          path: '/',
-          sameSite: 'Lax'
-        });
+        localStorage.setItem('token', accessToken);
+        Cookies.set('token', accessToken, );
+
         // 获取当前用户信息
         const resp = await me();
         if (resp.success && resp.data) {
-          const loggingInUser = resp.data
-          setUser(loggingInUser)
+          const loggingInUser = resp.data;
+          setUser(loggingInUser);
           localStorage.setItem('user', JSON.stringify(loggingInUser));
           setIsAuthenticated(true);
+
           return response;
         }
+
+        // 如果获取用户信息失败，清理已存储的数据
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         Cookies.remove('token');
@@ -87,6 +92,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           message: resp.message,
         };
       }
+
       return {
         ...baseErrLoginResponse,
         message: response.message,
@@ -102,15 +108,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  // logoutFunc 退出方法
+  // logoutFunc 退出方法 - 退出方法比较特殊，直接在这里提示和跳转
   const logoutFunc = async () => {
     try {
-      logout().then(()=>{
-        setUser(null);
-        setIsAuthenticated(false);
-        localStorage.removeItem('user');
-        localStorage.removeItem('token');
-      });
+      await logout();
+
+      // 清除本地存储和状态
+      setUser(null);
+      setIsAuthenticated(false);
+      localStorage.removeItem('user');
+      localStorage.removeItem('token');
+      Cookies.remove('token');
+
+      notify('Logged out Successfully', 'success');
+      router.push('/');
     } catch (error) {
       if (error instanceof Error) {
         notify(error.message, 'error');
@@ -120,7 +131,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   // registerFunc 注册方法
-  const registerFunc = async (params:registerRequest) => {
+  const registerFunc = async (params: registerRequest) => {
     try {
       return await register(params);
     } catch (error) {

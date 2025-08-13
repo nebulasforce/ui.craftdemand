@@ -168,7 +168,7 @@ export function AuthenticationForm(props: PaperProps) {
         const result = await login(params);
         if (result.success) {
           notify('Login successfully', 'success');
-          router.push('/'); // 登录成功后跳转到首页
+         // router.push('/'); // 登录成功后跳转到首页
         } else {
           // 根据响应结果判断，如果需要显示图形验证码则显示图形验证码
           notify(result.message||'Login failed', 'error');
