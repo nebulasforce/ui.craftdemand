@@ -45,7 +45,6 @@ const iconMap = {
   IconUsers,
 };
 
-
 const defaultSegments = [
   { label: 'Account', value: 'Account' },
   { label: 'System', value: 'System' },

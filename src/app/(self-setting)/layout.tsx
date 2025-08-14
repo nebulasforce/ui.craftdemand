@@ -1,4 +1,3 @@
-// /src/app/layout.tsx
 "use client"
 import {
   AppShell,
@@ -6,7 +5,7 @@ import {
   AppShellNavbar,
   AppShellMain,
 } from "@mantine/core";
-
+import { useDisclosure } from '@mantine/hooks';
 import "@/app/globals.css";
 import React from 'react';
 import { HeaderMegaMenu } from '@/components/HeaderMegaMenu/HeaderMegaMenu';
@@ -14,8 +13,15 @@ import { NavbarSegmented } from '@/components/NavbarSegmented/NavbarSegmented';
 
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode; }>) {
+
+  const [opened] = useDisclosure();
+
   return (
-    <AppShell header={{ height: 60 }} padding="md">
+    <AppShell
+      header={{ height: 60 }}
+      navbar={{ width: 300, breakpoint: 'sm', collapsed: { mobile: !opened } }}
+      padding="md"
+    >
       <AppShellHeader>
         <HeaderMegaMenu  />
       </AppShellHeader>
