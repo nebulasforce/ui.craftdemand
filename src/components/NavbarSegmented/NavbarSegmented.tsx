@@ -16,6 +16,7 @@ import {
   IconShoppingCart,
   IconSwitchHorizontal,
   IconUsers,
+  IconUser,
 } from '@tabler/icons-react';
 import { Box, LoadingOverlay, SegmentedControl, Text } from '@mantine/core';
 import classes from './NavbarSegmented.module.css';
@@ -29,6 +30,7 @@ type SectionType = Extract<keyof listGroupData, string>
 
 // 图标映射表，将接口返回的图标字符串映射到实际组件
 const iconMap = {
+  IconUser,
   Icon2fa,
   IconBellRinging,
   IconDatabaseImport,
@@ -54,7 +56,7 @@ export function NavbarSegmented() {
   const [data ,setData] = useState<listGroupData>();
   const [segments, setSegments] = useState<{ label: string; value: SectionType }[]>(defaultSegments);
   const [section, setSection] = useState<SectionType>('Account');
-  const [active, setActive] = useState('Billing');
+  const [active, setActive] = useState('Profile');
   const [loading, setLoading] = useState(true);
 
   const fetchData = async (): Promise<void> => {

@@ -1,4 +1,5 @@
 import {
+  IconUserCog,
   IconSettings,
   IconSearch,
   IconPhoto,
@@ -78,6 +79,7 @@ export function HeaderDropdown({ user }: HeaderDropdownProps) {
 
   // 图标映射表
   const iconMap = {
+    IconUserCog,
     IconSettings ,
     IconSearch,
     IconPhoto,
@@ -127,7 +129,7 @@ export function HeaderDropdown({ user }: HeaderDropdownProps) {
   const menuGroups = getMenuGroups();
   return (
     <Box pos="relative">
-      <Menu withinPortal trigger="hover">
+      <Menu width={200} withinPortal trigger="hover">
         <LoadingOverlay  visible={loading} />
         <Menu.Target>
           <UnstyledButton>
