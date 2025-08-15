@@ -70,7 +70,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (response.success && response.data?.accessToken) {
         const accessToken = response.data?.accessToken;
         localStorage.setItem('token', accessToken);
-        Cookies.set('token', accessToken, );
+        Cookies.set('token', accessToken, {
+          expires: 1
+        });
 
         // 获取当前用户信息
         const resp = await me();

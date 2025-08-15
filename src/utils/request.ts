@@ -6,6 +6,7 @@ import axios, {
 } from 'axios';
 
 import apiConfig from '@/config/api.config';
+import Cookies from 'js-cookie';
 
 // 创建 axios 实例
 const instance = axios.create({
@@ -27,6 +28,8 @@ instance.interceptors.request.use(
     if (token) {
       config.headers = config.headers || {};
       config.headers.Authorization = `Bearer ${token}`;
+    } else {
+      Cookies.remove('token');
     }
 
     // 从本地存储获取语言（关键修正）

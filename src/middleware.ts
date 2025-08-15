@@ -16,7 +16,7 @@ export function middleware(request: NextRequest) {
   // const token = Cookies.get('token');
   const isAuthenticated = !!token;
 
-  // 3. 已认证用户访问登录页 → 重定向到个人中心
+  // 3. 已认证用户访问登录页 → 重定向到个人中心 - 有可能token已过期
   if (isAuthenticated && currentPath.startsWith('/auth/login')) {
     return NextResponse.redirect(new URL('/', request.url));
   }
