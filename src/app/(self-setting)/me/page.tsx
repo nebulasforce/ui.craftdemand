@@ -1,4 +1,5 @@
 "use client"
+// src/app/(self-setting)/me/page.tsx
 
 import { useNavbar } from '@/contexts/NavbarContext/NavbarContext';
 import { useEffect } from 'react';

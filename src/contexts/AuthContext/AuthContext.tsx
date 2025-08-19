@@ -1,5 +1,7 @@
 "use client"
 
+// src/contexts/AuthContext/AuthContext.tsx
+
 import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation'; // 用于App Router
 // 如果你使用Pages Router，导入方式为：
@@ -71,7 +73,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const accessToken = response.data?.accessToken;
         localStorage.setItem('token', accessToken);
         Cookies.set('token', accessToken, {
-          expires: 1
+          expires: 24
         });
 
         // 获取当前用户信息

@@ -18,7 +18,7 @@ export function middleware(request: NextRequest) {
 
   // 3. 已认证用户访问登录页 → 重定向到个人中心 - 有可能token已过期
   if (isAuthenticated && currentPath.startsWith('/auth/login')) {
-    return NextResponse.redirect(new URL('/', request.url));
+    return NextResponse.redirect(new URL('/me', request.url)); // 需要跳转一个需要认证的保护路由
   }
 
   // 4. 检查是否为公开路由（公开路由直接放行）
