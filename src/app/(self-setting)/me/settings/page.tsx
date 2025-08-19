@@ -1,9 +1,11 @@
 "use client"
 
+import { Title } from '@mantine/core';
+
 const SettingsPage = () => {
   return (
     <>
-      test递四方速递发生的防守打法是的冯绍峰第三方水电费是否水电费是
+      <Title order={2}>This is h2 title</Title>
     </>
   )
 }
