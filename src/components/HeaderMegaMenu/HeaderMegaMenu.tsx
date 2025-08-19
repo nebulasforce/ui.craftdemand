@@ -79,7 +79,6 @@ const mockdata = [
   },
 ];
 
-
 export function HeaderMegaMenu() {
   const [drawerOpened, { toggle: toggleDrawer, close: closeDrawer }] = useDisclosure(false);
   const [linksOpened, { toggle: toggleLinks }] = useDisclosure(false);
@@ -88,7 +87,6 @@ export function HeaderMegaMenu() {
 
   const theme = useMantineTheme();
   const { user, isLoading:authLoading , logout ,isAuthenticated} = useAuth();
-
 
   const fetchMenu = async (): Promise<void> => {
     try {

@@ -15,6 +15,15 @@ const instance = axios.create({
   ...apiConfig,
 });
 
+// 清除所有认证相关信息
+const clearAuthInfo = () => {
+  localStorage.removeItem('token');
+  localStorage.removeItem('tokenExpiry');
+  localStorage.removeItem('user');
+  Cookies.remove('refreshToken');
+};
+
+
 // 从当前URL中获取lang参数
 const getLangFromUrl = (): string | null => {
   const searchParams = new URLSearchParams(window.location.search);
@@ -29,7 +38,7 @@ instance.interceptors.request.use(
       config.headers = config.headers || {};
       config.headers.Authorization = `Bearer ${token}`;
     } else {
-      Cookies.remove('token');
+      clearAuthInfo();
     }
 
     // 从本地存储获取语言（关键修正）
@@ -67,8 +76,7 @@ instance.interceptors.response.use(
       switch (error.response.status) {
         case 401:
           if (window.location.pathname !== '/auth/login') {
-            localStorage.removeItem('user');
-            localStorage.removeItem('token');
+            clearAuthInfo()
             window.location.href = '/auth/login';
           }
           break;

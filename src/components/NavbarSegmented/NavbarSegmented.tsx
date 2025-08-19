@@ -27,6 +27,7 @@ import { useAuth } from '@/contexts/AuthContext/AuthContext';
 import Link from 'next/link';
 import { useNavbar } from '@/contexts/NavbarContext/NavbarContext'; // 引入Context
 
+
 export type SectionType = Extract<keyof listGroupData, string>
 
 // 图标映射表，将接口返回的图标字符串映射到实际组件
@@ -58,8 +59,10 @@ export function NavbarSegmented() {
   const [segments, setSegments] = useState<{ label: string; value: SectionType }[]>(defaultSegments);
   // const [section, setSection] = useState<SectionType>('Account');
   // const [active, setActive] = useState('Profile');
-  const { active, section, setSection } = useNavbar();
+  const { active,setActive, section, setSection } = useNavbar();
   const [loading, setLoading] = useState(true);
+  // 在组件内部
+
 
   const fetchData = async (): Promise<void> => {
     try {
@@ -129,8 +132,8 @@ export function NavbarSegmented() {
               href={item.url}
               key={item.code}
               onClick={(event) => {
-                event.preventDefault();
-                // setActive(item.name);
+                // event.preventDefault();
+                setActive(item.name);
               }}
             >
               <IconComponent className={classes.linkIcon} stroke={1.5} />
