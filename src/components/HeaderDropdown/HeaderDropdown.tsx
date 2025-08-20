@@ -1,5 +1,6 @@
 import {
   IconUserCog,
+  IconUser,
   IconSettings,
   IconSearch,
   IconPhoto,
@@ -79,6 +80,7 @@ export function HeaderDropdown({ user }: HeaderDropdownProps) {
 
   // 图标映射表
   const iconMap = {
+    IconUser,
     IconUserCog,
     IconSettings ,
     IconSearch,

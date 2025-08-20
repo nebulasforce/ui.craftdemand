@@ -5,7 +5,7 @@ import { Title } from '@mantine/core';
 const SettingsPage = () => {
   return (
     <>
-      <Title order={2}>This is h2 title</Title>
+      <Title order={2}>settings</Title>
     </>
   )
 }

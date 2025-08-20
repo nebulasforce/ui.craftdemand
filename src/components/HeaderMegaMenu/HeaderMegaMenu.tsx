@@ -128,7 +128,7 @@ export function HeaderMegaMenu() {
   ));
 
   return (
-    <Box pb={120}>
+    <Box>
       <header className={classes.header}>
         <Group justify="flex-start" h="100%">
           <Logo size={30} src="/avatar.png" />

@@ -1,32 +1,32 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { jwtVerify } from 'jose';
 
+interface JwtParseResult {
+  valid: boolean;
+  payload: Record<string, any> | null;
+  error?: string;
+}
 
 // 工具函数：安全解析 JWT（处理 Base64URL 编码问题）
-const safeParseJwt = (token: string) => {
-  try {
-    // 检查 token 格式（必须是三部分）
-    const parts = token.split('.');
-    if (parts.length !== 3) {
-      throw new Error('tokens must be at least 3 characters');
-    }
-
-    // 处理 Base64URL 编码（转换为标准 Base64）
-    const payloadBase64 = parts[1]
-      .replace(/-/g, '+') // 替换 URL 安全字符
-      .replace(/_/g, '/');
-
-    // 补充 Base64 填充字符（长度必须是4的倍数）
-    const padLength = (4 - (payloadBase64.length % 4)) % 4;
-    const paddedPayload = payloadBase64 + '='.repeat(padLength);
-
-    // 解码并解析 JSON
-    const payload = JSON.parse(atob(paddedPayload));
-    return { valid: true, payload };
-  } catch (error) {
-    const message = error instanceof Error ? error.message : '解析失败';
-    return { valid: false, payload: null, error: message };
+const safeParseJwt = (token: string): JwtParseResult => {
+  // 检查 token 格式（必须是三部分）
+  const parts = token.split('.');
+  if (parts.length !== 3) {
+    return { valid: false, payload: null, error: 'tokens must be at least 3 characters' };
   }
+
+  // 处理 Base64URL 编码（转换为标准 Base64）
+  const payloadBase64 = parts[1]
+    .replace(/-/g, '+') // 替换 URL 安全字符
+    .replace(/_/g, '/');
+
+  // 补充 Base64 填充字符（长度必须是4的倍数）
+  const padLength = (4 - (payloadBase64.length % 4)) % 4;
+  const paddedPayload = payloadBase64 + '='.repeat(padLength);
+
+  // 解码并解析 JSON
+  const payload = JSON.parse(atob(paddedPayload));
+  return { valid: true, payload };
 };
 
 // 验证 token 有效性
@@ -35,8 +35,12 @@ const verifyToken = async (token: string): Promise<{ valid: boolean; error: stri
     // 1. 先检查环境变量
     const secret = process.env.JWT_SECRET;
     const issuer = process.env.JWT_ISSUER;
-    if (!secret) {return { valid: false, error: 'JWT_SECRET 未配置' };}
-    if (!issuer) {return { valid: false, error: 'JWT_ISSUER 未配置' };}
+    if (!secret) {
+      return { valid: false, error: 'JWT_SECRET 未配置' };
+    }
+    if (!issuer) {
+      return { valid: false, error: 'JWT_ISSUER 未配置' };
+    }
 
     // 2. 预解析 token 查看基本信息（辅助调试）
     const parseResult = safeParseJwt(token);
@@ -48,7 +52,7 @@ const verifyToken = async (token: string): Promise<{ valid: boolean; error: stri
     //const aaa = await jwtVerify(token, secret);
     await jwtVerify(token, secretKey, {
       algorithms: ['HS256'], // 必须与后端一致
-      issuer
+      issuer,
     });
     //console.error("aaa",aaa)
 
@@ -93,8 +97,8 @@ export async function middleware(request: NextRequest) {
   }
 
   // 4. 检查是否为公开路由（公开路由直接放行）
-  const isPublicRoute = publicRoutes.some(route =>
-    currentPath === route || currentPath.startsWith(`${route}/`)
+  const isPublicRoute = publicRoutes.some(
+    (route) => currentPath === route || currentPath.startsWith(`${route}/`)
   );
 
   if (isPublicRoute) {
@@ -102,7 +106,7 @@ export async function middleware(request: NextRequest) {
   }
 
   // 5. 检查是否访问受保护路由
-  const isAccessingProtectedRoute = protectedRoutes.some(route => {
+  const isAccessingProtectedRoute = protectedRoutes.some((route) => {
     const baseRoute = route.replace('/*', ''); // 提取基础路径（如 /me/* → /me）
     return currentPath === baseRoute || currentPath.startsWith(`${baseRoute}/`);
   });
@@ -125,6 +129,6 @@ export async function middleware(request: NextRequest) {
 // 排除 API 路由、静态资源等不需要认证的路径
 export const config = {
   matcher: [
-    '/((?!api|_next/static|_next/image|favicon.ico|robots.txt|.*\\.json|.*\\.png|.*\\.jpg|.*\\.jpeg|.*\\.gif|.*\\.svg|.*\\.ico).*)'
-  ]
+    '/((?!api|_next/static|_next/image|favicon.ico|robots.txt|.*\\.json|.*\\.png|.*\\.jpg|.*\\.jpeg|.*\\.gif|.*\\.svg|.*\\.ico).*)',
+  ],
 };
