@@ -37,6 +37,12 @@ const baseErrRegisterResponse: registerResponse = {
   message: 'Register failed',
 };
 
+const removeStored = ()=> {
+  localStorage.removeItem('user');
+  localStorage.removeItem('token');
+  Cookies.remove('token');
+}
+
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
@@ -89,9 +95,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
 
         // 如果获取用户信息失败，清理已存储的数据
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        Cookies.remove('token');
+        removeStored()
         return {
           ...baseErrLoginResponse,
           message: resp.message,
@@ -121,9 +125,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       // 清除本地存储和状态
       setUser(null);
       setIsAuthenticated(false);
-      localStorage.removeItem('user');
-      localStorage.removeItem('token');
-      Cookies.remove('token');
+      removeStored()
 
       notify('Logged out Successfully', 'success');
       router.push('/');
