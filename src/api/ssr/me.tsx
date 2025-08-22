@@ -1,13 +1,12 @@
-import { Options } from '@/api/common/request';
-import { meRequest } from '@/api/me/request';
-import { meResponse } from '@/api/me/response';
-import request from '@/utils/request';
 import sRequest from '@/utils/sRequest';
+import { meRequest } from '@/api/me/request';
+import { Options } from '@/api/common/request';
+import { meResponse } from '@/api/me/response';
 
 
-// me 获取个人信息
+
 export async function me(req?:meRequest,options?:Options) {
-  return request<meResponse>({
+  return sRequest<meResponse>({
     url: '/api/v1/me',
     method: 'GET',
     headers: {

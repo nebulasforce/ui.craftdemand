@@ -1,4 +1,6 @@
+"use client"
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import {
   Icon2fa,
   IconBellRinging,
@@ -15,22 +17,17 @@ import {
   IconSettings,
   IconShoppingCart,
   IconSwitchHorizontal,
-  IconUsers,
   IconUser,
+  IconUsers,
 } from '@tabler/icons-react';
-import { Box, LoadingOverlay, SegmentedControl, Text } from '@mantine/core';
-import classes from './NavbarSegmented.module.css';
+import { Box, SegmentedControl, Text } from '@mantine/core';
 import { listGroupData } from '@/api/navbar/response';
-import { listGroup } from '@/api/navbar/api';
-import notify from '@/utils/notify';
 import { useAuth } from '@/contexts/AuthContext/AuthContext';
-import Link from 'next/link';
-import { useNavbar } from '@/contexts/NavbarContext/NavbarContext'; // 引入Context
+import { useNavbar } from '@/contexts/NavbarContext/NavbarContext';
+import classes from './NavbarSegmented.module.css';
 
+export type SectionType = Extract<keyof listGroupData, string>;
 
-export type SectionType = Extract<keyof listGroupData, string>
-
-// 图标映射表，将接口返回的图标字符串映射到实际组件
 const iconMap = {
   IconUser,
   Icon2fa,
@@ -49,77 +46,37 @@ const iconMap = {
   IconUsers,
 };
 
-const defaultSegments = [
-  { label: 'Account', value: 'Account' },
-  { label: 'System', value: 'System' },
-];
+const generateSegments = (data: listGroupData) => {
+  const keys = Object.keys(data) as SectionType[];
+  return keys.map((key) => ({
+    label: key,
+    value: key,
+  }));
+};
 
-export function NavbarSegmented() {
-  const [data ,setData] = useState<listGroupData>();
-  const [segments, setSegments] = useState<{ label: string; value: SectionType }[]>(defaultSegments);
-  // const [section, setSection] = useState<SectionType>('Account');
-  // const [active, setActive] = useState('Profile');
-  const { active,setActive, section, setSection } = useNavbar();
-  const [loading, setLoading] = useState(true);
-  // 在组件内部
+interface NavbarSegmentedProps {
+  data: listGroupData;
+}
 
+export function NavbarSegmented({ data }: NavbarSegmentedProps) {
+  // 初始化时就使用data生成segments，减少一次更新
+  const [segments, setSegments] = useState<{ label: string; value: SectionType }[]>(
+    generateSegments(data)
+  );
 
-  const fetchData = async (): Promise<void> => {
-    try {
-      const response = await listGroup();
-      if (response.code === 0) {
-        if (response.data) {
-          setData(response.data);
-          // 提取其他数据
-          // 从data的一级键生成分段控制器选项
-          const generatedSegments = generateSegments(response.data);
-          setSegments(generatedSegments);
+  const { active, setActive, section, setSection } = useNavbar();
+  const { logout } = useAuth();
 
-          // // 设置默认选中的分段（第一个分段）
-          // const defaultSection = generatedSegments[0]?.value || 'Account';
-          // setSection(defaultSection);
-
-          // 设置默认激活项
-          // const firstItems = response.data[defaultSection] || [];
-          // if (firstItems.length > 0) {
-          //   setActive(firstItems[0].name);
-          // }
-        }
-      }
-    } catch (err) {
-      if (err instanceof Error) {
-        notify(err.message, 'error');
-      } else {
-        notify('系统错误', 'error');
-      }
-    }
-  }
-
-  // 生成分段控制器选项：label为原始键名
-  const generateSegments = (data: listGroupData) => {
-      // 获取data对象的所有一级键
-      const keys = Object.keys(data);
-
-      // 转换为分段控制器需要的格式：label保持原始键名
-      return keys.map(key => ({
-        label: key,               // 显示的标签（如"Account"、"System"）
-        value: key
-      }));
-  };
-
-  const { logout, isAuthenticated } = useAuth();
-
+  // 当data变化时更新segments
   useEffect(() => {
-    if (isAuthenticated) {
-      fetchData().then(() =>{
-        setLoading(false);
-      } );
+    const generatedSegments = generateSegments(data);
+    if (JSON.stringify(generatedSegments) !== JSON.stringify(segments)) {
+      setSegments(generatedSegments);
     }
-  }, [isAuthenticated]);
+  }, [data, segments]);
 
 
   const getLinks = () => {
-    // 接口数据存在时使用接口数据
     if (data && section && data[section]) {
       return data[section]
         .sort((a, b) => (a.sort || 0) - (b.sort || 0))
@@ -131,10 +88,7 @@ export function NavbarSegmented() {
               data-active={item.name === active || undefined}
               href={item.url}
               key={item.code}
-              onClick={(event) => {
-                // event.preventDefault();
-                setActive(item.name);
-              }}
+              onClick={() => setActive(item.name)}
             >
               <IconComponent className={classes.linkIcon} stroke={1.5} />
               <span>{item.name}</span>
@@ -142,42 +96,41 @@ export function NavbarSegmented() {
           );
         });
     }
-  }
+  };
 
   return (
-      <nav className={classes.navbar}>
-        <Box pos="relative" className={classes.top}>
-          <LoadingOverlay  visible={loading} />
-          <div>
-            <Text fw={500} size="sm" className={classes.title} c="dimmed" mb="xs">
-              bgluesticker@mantine.dev
-            </Text>
+    <nav className={classes.navbar}>
+      <Box pos="relative" className={classes.top}>
+        <div>
+          <Text fw={500} size="sm" className={classes.title} c="dimmed" mb="xs">
+            bgluesticker@mantine.dev
+          </Text>
 
-            <SegmentedControl
-              value={section}
-              onChange={(value: any) => setSection(value)}
-              transitionTimingFunction="ease"
-              fullWidth
-              data={segments}
-            />
-          </div>
+          <SegmentedControl
+            value={section}
+            onChange={(value: any) => setSection(value)}
+            transitionTimingFunction="ease"
+            fullWidth
+            data={segments}
+          />
+        </div>
 
-          <div className={classes.navbarMain}>{getLinks()}</div>
-        </Box>
+        <div className={classes.navbarMain}>{getLinks()}</div>
+      </Box>
 
-        <Box className={classes.footerContainer} >
-          <div className={classes.footer}>
-            <Link href="#" className={classes.link} onClick={(event) => event.preventDefault()}>
-              <IconSwitchHorizontal className={classes.linkIcon} stroke={1.5} />
-              <span>Change account</span>
-            </Link>
+      <Box className={classes.footerContainer}>
+        <div className={classes.footer}>
+          <Link href="#" className={classes.link} onClick={(event) => event.preventDefault()}>
+            <IconSwitchHorizontal className={classes.linkIcon} stroke={1.5} />
+            <span>Change account</span>
+          </Link>
 
-            <Link href="#" className={classes.link} onClick={logout}>
-              <IconLogout className={classes.linkIcon} stroke={1.5} />
-              <span>Logout</span>
-            </Link>
-          </div>
-        </Box>
-      </nav>
+          <Link href="#" className={classes.link} onClick={logout}>
+            <IconLogout className={classes.linkIcon} stroke={1.5} />
+            <span>Logout</span>
+          </Link>
+        </div>
+      </Box>
+    </nav>
   );
 }

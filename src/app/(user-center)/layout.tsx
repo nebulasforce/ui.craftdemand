@@ -1,36 +1,46 @@
-'use client';
-
-// src/app/(user-center)/layout.tsx
-import { AppShell, AppShellHeader, AppShellMain, AppShellNavbar } from '@mantine/core';
-import { useDisclosure } from '@mantine/hooks';
-
 import '@/app/globals.css';
 
 import React from 'react';
-import { HeaderMegaMenu } from '@/components/HeaderMegaMenu/HeaderMegaMenu';
-import { NavbarSegmented } from '@/components/NavbarSegmented/NavbarSegmented';
-import { NavbarProvider } from '@/contexts/NavbarContext/NavbarContext'; // 引入Context
+import { listGroup } from '@/api/ssr/navbar';
+import { me } from '@/api/ssr/me';
+import { listGroupData } from '@/api/navbar/response';
+import { AppShellWrapper } from '@/components/AppShellWrapper/AppShellWrapper';
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  const [opened] = useDisclosure();
+
+const defaultNavbarData: listGroupData = {
+  Account: [],
+  System: [],
+};
+
+// 在布局中获取数据（App Router 支持布局中的异步数据获取）
+async function getNavbarData() {
+  try {
+    const response = await listGroup();
+    return response.data || defaultNavbarData;
+  } catch (error) {
+    return defaultNavbarData;
+  }
+}
+
+// 在布局中获取数据（App Router 支持布局中的异步数据获取）
+async function geMe() {
+  try {
+    const response = await me();
+    return response.data || null;
+  } catch (error) {
+    return null;
+  }
+}
+
+export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+
+  // 获取导航栏数据
+  const navbarData = await getNavbarData();
+  const user = await geMe();
 
   return (
-    <NavbarProvider>
-        <AppShell
-          header={{ height: 60 }}
-          navbar={{ width: 300, breakpoint: 'sm', collapsed: { mobile: !opened } }}
-          padding="md"
-        >
-          <AppShellHeader>
-            <HeaderMegaMenu />
-          </AppShellHeader>
-          <AppShellNavbar>
-            <NavbarSegmented />
-          </AppShellNavbar>
-          <AppShellMain>
-            {children}
-          </AppShellMain>
-        </AppShell>
-    </NavbarProvider>
+    <AppShellWrapper navbarData={navbarData} user={user} >
+      {children}
+    </AppShellWrapper>
   );
 }

@@ -14,7 +14,7 @@ type NavbarContextType = {
 const NavbarContext = createContext<NavbarContextType | undefined>(undefined);
 
 export function NavbarProvider({ children }: { children: ReactNode }) {
-  const [active, setActive] = useState('Profile'); // 默认值和原来保持一致
+  const [active, setActive] = useState('User Profile'); // 默认值和原来保持一致
   const [section, setSection] = useState<SectionType>('Account');
   return (
     <NavbarContext.Provider value={{ active, setActive, section, setSection }}>

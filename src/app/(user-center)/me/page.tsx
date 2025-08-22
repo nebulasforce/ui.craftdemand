@@ -7,11 +7,11 @@ import { Anchor, Box, Breadcrumbs, Paper, Title } from '@mantine/core';
 import { useNavbar } from '@/contexts/NavbarContext/NavbarContext';
 
 const SettingsPage = () => {
-  const { setActive,setSection } = useNavbar();
+  const { setActive, setSection } = useNavbar();
 
   useEffect(() => {
       setSection('Account');
-      setActive('Profile');
+      setActive('User Profile');
   }, []); // 合并依赖项
 
 
