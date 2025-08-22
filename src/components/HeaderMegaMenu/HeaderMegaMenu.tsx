@@ -1,7 +1,8 @@
 // src/components/HeaderMegaMenu/HeaderMegaMenu.tsx
 
-"use client";
+'use client';
 
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import {
   IconBook,
@@ -11,16 +12,12 @@ import {
   IconCoin,
   IconFingerprint,
   IconNotification,
-  IconUser,
-  IconSettings,
-  IconLogout,
 } from '@tabler/icons-react';
 import {
   Anchor,
   Box,
   Burger,
   Button,
-  ThemeIcon,
   Center,
   Collapse,
   Divider,
@@ -30,16 +27,16 @@ import {
   ScrollArea,
   SimpleGrid,
   Text,
+  ThemeIcon,
   UnstyledButton,
   useMantineTheme,
-  Menu,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { Logo } from '@/components/Logo/Logo';
-import classes from './HeaderMegaMenu.module.css';
-import { useAuth } from '@/contexts/AuthContext/AuthContext';
-import { HeaderDropdown } from '@/components/HeaderDropdown/HeaderDropdown';
 import { User } from '@/api/me/typings';
+import { HeaderDropdown } from '@/components/HeaderDropdown/HeaderDropdown';
+import { Logo } from '@/components/Logo/Logo';
+import { useAuth } from '@/contexts/AuthContext/AuthContext';
+import classes from './HeaderMegaMenu.module.css';
 
 const mockdata = [
   {
@@ -78,11 +75,16 @@ interface HeaderMegaMenuProps {
   user: User | null;
 }
 
-export function HeaderMegaMenu({user}: HeaderMegaMenuProps) {
+export function HeaderMegaMenu({ user }: HeaderMegaMenuProps) {
   const [drawerOpened, { toggle: toggleDrawer, close: closeDrawer }] = useDisclosure(false);
   const [linksOpened, { toggle: toggleLinks }] = useDisclosure(false);
   const theme = useMantineTheme();
-  const { logout } = useAuth();
+  const { user: authedUser } = useAuth();
+  const [userDisplay, setUserDisplay] = useState<User | null>(user);
+
+  useEffect(() => {
+    setUserDisplay(authedUser);
+  }, [authedUser]);
 
   const links = mockdata.map((item) => (
     <UnstyledButton className={classes.subLink} key={item.title}>
@@ -108,7 +110,7 @@ export function HeaderMegaMenu({user}: HeaderMegaMenuProps) {
         <Group justify="flex-start" h="100%">
           <Logo size={30} src="/avatar.png" />
 
-          <Group h="100%"  gap={0} visibleFrom="sm" ml="md" pos="relative">
+          <Group h="100%" gap={0} visibleFrom="sm" ml="md" pos="relative">
             <Link href="/" passHref className={classes.link}>
               Home
             </Link>
@@ -165,20 +167,18 @@ export function HeaderMegaMenu({user}: HeaderMegaMenuProps) {
           </Group>
 
           <Group visibleFrom="sm" ml="auto">
-            {
-              user ? (
-                <HeaderDropdown user={user} />
-              ):(
-                <>
-                  <Link href="/auth/login" passHref>
-                    <Button variant="default">Log in</Button>
-                  </Link>
-                  <Link href="/auth/register" passHref>
-                    <Button>Sign up</Button>
-                  </Link>
-                </>
-              )
-            }
+            {userDisplay ? (
+              <HeaderDropdown user={userDisplay} />
+            ) : (
+              <>
+                <Link href="/auth/login" passHref>
+                  <Button variant="default">Log in</Button>
+                </Link>
+                <Link href="/auth/register" passHref>
+                  <Button>Sign up</Button>
+                </Link>
+              </>
+            )}
           </Group>
 
           <Burger opened={drawerOpened} onClick={toggleDrawer} hiddenFrom="sm" />
@@ -219,48 +219,18 @@ export function HeaderMegaMenu({user}: HeaderMegaMenuProps) {
           <Divider my="sm" />
 
           <Group justify="center" grow pb="xl" px="md">
-            {
-              user ? (
-                <>
-                  <Menu
-                    trigger="hover"
-                    withinPortal
-                  >
-                    <Menu.Target>
-                      <UnstyledButton className={`${classes.link} ${classes.noHoverEffect}`}>
-                        <Group align="center">
-                          <img
-                            src={user.profile.avatar || '/avatar_default.png'}
-                            alt={user.account.username}
-                            style={{ width: 30, height: 30, borderRadius: '50%' }}
-                          />
-                          <Text size="sm" fw={500} >
-                            {user.account.username}
-                          </Text>
-                        </Group>
-                      </UnstyledButton>
-                    </Menu.Target>
-                    <Menu.Dropdown>
-                      <Menu.Item leftSection={<IconUser />}>个人中心</Menu.Item>
-                      <Menu.Item leftSection={<IconSettings />}>个人设置</Menu.Item>
-                      <Divider />
-                      <Menu.Item leftSection={<IconLogout />} onClick={logout}>
-                        退出登录
-                      </Menu.Item>
-                    </Menu.Dropdown>
-                  </Menu>
-                </>
-              ) : (
-                <>
-                  <Link href="/auth/login" passHref>
-                    <Button variant="default">Log in</Button>
-                  </Link>
-                  <Link href="/auth/register" passHref>
-                    <Button>Sign up</Button>
-                  </Link>
-                </>
-              )
-            }
+            {userDisplay ? (
+              <HeaderDropdown user={userDisplay} />
+            ) : (
+              <>
+                <Link href="/auth/login" passHref>
+                  <Button variant="default">Log in</Button>
+                </Link>
+                <Link href="/auth/register" passHref>
+                  <Button>Sign up</Button>
+                </Link>
+              </>
+            )}
           </Group>
         </ScrollArea>
       </Drawer>
