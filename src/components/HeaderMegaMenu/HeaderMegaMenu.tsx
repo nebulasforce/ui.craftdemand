@@ -107,7 +107,7 @@ export function HeaderMegaMenu({ user }: HeaderMegaMenuProps) {
   return (
     <Box>
       <header className={classes.header}>
-        <Group justify="flex-start" h="100%">
+        <Group justify="space-between" h="100%">
           <Logo size={30} src="/avatar.png" />
 
           <Group h="100%" gap={0} visibleFrom="sm" ml="md" pos="relative">

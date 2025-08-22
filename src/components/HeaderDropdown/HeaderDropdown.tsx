@@ -19,7 +19,21 @@ import {
   type Icon,
   type IconProps,
 } from '@tabler/icons-react';
-import { Avatar, Box, Group, LoadingOverlay, Menu, Text, UnstyledButton } from '@mantine/core';
+import {
+  Avatar,
+  Box,
+  Group,
+  LoadingOverlay,
+  Menu,
+  Text,
+  UnstyledButton,
+  useMantineTheme,
+  em,
+  Drawer,
+  Stack,
+  Divider,
+} from '@mantine/core';
+import { useMediaQuery } from '@mantine/hooks';
 import { listGroup } from '@/api/headDropdown/api';
 import { listGroupData } from '@/api/headDropdown/response';
 import { User } from '@/api/me/typings';
@@ -55,6 +69,11 @@ export interface HeaderDropdownProps {
 export function HeaderDropdown({ user }: HeaderDropdownProps) {
   const [data, setData] = useState<listGroupData>();
   const [loading, setLoading] = useState(true);
+  const [drawerOpened, setDrawerOpened] = useState(false);
+  const theme = useMantineTheme();
+
+  // 媒体查询 - 检测屏幕尺寸
+  const isMobile = useMediaQuery(`(max-width: ${em(theme.breakpoints.sm)})`);
 
   const fetchData = async (): Promise<void> => {
     try {
@@ -94,7 +113,10 @@ export function HeaderDropdown({ user }: HeaderDropdownProps) {
   };
 
   const eventMap = {
-    logout,
+    logout: () => {
+      logout();
+      setDrawerOpened(false);
+    },
   };
 
   const getMenuGroups = (): DropdownGroup[] => {
@@ -120,7 +142,10 @@ export function HeaderDropdown({ user }: HeaderDropdownProps) {
           url: item.url,
           color: item.color || undefined,
           rightSection: item.rightSection || undefined,
-          onClick: handleEvent,
+          onClick: handleEvent ? () => {
+            handleEvent();
+            setDrawerOpened(false);
+          } : undefined,
         };
       });
 
@@ -131,56 +156,155 @@ export function HeaderDropdown({ user }: HeaderDropdownProps) {
       };
     });
   };
+
   const menuGroups = getMenuGroups();
+
+  // 移动端抽屉内容
+  const renderDrawerContent = () => (
+    <Stack gap="md">
+      <Group>
+        <Avatar
+          src={user.profile.avatar || '/avatar_default.png'}
+          radius="xl"
+          alt={user.account.username}
+          size="md"
+        />
+        <div style={{ flex: 1 }}>
+          <Text size="sm" fw={500}>
+            {user.account.username}
+          </Text>
+          <Text c="dimmed" size="xs">
+            {user.profile.name}
+          </Text>
+        </div>
+      </Group>
+
+      <Divider />
+
+      {menuGroups.map((menuGroup, groupIndex) => (
+        <Fragment key={groupIndex}>
+          {/* 渲染分组标题 */}
+          {menuGroup.label && (
+            <Text size="sm" fw={600} c="dimmed" pl="sm">
+              {menuGroup.label}
+            </Text>
+          )}
+
+          {/* 渲染分组内的菜单项 */}
+          <Stack gap={4}>
+            {menuGroup.items.map((item, itemIndex) => (
+              <UnstyledButton
+                key={`item-${groupIndex}-${itemIndex}`}
+                component={item.url ? 'a' : 'div'}
+                href={item.url ? item.url : undefined}
+                c={item.color}
+                onClick={item.onClick}
+                py="xs"
+                px="sm"
+                style={{
+                  borderRadius: theme.radius.sm,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: theme.spacing.sm,
+                  '&:hover': {
+                    backgroundColor: theme.colors.gray[1],
+                  }
+                }}
+              >
+                {item.icon && <item.icon size={18} />}
+                <Text size="sm">{item.label}</Text>
+                {item.rightSection && (
+                  <Box ml="auto">{item.rightSection}</Box>
+                )}
+              </UnstyledButton>
+            ))}
+          </Stack>
+
+          {/* 渲染分隔线（如果需要） */}
+          {menuGroup.isDivider && <Divider key={`divider-${groupIndex}`} my="sm" />}
+        </Fragment>
+      ))}
+    </Stack>
+  );
+
+  // 用户信息显示部分（始终保持显示）
+  const userInfoSection = (
+    <UnstyledButton
+      onClick={() => isMobile && setDrawerOpened(true)}
+      style={{ width: isMobile ? '100%' : 'auto' }}
+    >
+      <Group>
+        <Avatar
+          src={user.profile.avatar || '/avatar_default.png'}
+          radius="xl"
+          alt={user.account.username}
+        />
+        <div style={{ flex: 1 }}>
+          <Text size="sm" fw={500}>
+            {user.account.username}
+          </Text>
+          <Text c="dimmed" size="xs">
+            {user.profile.name}
+          </Text>
+        </div>
+        <IconChevronRight size={16} />
+      </Group>
+    </UnstyledButton>
+  );
+
   return (
     <Box pos="relative">
-      <Menu width={200} withinPortal trigger="hover">
-        <Menu.Target>
-          <UnstyledButton>
-            <Group>
-              <Avatar
-                src={user.profile.avatar || '/avatar_default.png'}
-                radius="xl"
-                alt={user.account.username}
-              />
-              <div style={{ flex: 1 }}>
-                <Text size="sm" fw={500}>
-                  {user.account.username}
-                </Text>
-                <Text c="dimmed" size="xs">
-                  {user.profile.name}
-                </Text>
-              </div>
-              <IconChevronRight size={16} />
-            </Group>
-          </UnstyledButton>
-        </Menu.Target>
-        <Menu.Dropdown>
-          <LoadingOverlay visible={loading} />
-          {menuGroups.map((menuGroup, groupIndex) => (
-            <Fragment key={groupIndex}>
-              {/* 渲染label */}
-              {menuGroup.label && <Menu.Label>Application</Menu.Label>}
-              {/* 渲染分组内的菜单项 */}
-              {menuGroup.items.map((item, itemIndex) => (
-                <Menu.Item
-                  key={`item-${groupIndex}-${itemIndex}`}
-                  component={item.url ? 'a' : undefined}
-                  href={item.url ? item.url : undefined}
-                  color={item.color as any}
-                  onClick={item.onClick}
-                  leftSection={item.icon ? <item.icon size={14} /> : null}
-                  rightSection={item.rightSection}
-                >
-                  {item.label}
-                </Menu.Item>
-              ))}
-              {/* 渲染分隔线（如果需要） */}
-              {menuGroup.isDivider && <Menu.Divider key={`divider-${groupIndex}`} />}
-            </Fragment>
-          ))}
-        </Menu.Dropdown>
-      </Menu>
+      {/* 桌面端使用下拉菜单 */}
+      {!isMobile && (
+        <Menu width={200} withinPortal trigger="click-hover">
+          <Menu.Target>
+            {userInfoSection}
+          </Menu.Target>
+          <Menu.Dropdown>
+            <LoadingOverlay visible={loading} />
+            {menuGroups.map((menuGroup, groupIndex) => (
+              <Fragment key={groupIndex}>
+                {/* 渲染label */}
+                {menuGroup.label && <Menu.Label>{menuGroup.label}</Menu.Label>}
+                {/* 渲染分组内的菜单项 */}
+                {menuGroup.items.map((item, itemIndex) => (
+                  <Menu.Item
+                    key={`item-${groupIndex}-${itemIndex}`}
+                    component={item.url ? 'a' : undefined}
+                    href={item.url ? item.url : undefined}
+                    color={item.color as any}
+                    onClick={item.onClick}
+                    leftSection={item.icon ? <item.icon size={14} /> : null}
+                    rightSection={item.rightSection}
+                  >
+                    {item.label}
+                  </Menu.Item>
+                ))}
+                {/* 渲染分隔线（如果需要） */}
+                {menuGroup.isDivider && <Menu.Divider key={`divider-${groupIndex}`} />}
+              </Fragment>
+            ))}
+          </Menu.Dropdown>
+        </Menu>
+      )}
+
+      {/* 移动端使用抽屉 */}
+      {isMobile && (
+        <>
+          {userInfoSection}
+          <Drawer
+            opened={drawerOpened}
+            onClose={() => setDrawerOpened(false)}
+            withCloseButton={false}
+            position="right"
+            size="80%"
+            padding="md"
+            zIndex={1000001}
+          >
+            {renderDrawerContent()}
+          </Drawer>
+        </>
+      )}
     </Box>
   );
 }
