@@ -16,7 +16,7 @@ interface AppShellWrapperProps {
   user: User | null;
 }
 
-export function AppShellWrapper({ navbarData, children }: AppShellWrapperProps) {
+export function AppShellWrapper({ navbarData, children, user }: AppShellWrapperProps) {
   const [opened] = useDisclosure();
 
   return (
@@ -27,8 +27,8 @@ export function AppShellWrapper({ navbarData, children }: AppShellWrapperProps) 
           padding="md"
         >
           <AppShellHeader>
-            <HeaderMegaMenu />
-            {/*<HeaderMegaMenu user={user}/>*/}
+            {/*<HeaderMegaMenu />*/}
+            <HeaderMegaMenu user={user}/>
           </AppShellHeader>
           <AppShellNavbar>
             {/* 将数据传递给NavbarSegmented组件 */}

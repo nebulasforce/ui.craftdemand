@@ -3,7 +3,6 @@
 "use client";
 
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
 import {
   IconBook,
   IconChartPie3,
@@ -33,18 +32,14 @@ import {
   Text,
   UnstyledButton,
   useMantineTheme,
-  Loader,
   Menu,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { Logo } from '@/components/Logo/Logo';
-import { listFront } from '@/api/menu/api';
-import { listFrontData } from '@/api/menu/response';
 import classes from './HeaderMegaMenu.module.css';
-import notify from '@/utils/notify';
 import { useAuth } from '@/contexts/AuthContext/AuthContext';
 import { HeaderDropdown } from '@/components/HeaderDropdown/HeaderDropdown';
-
+import { User } from '@/api/me/typings';
 
 const mockdata = [
   {
@@ -79,35 +74,15 @@ const mockdata = [
   },
 ];
 
-export function HeaderMegaMenu() {
+interface HeaderMegaMenuProps {
+  user: User | null;
+}
+
+export function HeaderMegaMenu({user}: HeaderMegaMenuProps) {
   const [drawerOpened, { toggle: toggleDrawer, close: closeDrawer }] = useDisclosure(false);
   const [linksOpened, { toggle: toggleLinks }] = useDisclosure(false);
-  const [ ,setMenuData] = useState<listFrontData>();
-  const [, setLoading] = useState(true);
-
   const theme = useMantineTheme();
-  const { user, isLoading:authLoading , logout ,isAuthenticated} = useAuth();
-
-  const fetchMenu = async (): Promise<void> => {
-    try {
-      const response = await listFront();
-      if (response.code === 0) {
-        setMenuData(response.data);
-      }
-    }catch(err) {
-      if (err instanceof Error) {
-        notify(err.message, 'error');
-      } else {
-        notify('系统错误', 'error');
-      }
-    }
-  }
-
-  useEffect(() => {
-    fetchMenu().then(() =>{
-      setLoading(false);
-    } );
-  }, []);
+  const { logout } = useAuth();
 
   const links = mockdata.map((item) => (
     <UnstyledButton className={classes.subLink} key={item.title}>
@@ -191,25 +166,18 @@ export function HeaderMegaMenu() {
 
           <Group visibleFrom="sm" ml="auto">
             {
-              authLoading ?
-                (
-                  <Group variant="dots"  justify="center">
-                    <Loader size={30} variant="dots" />
-                  </Group>
-                ):(
-                  user && isAuthenticated ? (
-                    <HeaderDropdown user={user} />
-                  ):(
-                    <>
-                      <Link href="/auth/login" passHref>
-                        <Button variant="default">Log in</Button>
-                      </Link>
-                      <Link href="/auth/register" passHref>
-                        <Button>Sign up</Button>
-                      </Link>
-                    </>
-                  )
-                )
+              user ? (
+                <HeaderDropdown user={user} />
+              ):(
+                <>
+                  <Link href="/auth/login" passHref>
+                    <Button variant="default">Log in</Button>
+                  </Link>
+                  <Link href="/auth/register" passHref>
+                    <Button>Sign up</Button>
+                  </Link>
+                </>
+              )
             }
           </Group>
 
@@ -252,51 +220,45 @@ export function HeaderMegaMenu() {
 
           <Group justify="center" grow pb="xl" px="md">
             {
-              authLoading ? (
-                <Group variant="dots"  justify="center">
-                  <Loader size={30} variant="dots" />
-                </Group>
+              user ? (
+                <>
+                  <Menu
+                    trigger="hover"
+                    withinPortal
+                  >
+                    <Menu.Target>
+                      <UnstyledButton className={`${classes.link} ${classes.noHoverEffect}`}>
+                        <Group align="center">
+                          <img
+                            src={user.profile.avatar || '/avatar_default.png'}
+                            alt={user.account.username}
+                            style={{ width: 30, height: 30, borderRadius: '50%' }}
+                          />
+                          <Text size="sm" fw={500} >
+                            {user.account.username}
+                          </Text>
+                        </Group>
+                      </UnstyledButton>
+                    </Menu.Target>
+                    <Menu.Dropdown>
+                      <Menu.Item leftSection={<IconUser />}>个人中心</Menu.Item>
+                      <Menu.Item leftSection={<IconSettings />}>个人设置</Menu.Item>
+                      <Divider />
+                      <Menu.Item leftSection={<IconLogout />} onClick={logout}>
+                        退出登录
+                      </Menu.Item>
+                    </Menu.Dropdown>
+                  </Menu>
+                </>
               ) : (
-                user ? (
-                  <>
-                    <Menu
-                      trigger="hover"
-                      withinPortal
-                    >
-                      <Menu.Target>
-                        <UnstyledButton className={`${classes.link} ${classes.noHoverEffect}`}>
-                          <Group align="center">
-                            <img
-                              src={user.profile.avatar || '/avatar_default.png'}
-                              alt={user.account.username}
-                              style={{ width: 30, height: 30, borderRadius: '50%' }}
-                            />
-                            <Text size="sm" fw={500} >
-                              {user.account.username}
-                            </Text>
-                          </Group>
-                        </UnstyledButton>
-                      </Menu.Target>
-                      <Menu.Dropdown>
-                        <Menu.Item leftSection={<IconUser />}>个人中心</Menu.Item>
-                        <Menu.Item leftSection={<IconSettings />}>个人设置</Menu.Item>
-                        <Divider />
-                        <Menu.Item leftSection={<IconLogout />} onClick={logout}>
-                          退出登录
-                        </Menu.Item>
-                      </Menu.Dropdown>
-                    </Menu>
-                  </>
-                ) : (
-                  <>
-                    <Link href="/auth/login" passHref>
-                      <Button variant="default">Log in</Button>
-                    </Link>
-                    <Link href="/auth/register" passHref>
-                      <Button>Sign up</Button>
-                    </Link>
-                  </>
-                )
+                <>
+                  <Link href="/auth/login" passHref>
+                    <Button variant="default">Log in</Button>
+                  </Link>
+                  <Link href="/auth/register" passHref>
+                    <Button>Sign up</Button>
+                  </Link>
+                </>
               )
             }
           </Group>
