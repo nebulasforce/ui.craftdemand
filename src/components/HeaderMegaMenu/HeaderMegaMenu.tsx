@@ -166,7 +166,7 @@ export function HeaderMegaMenu({ user }: HeaderMegaMenuProps) {
             </Link>
           </Group>
 
-          <Group visibleFrom="sm" ml="auto">
+          <Group visibleFrom="md" ml="auto">
             {userDisplay ? (
               <HeaderDropdown user={userDisplay} />
             ) : (
