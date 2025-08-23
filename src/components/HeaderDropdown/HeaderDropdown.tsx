@@ -256,7 +256,7 @@ export function HeaderDropdown({ user }: HeaderDropdownProps) {
     <Box pos="relative">
       {/* 桌面端使用下拉菜单 */}
       {!isMobile && (
-        <Menu width={200} withinPortal trigger="click-hover">
+        <Menu width={200} withinPortal trigger="click-hover" >
           <Menu.Target>
             {userInfoSection}
           </Menu.Target>

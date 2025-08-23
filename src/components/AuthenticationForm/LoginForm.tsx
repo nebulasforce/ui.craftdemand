@@ -1,36 +1,36 @@
 // src/components/AuthenticationForm/LoginForm.tsx
-"use client"
+'use client';
 
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
+import JSEncrypt from 'jsencrypt';
+import Typist from 'react-typist';
 import {
   Anchor,
   Button,
   Divider,
+  FocusTrap, // 添加 FocusTrap 组件
   Group,
+  LoadingOverlay,
   Paper,
-  type PaperProps,
   PasswordInput,
   Stack,
   Text,
   TextInput,
-  LoadingOverlay,
+  type PaperProps,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { GoogleButton } from './GoogleButton';
-import { TwitterButton } from './TwitterButton';
-import { useAuth } from '@/contexts/AuthContext/AuthContext';
-import { useSearchParams, useRouter } from 'next/navigation';
-import { useState, useRef, useEffect } from 'react';
-import notify from '@/utils/notify';
-import Link from 'next/link';
 import { getPublicKey } from '@/api/data/api';
 import { getPublicKeyData } from '@/api/data/response';
-import JSEncrypt from 'jsencrypt';
-import Typist from 'react-typist';
+import { useAuth } from '@/contexts/AuthContext/AuthContext';
+import notify from '@/utils/notify';
+import { GoogleButton } from './GoogleButton';
+import { TwitterButton } from './TwitterButton';
+
 import 'react-typist/dist/Typist.css'; // 导入默认样式
 
-
 export function LoginForm(props: PaperProps) {
-
   const [loading, setLoading] = useState(false);
   const [publicKey, setPublicKey] = useState<getPublicKeyData>();
   const { login } = useAuth();
@@ -45,17 +45,17 @@ export function LoginForm(props: PaperProps) {
       if (response.code === 0) {
         setPublicKey(response.data);
       }
-    }catch(err) {
+    } catch (err) {
       if (err instanceof Error) {
         notify(err.message, 'error');
       } else {
         notify('系统错误', 'error');
       }
     }
-  }
+  };
 
   // RSA加密函数
-  const encryptPassword =  (password: string) => {
+  const encryptPassword = (password: string) => {
     const encrypt = new JSEncrypt();
     encrypt.setPublicKey(String(publicKey));
     return encrypt.encrypt(password) || '';
@@ -63,17 +63,14 @@ export function LoginForm(props: PaperProps) {
 
   useEffect(() => {
     setLoading(true);
-    fetchPublicKey().then(()=>{
+    fetchPublicKey().then(() => {
       setLoading(false);
-    })
+    });
   }, []);
-
-  // 创建 ref 用于存储输入框引用
-  const loginIdRef = useRef<HTMLInputElement>(null);
 
   const form = useForm({
     initialValues: {
-      loginId: '',  // 统一的登录id字段
+      loginId: '', // 统一的登录id字段
       password: '', // 密码
       captcha: '', // 验证码
     },
@@ -96,29 +93,21 @@ export function LoginForm(props: PaperProps) {
       },
 
       captcha: (val) => {
-        if(val) {
+        if (val) {
           if (val.length !== 6) {
-            return 'Verification code is 6 digits'
+            return 'Verification code is 6 digits';
           }
         }
         return null;
-      }
-    }
+      },
+    },
   });
-
-
-  // 焦点自动获取逻辑
-  useEffect(() => {
-    if (loginIdRef.current) {
-      loginIdRef.current.focus();
-    }
-  }, []);
 
   // handleSubmit 表单处理
   const handleSubmit = async (): Promise<void> => {
     setLoading(true);
     try {
-      const encryptedPassword = encryptPassword(form.values.password)
+      const encryptedPassword = encryptPassword(form.values.password);
       const params = {
         loginId: form.values.loginId,
         password: encryptedPassword,
@@ -147,13 +136,13 @@ export function LoginForm(props: PaperProps) {
     } finally {
       setLoading(false);
     }
-  }
+  };
 
   return (
-    <Paper radius="md" p="lg" pos="relative"  withBorder {...props}>
+    <Paper radius="md" p="lg" pos="relative" withBorder {...props}>
       <LoadingOverlay visible={loading} />
       <Text size="lg" component="span" fw={500}>
-        <Typist cursor={{hideWhenDone:true}}>Welcome to Mantine, login with </Typist>
+        <Typist cursor={{ hideWhenDone: true }}>Welcome to Mantine, login with </Typist>
       </Text>
 
       <Group grow mb="md" mt="md">
@@ -162,39 +151,41 @@ export function LoginForm(props: PaperProps) {
       </Group>
 
       <Divider label="Or continue with mobile / email / username" labelPosition="center" my="lg" />
+      {/* 添加 FocusTrap 包装表单内容 */}
+      <FocusTrap active>
+        <form onSubmit={form.onSubmit(handleSubmit)}>
+          <Stack>
+            <TextInput
+              required
+              data-autofocus
+              label="Email/Mobile/Username"
+              placeholder="Enter your email, mobile or username"
+              value={form.values.loginId}
+              onChange={(event) => form.setFieldValue('loginId', event.currentTarget.value)}
+              error={form.errors.loginId} // 显示验证错误
+              radius="md"
+            />
+            <PasswordInput
+              required
+              label="Password"
+              placeholder="Your password"
+              value={form.values.password}
+              onChange={(event) => form.setFieldValue('password', event.currentTarget.value)}
+              error={form.errors.password}
+              radius="md"
+            />
+          </Stack>
 
-      <form onSubmit={form.onSubmit(handleSubmit)}>
-        <Stack>
-          <TextInput
-            required
-            label="Email/Mobile/Username"
-            placeholder="Enter your email, mobile or username"
-            value={form.values.loginId}
-            onChange={(event) => form.setFieldValue('loginId', event.currentTarget.value)}
-            error={form.errors.loginId} // 显示验证错误
-            radius="md"
-            ref={loginIdRef} // 添加 ref
-          />
-          <PasswordInput
-            required
-            label="Password"
-            placeholder="Your password"
-            value={form.values.password}
-            onChange={(event) => form.setFieldValue('password', event.currentTarget.value)}
-            error={form.errors.password}
-            radius="md"
-          />
-        </Stack>
-
-        <Group justify="space-between" mt="xl">
-          <Anchor component={Link}  href="/auth/register" c="dimmed" size="xs">
-            Don't have an account? Register
-          </Anchor>
-          <Button type="submit" radius="xl">
-            Login
-          </Button>
-        </Group>
-      </form>
+          <Group justify="space-between" mt="xl">
+            <Anchor component={Link} href="/auth/register" c="dimmed" size="xs">
+              Don't have an account? Register
+            </Anchor>
+            <Button type="submit" radius="xl">
+              Login
+            </Button>
+          </Group>
+        </form>
+      </FocusTrap>
     </Paper>
   );
 }

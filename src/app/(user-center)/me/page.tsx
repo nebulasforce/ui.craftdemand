@@ -3,7 +3,7 @@
 // src/app/(self-setting)/me/page.tsx
 import React, { useEffect } from 'react';
 import Link from 'next/link';
-import { Anchor, Box, Breadcrumbs, Paper, Title } from '@mantine/core';
+import { Anchor, Box, Breadcrumbs, Paper, Title,Text,Divider } from '@mantine/core';
 import { useNavbar } from '@/contexts/NavbarContext/NavbarContext';
 
 const SettingsPage = () => {
@@ -50,9 +50,16 @@ const SettingsPage = () => {
         )}
       </Breadcrumbs>
       {/*页面容器*/}
-      <Paper pt="lg" pb="lg">
+      <Paper pt="lg" pb="lg" >
         {/*页面容器 - 标题*/}
-        <Title order={3}>User Profile</Title>
+        <Box mb="lg">
+          <Title order={3}>User Profile</Title>
+          <Text size="sm" c="dimmed">
+            Enhance your profile to let us get to know you better.
+          </Text>
+        </Box>
+        <Divider mb="lg" my="xs" variant="dashed" />
+
         {/*页面内容 - 表单 */}
         {/*页面内容 - 表单 -  昵称（文本） */}
         {/*页面内容 - 表单 -  个人签名(textarea) */}
