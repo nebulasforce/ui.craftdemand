@@ -22,7 +22,7 @@ import {
 import { useForm } from '@mantine/form';
 import { useNavbar } from '@/contexts/NavbarContext/NavbarContext';
 
-const SettingsPage = () => {
+const UserProfile = () => {
   const { setActive, setSection } = useNavbar();
   const [loading, setLoading] = useState(false);
   useEffect(() => {
@@ -162,4 +162,4 @@ const SettingsPage = () => {
     </Box>
   );
 };
-export default SettingsPage;
+export default UserProfile;

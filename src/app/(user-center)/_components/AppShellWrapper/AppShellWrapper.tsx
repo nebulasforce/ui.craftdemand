@@ -1,4 +1,3 @@
-// components/AppShellWrapper/AppShellWrapper.tsx
 'use client';
 
 import React from 'react';

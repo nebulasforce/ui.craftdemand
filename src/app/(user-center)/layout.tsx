@@ -4,7 +4,7 @@ import React from 'react';
 import { listGroup } from '@/api/ssr/navbar';
 import { me } from '@/api/ssr/me';
 import { listGroupData } from '@/api/navbar/response';
-import { AppShellWrapper } from '@/components/AppShellWrapper/AppShellWrapper';
+import { AppShellWrapper } from './_components/AppShellWrapper/AppShellWrapper';
 
 
 const defaultNavbarData: listGroupData = {
