@@ -1,7 +1,6 @@
 export interface User {
   account: Account;
   profile: Profile;
-  user?: User;
 }
 
 export interface Account {

@@ -1,4 +1,6 @@
 "use client"
+
+import { usePathname } from 'next/navigation'; // 用于获取当前路由
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import {
@@ -82,10 +84,12 @@ export function NavbarSegmented({ data }: NavbarSegmentedProps) {
         .sort((a, b) => (a.sort || 0) - (b.sort || 0))
         .map((item) => {
           const IconComponent = iconMap[item.icon as keyof typeof iconMap] || (() => null);
+          // 即使 active 为空，也基于 item.url 和当前路由判断是否激活（双重保障）
+          const isActive = active === item.name || usePathname().startsWith(item.url);
           return (
             <Link
               className={classes.link}
-              data-active={item.name === active || undefined}
+              data-active={isActive || undefined}
               href={item.url}
               key={item.code}
               onClick={() => setActive(item.name)}

@@ -1,14 +1,11 @@
+;
 // 继承根布局的大部分配置，但移除Footer
-import {
-  MantineProvider,
-  AppShell,
-  AppShellHeader,
-  AppShellMain,
-} from "@mantine/core";
-import theme from "@/app/theme";
+import { AppShell, AppShellHeader, AppShellMain, MantineProvider } from "@mantine/core";
 import { Notifications } from '@mantine/notifications';
+import theme from "@/app/theme";
 import { HeaderMegaMenu } from '@/components/HeaderMegaMenu/HeaderMegaMenu';
 import { AuthProvider } from '@/contexts/AuthContext/AuthContext';
+
 
 export default function NoFooterLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -17,11 +14,9 @@ export default function NoFooterLayout({ children }: { children: React.ReactNode
       <AuthProvider>
         <AppShell header={{ height: 60 }} padding="md">
           <AppShellHeader>
-            <HeaderMegaMenu />
+            <HeaderMegaMenu user={null} />
           </AppShellHeader>
-          <AppShellMain>
-            {children}
-          </AppShellMain>
+          <AppShellMain>{children}</AppShellMain>
           {/* 这里不渲染Footer */}
         </AppShell>
       </AuthProvider>

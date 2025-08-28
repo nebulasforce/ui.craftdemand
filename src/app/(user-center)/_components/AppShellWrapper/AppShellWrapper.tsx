@@ -19,7 +19,7 @@ export function AppShellWrapper({ navbarData, children, user }: AppShellWrapperP
   const [opened] = useDisclosure();
 
   return (
-    <NavbarProvider>
+    <NavbarProvider navbarData={navbarData}>
       <AppShell
         header={{ height: 60 }}
         navbar={{ width: 300, breakpoint: 'sm', collapsed: { mobile: !opened } }}

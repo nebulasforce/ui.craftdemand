@@ -1,12 +1,11 @@
-"use client"
+import SettingPageRender from './_render';
 
-import { Title } from '@mantine/core';
-
-const SettingsPage = () => {
+const SettingsPage = async () => {
+  const data = "settings";
   return (
     <>
-      <Title order={2}>settings</Title>
+      <SettingPageRender initialData={data} />
     </>
   )
 }
-export default SettingsPage;
+export default  SettingsPage;

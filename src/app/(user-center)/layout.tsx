@@ -1,10 +1,11 @@
+// src/app/(user-center)/layout.tsx
 import '@/app/globals.css';
-
 import React from 'react';
 import { listGroup } from '@/api/ssr/navbar';
 import { me } from '@/api/ssr/me';
 import { listGroupData } from '@/api/navbar/response';
 import { AppShellWrapper } from './_components/AppShellWrapper/AppShellWrapper';
+import { UserProvider} from '@/contexts/UserContext/UserContext';
 
 
 const defaultNavbarData: listGroupData = {
@@ -38,9 +39,12 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   const navbarData = await getNavbarData();
   const user = await geMe();
 
+
   return (
+    <UserProvider user={user}>
     <AppShellWrapper navbarData={navbarData} user={user} >
       {children}
     </AppShellWrapper>
+      </UserProvider>
   );
 }
