@@ -7987,6 +7987,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"dayjs@npm:^1.11.15":
+  version: 1.11.15
+  resolution: "dayjs@npm:1.11.15"
+  checksum: 10c0/bb66cd5419fff017f3950b95fc27643cf4e0ce22a087cef1f67398f18126ed07bf36d6911f33b19029a1621c64090b8ecaef660477de7678287fe8c0f4e68d29
+  languageName: node
+  linkType: hard
+
 "debounce@npm:^1.2.1":
   version: 1.2.1
   resolution: "debounce@npm:1.2.1"
@@ -12485,6 +12492,7 @@ __metadata:
     axios: "npm:^1.10.0"
     babel-loader: "npm:^10.0.0"
     cookie: "npm:^1.0.2"
+    dayjs: "npm:^1.11.15"
     eslint: "npm:^9.29.0"
     eslint-config-mantine: "npm:^4.0.3"
     eslint-plugin-jsx-a11y: "npm:^6.10.2"
