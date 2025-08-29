@@ -1,6 +1,6 @@
 'use client';
 
-// src/app/(self-setting)/me/_children.tsx
+// src/app/(user-center)/me/profile/_render.tsx
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
@@ -9,6 +9,7 @@ import { DatePickerInput } from '@mantine/dates';
 import { useForm } from '@mantine/form';
 import { useNavbar } from '@/contexts/NavbarContext/NavbarContext';
 import { useUser } from '@/contexts/UserContext/UserContext'; // 导入hooks
+import '@mantine/dates/styles.css'; // 确保导入日期组件样式
 import { IconCalendar } from '@tabler/icons-react'
 
 interface ProfilePageProps {
@@ -48,6 +49,12 @@ const ProfilePageRender = ({initialData}:ProfilePageProps) => {
         return null;
       },
       signature: (val) => {
+        if (!val) {
+          return 'This field is required';
+        }
+        return null;
+      },
+      birthday: (val) => {
         if (!val) {
           return 'This field is required';
         }
@@ -149,10 +156,10 @@ const ProfilePageRender = ({initialData}:ProfilePageProps) => {
                     {/*页面内容 - 表单 -  出生日期 (datepicker) */}
                     <DatePickerInput
                       label="Birthday"
+                      required
                       placeholder="Select your birthday"
                       value={form.values.birthday}
-
-
+                      rightSection={<IconCalendar size="16" />}
                       valueFormat="YYYY-MM-DD"
                       maxDate={new Date()} // 禁用未来日期（符合生日逻辑）
                     />
