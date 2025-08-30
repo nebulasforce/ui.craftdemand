@@ -160,6 +160,7 @@ const ProfilePageRender = ({initialData}:ProfilePageProps) => {
                       placeholder="Select your birthday"
                       value={form.values.birthday}
                       rightSection={<IconCalendar size="16" />}
+                      onChange={(date) => form.setFieldValue('birthday', date || '')}
                       valueFormat="YYYY-MM-DD"
                       maxDate={new Date()} // 禁用未来日期（符合生日逻辑）
                     />
