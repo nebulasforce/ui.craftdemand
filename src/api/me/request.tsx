@@ -15,3 +15,5 @@ export interface registerRequest {
 }
 
 export interface meRequest {}
+
+export interface editMyProfileRequest {}

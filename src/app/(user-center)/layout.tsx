@@ -43,7 +43,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
 
 
   return (
-    <UserProvider user={user}>
+    <UserProvider initialUser={user}>
     <AppShellWrapper navbarData={navbarData} user={user} >
       {children}
     </AppShellWrapper>
