@@ -40,12 +40,18 @@ interface ProfilePageProps {
   cities: getCitiesData | null;
 }
 
-const ProfilePageRender = ({ initialData, provinces, cities }: ProfilePageProps) => {
+const ProfilePageRender = ({  provinces, cities }: ProfilePageProps) => {
   const { setActive, setSection } = useNavbar();
   const [loading, setLoading] = useState(false);
   const { user } = useUser();
 
-  const [availableCities, setAvailableCities] = useState<CityItem[]>([]);
+  const [availableCities, setAvailableCities] = useState<CityItem[]>([] as CityItem[]);
+
+  useEffect(() => {
+    if (user&&cities) {
+      setAvailableCities(cities[user.profile.province.id] || [] as CityItem[]);
+    }
+  }, [cities,user]);
 
   // 处理省份变更，更新城市列表
   const handleProvinceChange = (value: string | null) => {
@@ -77,8 +83,6 @@ const ProfilePageRender = ({ initialData, provinces, cities }: ProfilePageProps)
   const handleReset = () => {
     form.reset();
   };
-
-  console.log('initialData', initialData);
 
   useEffect(() => {
     setSection('Account');
