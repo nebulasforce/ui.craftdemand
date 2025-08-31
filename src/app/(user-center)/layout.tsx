@@ -14,6 +14,8 @@ const defaultNavbarData: listGroupData = {
 };
 
 // 在布局中获取数据（App Router 支持布局中的异步数据获取）
+
+// 获取侧边栏数据
 async function getNavbarData() {
   try {
     const response = await listGroup();

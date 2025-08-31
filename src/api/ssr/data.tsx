@@ -1,10 +1,10 @@
 import { getPublicKeyRequest,getProvincesRequest,getCitiesRequest } from '@/api/data/request';
 import { getPublicKeyResponse ,getProvincesResponse,getCitiesResponse} from '@/api/data/response';
-import request from '@/utils/request';
+import sRequest from '@/utils/sRequest';
 
 // listFront
 export async function getPublicKey(req?: getPublicKeyRequest) {
-  return request<getPublicKeyResponse>({
+  return sRequest<getPublicKeyResponse>({
     url: '/api/v1/data/public-key',
     method: 'GET',
     ...(req || {}),
@@ -13,7 +13,7 @@ export async function getPublicKey(req?: getPublicKeyRequest) {
 
 // getProvinces 获取省份列表
 export async function getProvinces(req?: getProvincesRequest) {
-  return request<getProvincesResponse>({
+  return sRequest<getProvincesResponse>({
     url: '/api/v1/data/provinces',
     method: 'GET',
     ...(req || {}),
@@ -22,7 +22,7 @@ export async function getProvinces(req?: getProvincesRequest) {
 
 // getCities 获取城市列表
 export async function getCities(req?: getCitiesRequest) {
-  return request<getCitiesResponse>({
+  return sRequest<getCitiesResponse>({
     url: '/api/v1/data/cities',
     method: 'GET',
     ...(req || {}),

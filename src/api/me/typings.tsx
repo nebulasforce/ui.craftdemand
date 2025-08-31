@@ -30,11 +30,11 @@ export interface Profile {
   birthday: string;
   address: string;
   province: {
-    code: string;
+    id: string;
     name: string;
   };
   city: {
-    code: string;
+    id: string;
     name: string;
   };
   deliveryAddress: Address[];
