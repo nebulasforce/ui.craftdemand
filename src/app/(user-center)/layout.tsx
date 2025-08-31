@@ -40,8 +40,6 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   // 获取导航栏数据
   const navbarData = await getNavbarData();
   const user = await geMe();
-
-
   return (
     <UserProvider initialUser={user}>
     <AppShellWrapper navbarData={navbarData} user={user} >

@@ -3,9 +3,7 @@
 // src/contexts/AuthContext/AuthContext.tsx
 
 import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation'; // 用于App Router
-// 如果你使用Pages Router，导入方式为：
-// import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 import { login, logout, register } from '@/api/auth/api';
 import { loginRequest, registerRequest } from '@/api/auth/request';
 import { loginResponse, registerResponse } from '@/api/auth/response';
@@ -22,9 +20,10 @@ interface AuthContextValue {
   login: (params: loginRequest) => Promise<loginResponse>;
   logout: () => Promise<void>;
   register: (params: registerRequest) => Promise<registerResponse>;
+  // 添加updateUser方法到上下文类型
+  updateAuthedUser: (user: User | null) => void;
 }
 
-// baseErrLoginResponse 默认错误响应
 const baseErrLoginResponse: loginResponse = {
   success: false,
   code: 500500,
@@ -51,8 +50,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const router = useRouter();
 
-  // Pages Router获取查询参数的方式不同，需要在loginFunc中使用router.query
-
   // 从本地存储加载用户信息
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
@@ -71,7 +68,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setIsLoading(false);
   }, []);
 
-  // loginFunc 登录方法，支持传入redirectPath或从URL参数获取 - 登录方法只设置存储以及返回响应信息【需要调用方自行做跳转以及提示】
+  // 登录方法
   const loginFunc = async (params: loginRequest) => {
     try {
       const response = await login(params);
@@ -89,7 +86,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           setUser(loggingInUser);
           localStorage.setItem('user', JSON.stringify(loggingInUser));
           setIsAuthenticated(true);
-
 
           return response;
         }
@@ -117,7 +113,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  // logoutFunc 退出方法 - 退出方法比较特殊，直接在这里提示和跳转
+  // 退出方法
   const logoutFunc = async () => {
     try {
       await logout();
@@ -137,7 +133,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  // registerFunc 注册方法
+  // 注册方法
   const registerFunc = async (params: registerRequest) => {
     try {
       return await register(params);
@@ -152,13 +148,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }
 
+  const updateAuthedUser = (newUser: User | null) => {
+    setUser(newUser);
+    // 同步更新本地存储
+    if (newUser) {
+      localStorage.setItem('user', JSON.stringify(newUser));
+      setIsAuthenticated(true);
+    } else {
+      localStorage.removeItem('user');
+      setIsAuthenticated(false);
+    }
+  };
+
   const value = {
     user,
     isLoading,
     isAuthenticated,
     login: loginFunc,
     logout: logoutFunc,
-    register: registerFunc
+    register: registerFunc,
+    updateAuthedUser  // 暴露自定义的setUser方法
   };
 
   return (

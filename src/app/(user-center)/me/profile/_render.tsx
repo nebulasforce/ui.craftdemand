@@ -152,7 +152,7 @@ const ProfilePageRender = ({ provinces, cities }: ProfilePageProps) => {
 
   const form = useForm({
     initialValues: {
-      nickname: user?.profile?.name || '',
+      nickname: user?.profile?.nickname || '',
       avatar: user?.profile?.avatar || '',
       signature: user?.profile?.signature || '',
       gender: user?.profile?.gender || 1,

@@ -174,7 +174,7 @@ export function HeaderDropdown({ user }: HeaderDropdownProps) {
             {user.account.username}
           </Text>
           <Text c="dimmed" size="xs">
-            {user.profile.name}
+            {user.profile.nickname}
           </Text>
         </div>
       </Group>
@@ -244,7 +244,7 @@ export function HeaderDropdown({ user }: HeaderDropdownProps) {
             {user.account.username}
           </Text>
           <Text c="dimmed" size="xs">
-            {user.profile.name}
+            {user.profile.nickname}
           </Text>
         </div>
         <IconChevronRight size={16} />

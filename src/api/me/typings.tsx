@@ -23,7 +23,7 @@ export interface Account {
 }
 
 export interface Profile {
-  name: string;
+  nickname: string;
   avatar: string;
   gender: number;
   signature: string;
