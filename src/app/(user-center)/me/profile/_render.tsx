@@ -31,7 +31,7 @@ import { useNavbar } from '@/contexts/NavbarContext/NavbarContext';
 import { useUser } from '@/contexts/UserContext/UserContext';
 import '@mantine/dates/styles.css';
 
-import { IconCalendar } from '@tabler/icons-react';
+import { IconCalendar,IconUpload } from '@tabler/icons-react';
 import { CityItem } from '@/api/data/typings';
 import { editMyProfile } from '@/api/me/api';
 import notify from '@/utils/notify';
@@ -399,8 +399,8 @@ const ProfilePageRender = ({ provinces, cities }: ProfilePageProps) => {
                       radius={120}
                       mx="auto"
                     />
-                    <Button variant="default" mt="md">
-                      Save Avatar
+                    <Button variant="default" leftSection={<IconUpload size={14} />} mt="md">
+                      Upload Avatar
                     </Button>
                   </Stack>
                 </Grid.Col>
