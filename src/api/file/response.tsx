@@ -5,6 +5,5 @@ export interface uploadData {
   key: string;
 }
 
-
 export interface uploadResponse extends  Response<uploadData>{
 }

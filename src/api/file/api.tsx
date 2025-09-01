@@ -8,7 +8,7 @@ export async function upload(req: uploadRequest, options?:Options) {
     url: '/api/v1/file/upload/local',
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json',
+      'Content-Type': 'multipart/form-data',
     },
     data: req,
     ...(options || {}),

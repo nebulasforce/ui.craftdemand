@@ -1,5 +1,5 @@
 
 export interface uploadRequest {
   path: string;
-  file: Blob;
+  file: File;
 }

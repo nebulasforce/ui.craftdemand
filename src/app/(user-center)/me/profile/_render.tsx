@@ -22,7 +22,7 @@ import {
   Text,
   Textarea,
   TextInput,
-  Title,
+  Title, FileButton,
 } from '@mantine/core';
 import { DatePickerInput } from '@mantine/dates';
 import { useForm } from '@mantine/form';
@@ -30,11 +30,13 @@ import { getCitiesData, getProvincesData } from '@/api/data/response';
 import { useNavbar } from '@/contexts/NavbarContext/NavbarContext';
 import { useUser } from '@/contexts/UserContext/UserContext';
 import '@mantine/dates/styles.css';
-
-import { IconCalendar,IconUpload } from '@tabler/icons-react';
+import { uploadRequest } from '@/api/file/request';
+import { IconCalendar, IconUpload } from '@tabler/icons-react';
 import { CityItem } from '@/api/data/typings';
-import { editMyProfile } from '@/api/me/api';
+import { editMyProfile, editMyAvatar} from '@/api/me/api';
 import notify from '@/utils/notify';
+import { upload } from '@/api/file/api';
+import { editMyAvatarRequest } from '@/api/me/request';
 
 interface ProfilePageProps {
   initialData?: any;
@@ -60,6 +62,8 @@ const ProfilePageRender = ({ provinces, cities }: ProfilePageProps) => {
   const [loading, setLoading] = useState(false);
   const { user, updateUser } = useUser();
 
+  const [file, setFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState<boolean>(false);
 
   const provinceMap = (provinces ?? []).reduce((map, province) => {
     map[province.id] = province.name;
@@ -106,10 +110,8 @@ const ProfilePageRender = ({ provinces, cities }: ProfilePageProps) => {
       const response = await editMyProfile(formattedData);
 
       if (response.code === 0) {
-        notify('Profile updated successfully', 'success');
-
         // 更新本地用户上下文
-        if (updateUser) {
+        if (updateUser && user) {
           updateUser({
             ...user,
             profile: {
@@ -118,6 +120,7 @@ const ProfilePageRender = ({ provinces, cities }: ProfilePageProps) => {
             }
           })
         }
+        notify('Profile updated successfully', 'success');
       } else {
         notify(response.message || 'Failed to update profile', 'error');
       }
@@ -137,6 +140,62 @@ const ProfilePageRender = ({ provinces, cities }: ProfilePageProps) => {
     form.reset();
   };
 
+  const handleFileSelect = async (f: File | null) => {
+    if (f) {
+      setFile(f);
+      await handleUpload()
+    }
+  }
+
+  const handleUpload = async () => {
+    if (!file) { return; }
+    setUploading(true);
+    // 处理文件上传
+    try {
+      // 构造上传参数
+      const uploadData: uploadRequest  = {
+        path: '/avatar',
+        file,
+      }
+      const response = await upload(uploadData);
+      if (response.code === 0) {
+        if (response.data) {
+          const requestEditMyAvatar: editMyAvatarRequest = {
+            avatar: response.data.target
+          }
+          // editMyAvatar
+          const  responseEditMyAvatar = await editMyAvatar(requestEditMyAvatar)
+          if (responseEditMyAvatar.code === 0) {
+            // 更新本地用户上下文
+            if (updateUser && user) {
+              updateUser({
+                ...user,
+                profile: {
+                  ...user.profile,
+                  avatar: response.data.target
+                }
+              })
+            }
+            // 更新用户头像
+            notify('Avatar uploaded successfully', 'success');
+            setFile(null);
+          }
+        }
+      } else {
+        notify(response.message || 'Failed to upload avatar', 'error');
+      }
+
+    } catch (err) {
+      if (err instanceof Error) {
+        notify(err.message, 'error');
+      } else {
+        notify('系统错误', 'error');
+      }
+    } finally {
+      setUploading(false);
+    }
+  }
+
   useEffect(() => {
     setSection('Account');
     setActive('User Profile');
@@ -153,7 +212,6 @@ const ProfilePageRender = ({ provinces, cities }: ProfilePageProps) => {
   const form = useForm({
     initialValues: {
       nickname: user?.profile?.nickname || '',
-      avatar: user?.profile?.avatar || '',
       signature: user?.profile?.signature || '',
       gender: user?.profile?.gender || 1,
       birthday: user?.profile?.birthday || '',
@@ -393,15 +451,30 @@ const ProfilePageRender = ({ provinces, cities }: ProfilePageProps) => {
                   {/* 头像上传区域 */}
                   <Stack align="center" px={{ lg: 'xl' }}>
                     <Avatar
-                      src={form.values.avatar || '/avatar_default.png'}
-                      alt={user?.account?.username || 'User avatar'}
-                      size={120}
-                      radius={120}
+                      src={ user?.profile.avatar || '/avatar_default.png' }
+                      alt={ user?.account?.username || 'User avatar' }
+                      size={ 120 }
+                      radius={ 120 }
                       mx="auto"
                     />
-                    <Button variant="default" leftSection={<IconUpload size={14} />} mt="md">
-                      Upload Avatar
-                    </Button>
+                    <FileButton
+                      onChange={ handleFileSelect }
+                      accept="image/*"
+                      multiple={false}
+                      disabled={uploading}
+                    >
+                      {
+                        (props) =>
+                          <Button
+                            {...props}
+                            variant="default"
+                            leftSection={<IconUpload size={14} />}
+                            mt="md"
+                          >
+                            Upload Avatar
+                          </Button>
+                      }
+                    </FileButton>
                   </Stack>
                 </Grid.Col>
               </Grid>

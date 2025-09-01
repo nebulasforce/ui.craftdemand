@@ -18,10 +18,23 @@ export async function me(req?:meRequest,options?:Options) {
 }
 
 // editMeProfile 修改我的个人资料
-
 export async function editMyProfile(req?:editMyProfileRequest,options?:Options) {
   return request<editMyProfileResponse>({
     url: '/api/v1/me/profile',
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: req || {},
+    ...(options || {}),
+  });
+}
+
+
+// editMeAvatar 修改我的头像
+export async function editMyAvatar(req?:editMyProfileRequest,options?:Options) {
+  return request<editMyProfileResponse>({
+    url: '/api/v1/me/avatar',
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

@@ -16,4 +16,11 @@ export interface registerRequest {
 
 export interface meRequest {}
 
-export interface editMyProfileRequest {}
+export interface editMyProfileRequest {
+
+}
+
+
+export interface editMyAvatarRequest {
+  avatar: string;
+}
