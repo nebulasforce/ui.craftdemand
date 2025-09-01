@@ -39,6 +39,7 @@ import { listGroupData } from '@/api/headDropdown/response';
 import { User } from '@/api/me/typings';
 import { useAuth } from '@/contexts/AuthContext/AuthContext';
 import notify from '@/utils/notify';
+import { getImageUrl } from '@/utils/path';
 
 // TablerIcon 定义Tabler图标的类型（匹配实际的ForwardRef组件类型）
 type TablerIcon = ForwardRefExoticComponent<IconProps & RefAttributes<Icon>>;
@@ -164,7 +165,7 @@ export function HeaderDropdown({ user }: HeaderDropdownProps) {
     <Stack gap="md">
       <Group>
         <Avatar
-          src={user.profile.avatar || '/avatar_default.png'}
+          src={getImageUrl(user.profile.avatar) || '/avatar_default.png'}
           radius="xl"
           alt={user.account.username}
           size="md"
@@ -235,7 +236,7 @@ export function HeaderDropdown({ user }: HeaderDropdownProps) {
     >
       <Group>
         <Avatar
-          src={user.profile.avatar || '/avatar_default.png'}
+          src={getImageUrl(user.profile.avatar) || '/avatar_default.png'}
           radius="xl"
           alt={user.account.username}
         />

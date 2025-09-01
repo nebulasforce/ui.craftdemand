@@ -11,6 +11,7 @@ import {
   Divider,
   Button,
   FocusTrap,
+  Progress,
   Grid,
   Group,
   LoadingOverlay,
@@ -22,7 +23,8 @@ import {
   Text,
   Textarea,
   TextInput,
-  Title, FileButton,
+  Title,
+  FileButton,
 } from '@mantine/core';
 import { DatePickerInput } from '@mantine/dates';
 import { useForm } from '@mantine/form';
@@ -33,10 +35,10 @@ import '@mantine/dates/styles.css';
 import { uploadRequest } from '@/api/file/request';
 import { IconCalendar, IconUpload } from '@tabler/icons-react';
 import { CityItem } from '@/api/data/typings';
-import { editMyProfile, editMyAvatar} from '@/api/me/api';
+import { editMyProfile } from '@/api/me/api';
 import notify from '@/utils/notify';
 import { upload } from '@/api/file/api';
-import { editMyAvatarRequest } from '@/api/me/request';
+import { getImageUrl } from '@/utils/path';
 
 interface ProfilePageProps {
   initialData?: any;
@@ -64,6 +66,8 @@ const ProfilePageRender = ({ provinces, cities }: ProfilePageProps) => {
 
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState<boolean>(false);
+  const [uploadProgress, setUploadProgress] = useState<number>(0); // 新增：上传进度
+  const [avatarDisplay, setAvatarDisplay] = useState<string>(user?.profile.avatar||'');
 
   const provinceMap = (provinces ?? []).reduce((map, province) => {
     map[province.id] = province.name;
@@ -132,24 +136,20 @@ const ProfilePageRender = ({ provinces, cities }: ProfilePageProps) => {
       }
     } finally {
       setLoading(false);
+      setUploading(false);
     }
   };
 
   // 重置表单
   const handleReset = () => {
     form.reset();
+    setUploading(false);
   };
 
-  const handleFileSelect = async (f: File | null) => {
-    if (f) {
-      setFile(f);
-      await handleUpload()
-    }
-  }
 
   const handleUpload = async () => {
     if (!file) { return; }
-    setUploading(true);
+    setUploadProgress(0);
     // 处理文件上传
     try {
       // 构造上传参数
@@ -157,29 +157,39 @@ const ProfilePageRender = ({ provinces, cities }: ProfilePageProps) => {
         path: '/avatar',
         file,
       }
-      const response = await upload(uploadData);
+      const response = await upload(uploadData,{
+        onUploadProgress: (progressEvent:any) => {
+          // 计算上传进度百分比
+          if (progressEvent.total) {
+            const percent = Math.round((progressEvent.loaded / progressEvent.total) * 100);
+            setUploadProgress(percent);
+          }
+        },
+      });
       if (response.code === 0) {
         if (response.data) {
-          const requestEditMyAvatar: editMyAvatarRequest = {
-            avatar: response.data.target
-          }
-          // editMyAvatar
-          const  responseEditMyAvatar = await editMyAvatar(requestEditMyAvatar)
-          if (responseEditMyAvatar.code === 0) {
-            // 更新本地用户上下文
-            if (updateUser && user) {
-              updateUser({
-                ...user,
-                profile: {
-                  ...user.profile,
-                  avatar: response.data.target
-                }
-              })
-            }
-            // 更新用户头像
-            notify('Avatar uploaded successfully', 'success');
-            setFile(null);
-          }
+          form.setFieldValue('avatar',response.data.target)
+          setAvatarDisplay(response.data.target)
+          // const requestEditMyAvatar: editMyAvatarRequest = {
+          //   avatar: response.data.target
+          // }
+          // // editMyAvatar
+          // const  responseEditMyAvatar = await editMyAvatar(requestEditMyAvatar)
+          // if (responseEditMyAvatar.code === 0) {
+          //   // 更新本地用户上下文
+          //   if (updateUser && user) {
+          //     updateUser({
+          //       ...user,
+          //       profile: {
+          //         ...user.profile,
+          //         avatar: response.data.target
+          //       }
+          //     })
+          //   }
+          //   // 更新用户头像
+          //   notify('Avatar uploaded successfully', 'success');
+          //   setFile(null);
+          // }
         }
       } else {
         notify(response.message || 'Failed to upload avatar', 'error');
@@ -191,8 +201,6 @@ const ProfilePageRender = ({ provinces, cities }: ProfilePageProps) => {
       } else {
         notify('系统错误', 'error');
       }
-    } finally {
-      setUploading(false);
     }
   }
 
@@ -207,11 +215,21 @@ const ProfilePageRender = ({ provinces, cities }: ProfilePageProps) => {
     }
   }, [cities, user?.profile?.province?.id]); // 更精确的依赖项
 
+   useEffect(() => {
+    if (file) {
+      setUploading(true);
+      handleUpload().then(()=>{
+        // setUploading(false);
+      })
+    }
+  }, [file]);
+
   const items = [{ title: 'Home', href: '/' }, { title: 'User Profile' }];
 
   const form = useForm({
     initialValues: {
       nickname: user?.profile?.nickname || '',
+      avatar: user?.profile?.avatar || '',
       signature: user?.profile?.signature || '',
       gender: user?.profile?.gender || 1,
       birthday: user?.profile?.birthday || '',
@@ -426,24 +444,12 @@ const ProfilePageRender = ({ provinces, cities }: ProfilePageProps) => {
                         />
                       </Grid.Col>
                     </Grid>
-
-                    {/* 表单按钮 */}
-                    <Group justify="flex-end" mt="lg">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={handleReset}
-                        disabled={loading}
-                      >
-                        Reset
-                      </Button>
-                      <Button
-                        type="submit"
-                        disabled={loading}
-                      >
-                        Save Changes
-                      </Button>
-                    </Group>
+                    <TextInput
+                      name="avatar"
+                      value={form.values.avatar}
+                      onChange={(event) => form.setFieldValue('avatar', event.currentTarget.value)}
+                      hidden
+                    />
                   </Stack>
                 </Grid.Col>
 
@@ -451,17 +457,16 @@ const ProfilePageRender = ({ provinces, cities }: ProfilePageProps) => {
                   {/* 头像上传区域 */}
                   <Stack align="center" px={{ lg: 'xl' }}>
                     <Avatar
-                      src={ user?.profile.avatar || '/avatar_default.png' }
+                      src={ getImageUrl(avatarDisplay) || '/avatar_default.png' }
                       alt={ user?.account?.username || 'User avatar' }
                       size={ 120 }
                       radius={ 120 }
                       mx="auto"
                     />
                     <FileButton
-                      onChange={ handleFileSelect }
+                      onChange={ setFile }
                       accept="image/*"
                       multiple={false}
-                      disabled={uploading}
                     >
                       {
                         (props) =>
@@ -475,7 +480,46 @@ const ProfilePageRender = ({ provinces, cities }: ProfilePageProps) => {
                           </Button>
                       }
                     </FileButton>
+                    {
+                      uploading && (
+                        <Box w="70%">
+                          <Progress.Root size="lg" >
+                            <Progress.Section value={uploadProgress}>
+                              <Progress.Label>
+                                {uploadProgress}%
+                              </Progress.Label>
+                            </Progress.Section>
+                          </Progress.Root>
+                        </Box>
+                      )
+                    }
+                    {/* 文件大小提示 */}
+                    <Text size="xs" c="dimmed" >
+                      Supports JPG, PNG. Max size 5MB
+                    </Text>
                   </Stack>
+
+                </Grid.Col>
+              </Grid>
+              <Grid>
+                <Grid.Col span={12}>
+                  {/* 表单按钮 */}
+                  <Group justify="flex-start" mt="lg">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={handleReset}
+                      disabled={loading}
+                    >
+                      Reset
+                    </Button>
+                    <Button
+                      type="submit"
+                      disabled={loading}
+                    >
+                      Save Changes
+                    </Button>
+                  </Group>
                 </Grid.Col>
               </Grid>
             </form>
