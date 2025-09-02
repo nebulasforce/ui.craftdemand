@@ -150,6 +150,14 @@ const ProfilePageRender = ({ provinces, cities }: ProfilePageProps) => {
   const handleUpload = async () => {
     if (!file) { return; }
     setUploadProgress(0);
+    // 验证文件大小
+    if (file.size > 5 * 1024 * 1024) { // 5MB in bytes
+      const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
+      notify(`File size is too large (${fileSizeMB}MB). Maximum allowed size is 5MB.`);
+      setFile(null);
+      return;
+    }
+
     // 处理文件上传
     try {
       // 构造上传参数
