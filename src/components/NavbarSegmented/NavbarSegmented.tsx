@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import {
   Icon2fa,
+  IconPasswordUser,
   IconBellRinging,
   IconDatabaseImport,
   IconFileAnalytics,
@@ -33,6 +34,7 @@ export type SectionType = Extract<keyof listGroupData, string>;
 const iconMap = {
   IconUser,
   Icon2fa,
+  IconPasswordUser,
   IconBellRinging,
   IconDatabaseImport,
   IconFileAnalytics,
