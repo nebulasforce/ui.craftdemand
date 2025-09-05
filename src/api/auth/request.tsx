@@ -16,3 +16,6 @@ export interface registerRequest {
   authCode?: string;
 }
 
+export interface checkRequest {
+  key: string;
+}

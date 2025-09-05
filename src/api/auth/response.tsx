@@ -11,3 +11,7 @@ export interface logoutResponse extends Response<any> {
 }
 
 export interface registerResponse  extends  Response<Result> {}
+
+export interface checkResponse extends  Response<Result & {registerAble: boolean;}> {
+
+}

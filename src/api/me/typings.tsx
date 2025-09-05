@@ -10,6 +10,7 @@ export interface Account {
   mobile: string; // 手机号
   status: number; // 状态
   lastLogin: number;
+  active:number;
   wechat: string;
   alipay: string;
   qq: string;

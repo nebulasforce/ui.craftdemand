@@ -17,9 +17,24 @@ export interface registerRequest {
 export interface meRequest {}
 
 export interface editMyProfileRequest {
-
+  nickname: string;
+  signature: string;
+  address: string;
+  avatar: string;
+  birthday: string;
+  city: {
+    id: string;
+    name: string;
+  },
+  province: {
+    id: string;
+    name: string;
+  }
 }
 
+export interface editMyUsernameRequest {
+  username: string;
+}
 
 export interface editMyAvatarRequest {
   avatar: string;

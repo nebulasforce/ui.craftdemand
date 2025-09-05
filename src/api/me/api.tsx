@@ -1,6 +1,6 @@
 import { Options } from '@/api/common/request';
-import { meRequest,editMyProfileRequest } from '@/api/me/request';
-import { meResponse,editMyProfileResponse } from '@/api/me/response';
+import { meRequest,editMyProfileRequest,editMyUsernameRequest } from '@/api/me/request';
+import { meResponse,editMyProfileResponse,editMyUsernameResponse } from '@/api/me/response';
 import request from '@/utils/request';
 
 
@@ -17,7 +17,7 @@ export async function me(req?:meRequest,options?:Options) {
   });
 }
 
-// editMeProfile 修改我的个人资料
+// editMyProfile 修改我的个人资料
 export async function editMyProfile(req?:editMyProfileRequest,options?:Options) {
   return request<editMyProfileResponse>({
     url: '/api/v1/me/profile',
@@ -31,10 +31,24 @@ export async function editMyProfile(req?:editMyProfileRequest,options?:Options) 
 }
 
 
-// editMeAvatar 修改我的头像
+// editMyAvatar 修改我的头像
 export async function editMyAvatar(req?:editMyProfileRequest,options?:Options) {
   return request<editMyProfileResponse>({
     url: '/api/v1/me/avatar',
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: req || {},
+    ...(options || {}),
+  });
+}
+
+
+// editMyUsername 修改我的用户名
+export async function editMyUsername(req?:editMyUsernameRequest,options?:Options) {
+  return request<editMyUsernameResponse>({
+    url: '/api/v1/me/username',
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

@@ -7,3 +7,10 @@ export interface editMyProfileData extends Result{
   id: string
 }
 export interface editMyProfileResponse extends Response<editMyProfileData> {}
+
+
+export interface editMyUsernameData extends Result {
+  id: string
+}
+
+export interface editMyUsernameResponse extends Response<editMyUsernameData> {}

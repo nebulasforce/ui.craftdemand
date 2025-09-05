@@ -1,6 +1,6 @@
 import request from '@/utils/request';
-import { loginRequest, registerRequest,logoutRequest } from '@/api/auth/request';
-import { loginResponse, registerResponse } from '@/api/auth/response';
+import { loginRequest, registerRequest,logoutRequest,checkRequest } from '@/api/auth/request';
+import { loginResponse, registerResponse,checkResponse } from '@/api/auth/response';
 import { Options } from '@/api/common/request';
 
 // login 登录
@@ -43,5 +43,15 @@ export async function logout(req?: logoutRequest,options?:Options) {
 }
 
 
-
-
+// 检查用户注册状态
+export async function check(req?:checkRequest,options?:Options) {
+  return request<checkResponse>({
+    url: `/api/v1/auth/check/register/status/${ req?.key}`,
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: req || {},
+    ...(options || {}),
+  });
+}
