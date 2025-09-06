@@ -1,11 +1,10 @@
 // src/components/AuthenticationForm/RegisterForm.tsx
-
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import Typist from 'react-typist';
+
 import {
   Anchor,
   Button,
@@ -188,7 +187,7 @@ export function RegisterForm(props: PaperProps) {
     <Paper radius="md" p="lg" withBorder {...props}>
       <LoadingOverlay visible={loading} />
       <Text size="lg" component="span" fw={500}>
-        <Typist cursor={{ hideWhenDone: true }}> Welcome to Mantine, Register with</Typist>
+        Welcome to Mantine, Register with
       </Text>
 
       <Group grow mb="md" mt="md">

@@ -43,8 +43,10 @@
     "next": "15.3.3",
     "react": "18.3.1",
     "react-dom": "18.3.1",
+    "react-typewriter-effect": "^1.1.0",
     "react-typist": "^2.0.5",
-    "tailwind-preset-mantine": "^2.1.0"
+    "tailwind-preset-mantine": "^2.1.0",
+    "typewriter-effect": "^2.22.0"
   },
   "devDependencies": {
     "@babel/core": "^7.27.4",
@@ -63,7 +65,7 @@
     "@types/js-cookie": "^3",
     "@types/node": "^22.13.11",
     "@types/react": "^18.0.0",
-    "@types/react-typist": "^2",
+    "@types/react-typist": "^2.0.6",
     "babel-loader": "^10.0.0",
     "eslint": "^9.29.0",
     "eslint-config-mantine": "^4.0.3",

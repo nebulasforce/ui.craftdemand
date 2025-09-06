@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import JSEncrypt from 'jsencrypt';
-import Typist from 'react-typist';
+
 import {
   Anchor,
   Button,
@@ -27,8 +27,6 @@ import { useAuth } from '@/contexts/AuthContext/AuthContext';
 import notify from '@/utils/notify';
 import { GoogleButton } from './GoogleButton';
 import { TwitterButton } from './TwitterButton';
-
-import 'react-typist/dist/Typist.css'; // 导入默认样式
 
 export function LoginForm(props: PaperProps) {
   const [loading, setLoading] = useState(false);
@@ -142,7 +140,7 @@ export function LoginForm(props: PaperProps) {
     <Paper radius="md" p="lg" pos="relative" withBorder {...props}>
       <LoadingOverlay visible={loading} />
       <Text size="lg" component="span" fw={500}>
-        <Typist cursor={{ hideWhenDone: true }}>Welcome to Mantine, login with </Typist>
+        Welcome to Mantine, login with
       </Text>
 
       <Group grow mb="md" mt="md">

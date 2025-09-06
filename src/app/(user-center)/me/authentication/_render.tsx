@@ -12,14 +12,14 @@ import {
   Flex,
   Grid, Loader,
   Modal,
-  Paper,
+  Paper, PasswordInput,
   Space,
   Stack,
   Text,
   TextInput,
   Title,
 } from '@mantine/core';
-import { useDisclosure } from '@mantine/hooks';
+import { useDisclosure, useInterval } from '@mantine/hooks';
 import { useNavbar } from '@/contexts/NavbarContext/NavbarContext';
 import { useUser } from '@/contexts/UserContext/UserContext';
 import { useForm } from '@mantine/form';
@@ -38,6 +38,28 @@ import useDebounce from '@/utils/debouce';
 import { check } from '@/api/auth/api';
 
 
+// sendMobileVerificationCode 假设这里有发送验证码的函数
+const sendMobileVerificationCode = async (mobile: string) => {
+  // 模拟发送验证码的逻辑
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      notify(`Verification code sent to ${mobile} successfully`, 'success');
+      resolve(true);
+    }, 1000);
+  });
+};
+
+// sendEmailVerificationCode 假设这里有发送验证码的函数
+const sendEmailVerificationCode = async (email: string) => {
+  // 模拟发送验证码的逻辑
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      notify(`Verification code sent to ${email} successfully`, 'success');
+      resolve(true);
+    }, 1000);
+  });
+};
+
 interface AccountPageProps {
   initialData: any
 }
@@ -47,29 +69,35 @@ const AccountPageRender =  ({ initialData }:AccountPageProps) => {
   const { user ,updateUser} = useUser();
   const [loading, setLoading] = useState(false);
 
+
   const usernameActive = 1 << 0;
   const hasUsernameEditPermission = () => {
     if (user?.account?.active === undefined) {return true;}
     return !((user.account.active & usernameActive) === 0);
   }
+  const [usernameEditDisabled, setUsernameEditDisabled] = useState<boolean>(hasUsernameEditPermission());
 
-  const passwordSet = 1 << 1;
+  const passwordSetFlag = 1 << 1;
   const hasPasswordSet = () => {
     if (user?.account?.active === undefined) {return false;}
-    return (user.account.active & passwordSet) !== 0;
+    return (user.account.active & passwordSetFlag) !== 0;
   }
+  const [passwordSet, setPasswordSet] = useState<boolean>(hasPasswordSet());
 
-  const emailActive = 1 << 2;
+  const emailActiveFlag = 1 << 2;
   const hasEmailActive = () => {
     if (user?.account?.active === undefined) {return false;}
-    return (user.account.active & emailActive) !== 0;
+    return (user.account.active & emailActiveFlag) !== 0;
   }
+  const [emailActive, setEmailActive] = useState<boolean>(hasEmailActive());
 
-  const mobileActive = 1 << 3;
+
+  const mobileActiveFlag = 1 << 3;
   const hasMobileActive = () => {
     if (user?.account?.active === undefined) {return false;}
-    return (user.account.active & mobileActive) !== 0;
+    return (user.account.active & mobileActiveFlag) !== 0;
   }
+  const [mobileActive, setMobileActive] = useState<boolean>(hasMobileActive());
 
   const items = [{ title: 'Home', href: '/' }, { title: 'Authentication' }];
   useEffect(() => {
@@ -78,9 +106,29 @@ const AccountPageRender =  ({ initialData }:AccountPageProps) => {
   }, [setActive, setSection]); // 合并依赖项
 
 
-  const [checkUsernameLoading, setCheckUsernameLoading] = useState(false);
-  const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(null);
+  const [emailEditCountdown, setEmailEditCountdown] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const cd = localStorage.getItem('emailEditCountdown');
+      return cd ? Math.max(0, Number(cd)) : 0;
+    }
+    return 0;
+  });
 
+  const [mobileEditCountdown, setMobileEditCountdown] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const cd = localStorage.getItem('mobileEditCountdown');
+      return cd ? Math.max(0, Number(cd)) : 0;
+    }
+    return 0;
+  });
+
+
+  const [checkUsernameLoading, setCheckUsernameLoading] = useState(false);
+  const [checkEmailLoading, setCheckEmailLoading] = useState(false);
+  const [checkMobileLoading, setCheckMobileLoading] = useState(false);
+  const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(null);
+  const [emailAvailable, setEmailAvailable] = useState<boolean | null>(null);
+  const [mobileAvailable, setMobileAvailable] = useState<boolean | null>(null);
 
   const [usernameModalOpened, usernameModalActions] = useDisclosure(false);
   const usernameForm = useForm({
@@ -107,6 +155,113 @@ const AccountPageRender =  ({ initialData }:AccountPageProps) => {
       usernameForm.setFieldValue('username', user?.account?.username||'');
     }
   }, [usernameModalOpened]);
+
+  const [passwordModalOpened, passwordModalActions] = useDisclosure(false);
+  const passwordForm = useForm({
+    initialValues: {
+      confirmPassword: '',
+      password: '',
+      currentPassword: '',
+    },
+    validate: {
+      confirmPassword: (val) => {
+        if (!val) {
+          return 'This field is required';
+        }
+        return null;
+      },
+      currentPassword: (val) => {
+        if (!val) {
+          return 'This field is required';
+        }
+        return null;
+      },
+      password: (val) => {
+        if (!val) {
+          return 'This field is required';
+        }
+        return null;
+      },
+    }
+  })
+
+  // 弹窗关闭时重置状态
+  useEffect(() => {
+    if (!passwordModalOpened) {
+      // usernameForm.reset();
+    } else {
+      passwordForm.setFieldValue('currentPassword', '');
+      passwordForm.setFieldValue('password', '');
+      passwordForm.setFieldValue('confirmPassword', '');
+    }
+  }, [passwordModalOpened]);
+
+  const [emailModalOpened, setEmailModalActions] = useDisclosure(false);
+  const emailForm = useForm({
+    initialValues: {
+      email: '',
+      captcha: '',
+    },
+    validate: {
+      email: (val) => {
+        if (!val) {
+          return 'This field is required';
+        }
+        return null;
+      },
+      captcha: (val) => {
+        if (!val) {
+          return 'This field is required';
+        }
+        return null;
+      },
+    }
+  })
+
+  // 弹窗关闭时重置状态
+  useEffect(() => {
+    if (!emailModalOpened) {
+      // usernameForm.reset();
+    } else {
+      emailForm.setFieldValue('email', user?.account?.email||'');
+      emailForm.setFieldValue('captcha', '');
+
+    }
+  }, [emailModalOpened]);
+
+  const [mobileModalOpened, setMobileModalActions] = useDisclosure(false);
+  const mobileForm = useForm({
+    initialValues: {
+      mobile: '',
+      captcha: '',
+    },
+    validate: {
+      mobile: (val) => {
+        if (!val) {
+          return 'This field is required';
+        }
+        return null;
+      },
+      captcha: (val) => {
+        if (!val) {
+          return 'This field is required';
+        }
+        return null;
+      },
+    }
+  })
+
+  // 弹窗关闭时重置状态
+  useEffect(() => {
+    if (!mobileModalOpened) {
+      // usernameForm.reset();
+    } else {
+      mobileForm.setFieldValue('mobile', user?.account?.mobile||'');
+      mobileForm.setFieldValue('captcha', '');
+    }
+  }, [mobileModalOpened]);
+
+
 
   // 表单提交处理
   const handleUsernameFormSubmit = async (values: typeof usernameForm.values): Promise<void> => {
@@ -136,6 +291,7 @@ const AccountPageRender =  ({ initialData }:AccountPageProps) => {
               ...user.profile,
             }
           })
+          setUsernameEditDisabled(true)
         }
         notify('The username updated successfully', 'success');
       } else {
@@ -152,6 +308,18 @@ const AccountPageRender =  ({ initialData }:AccountPageProps) => {
     }
   };
 
+
+  const handlePasswordFormSubmit = async (values: typeof passwordForm.values): Promise<void> => {
+    console.log(values);
+  }
+
+  const handleEmailFormSubmit = async (values: typeof emailForm.values): Promise<void> => {
+    console.log(values);
+  }
+
+  const handleMobileFormSubmit = async (values: typeof mobileForm.values): Promise<void> => {
+    console.log(values);
+  }
 
   // 防抖处理用户名校验，500ms延迟
   const debouncedCheckUsername = useDebounce(async (username: string) => {
@@ -181,12 +349,159 @@ const AccountPageRender =  ({ initialData }:AccountPageProps) => {
     }
   }, 500);
 
+  // 防抖处理邮箱校验，500ms延迟
+  const debouncedCheckEmail = useDebounce(async (email: string) => {
+    const trimmedEmail = email.trim();
+
+    // 无需校验的情况
+    if (!trimmedEmail || trimmedEmail.length < 3 || trimmedEmail === user?.account?.email) {
+      setCheckEmailLoading(false);
+      setEmailAvailable(null);
+      return;
+    }
+
+    setCheckEmailLoading(true);
+    try {
+      const response = await check({ key: trimmedEmail });
+      if (response.code === 0 && response.data?.registerAble) {
+        setEmailAvailable(response.data?.registerAble);
+      } else {
+        notify(response.message || 'Failed to check email availability', 'error');
+        setEmailAvailable(null);
+      }
+    } catch (err) {
+      notify('Error checking email availability', 'error');
+      setEmailAvailable(null);
+    } finally {
+      setCheckEmailLoading(false);
+    }
+  }, 500);
+
+  // 防抖处理手机号校验，500ms延迟
+  const debouncedCheckMobile = useDebounce(async (mobile: string) => {
+    const trimmedMobile = mobile.trim();
+
+    // 无需校验的情况
+    if (!trimmedMobile || trimmedMobile.length < 3 || trimmedMobile === user?.account?.mobile) {
+      setCheckMobileLoading(false);
+      setMobileAvailable(null);
+      return;
+    }
+
+    setCheckMobileLoading(true);
+    try {
+      const response = await check({ key: trimmedMobile });
+      if (response.code === 0 && response.data?.registerAble) {
+        setMobileAvailable(response.data?.registerAble);
+      } else {
+        notify(response.message || 'Failed to check mobile availability', 'error');
+        setMobileAvailable(null);
+      }
+    } catch (err) {
+      notify('Error checking mobile availability', 'error');
+      setMobileAvailable(null);
+    } finally {
+      setCheckMobileLoading(false);
+    }
+  }, 500);
+
   // 处理用户名输入变化
   const handleUsernameChange = (event:ChangeEvent<HTMLInputElement>) => {
     const value = event.currentTarget.value;
     usernameForm.setFieldValue('username', value);
     debouncedCheckUsername(value);
   };
+
+  const handleEmailChange = (event:ChangeEvent<HTMLInputElement>) => {
+    const value = event.currentTarget.value;
+    emailForm.setFieldValue('email', value);
+    debouncedCheckEmail(value);
+  };
+
+  const handleMobileChange = (event:ChangeEvent<HTMLInputElement>) => {
+    const value = event.currentTarget.value;
+    mobileForm.setFieldValue('mobile', value);
+    debouncedCheckMobile(value);
+  };
+
+  // handleEmailSendCaptcha 发送邮箱验证码
+  const handleEmailSendCaptcha = async () => {
+    const { email } = emailForm.values; // 变量名从mobile改为email，表单也对应修改
+
+    // 验证邮箱格式（调整为邮箱正则表达式）
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email || !emailRegex.test(email)) {
+      notify('Please enter a valid email address', 'error'); // 提示信息改为邮箱相关
+      return;
+    }
+
+    // 防止重复发送（这部分逻辑无需修改）
+    if (emailEditCountdown > 0) {
+      return;
+    }
+
+    try {
+      setEmailEditCountdown(60); // 设置倒计时60秒
+      // 调用发送邮箱验证码的接口（函数名改为邮箱相关）
+      const success = await sendEmailVerificationCode(email);
+      if (!success) {
+        setEmailEditCountdown(0); // 发送失败则重置倒计时
+      }
+    } catch (error) {
+      setEmailEditCountdown(0);
+    }
+  };
+
+  // 发送手机验证码
+  const handleMobileSendCaptcha = async () => {
+    const { mobile } = mobileForm.values;
+    // 验证手机号
+    if (!mobile || !/^1[3-9]\d{9}$/.test(mobile)) {
+      notify('Please enter a valid mobile number', 'error');
+      return;
+    }
+    // 防止重复发送
+    if (mobileEditCountdown > 0) {
+      return;
+    }
+    try {
+      setMobileEditCountdown(60); // 设置倒计时60秒
+      const success = await sendMobileVerificationCode(mobile);
+      if (!success) {
+        setMobileEditCountdown(0);
+      } // 发送失败则重置倒计时
+    } catch (error) {
+      setMobileEditCountdown(0);
+    }
+  };
+
+  // 倒计时逻辑
+  useInterval(
+    () => {
+      if (emailEditCountdown > 0) {
+        setEmailEditCountdown((c) => c - 1); // 使用函数式更新确保拿到最新值
+        localStorage.setItem('emailEditCountdown', emailEditCountdown.toString());
+      } else {
+        localStorage.removeItem('emailEditCountdown');
+      }
+    },
+    1000,
+    { autoInvoke: true }
+  ); // 固定1000ms间隔
+
+  // 倒计时逻辑
+  useInterval(
+    () => {
+      if (mobileEditCountdown > 0) {
+        setMobileEditCountdown((c) => c - 1); // 使用函数式更新确保拿到最新值
+        localStorage.setItem('mobileEditCountdown', mobileEditCountdown.toString());
+      } else {
+        localStorage.removeItem('mobileEditCountdown');
+      }
+    },
+    1000,
+    { autoInvoke: true }
+  ); // 固定1000ms间隔
 
   return (
     <Box>
@@ -227,7 +542,7 @@ const AccountPageRender =  ({ initialData }:AccountPageProps) => {
                 </Grid.Col>
                 <Grid.Col display="flex"  span={{ base: 2, md: 2, lg: 2, xl: 2 }}>
                     <Flex align="center">
-                      <Button leftSection={<IconEdit size={14} />} onClick={usernameModalActions.open} disabled={hasUsernameEditPermission()}  variant="default" size="xs">
+                      <Button leftSection={<IconEdit size={14} />} onClick={usernameModalActions.open} disabled={usernameEditDisabled}  variant="default" size="xs">
                         Edit
                       </Button>
                     </Flex>
@@ -245,12 +560,12 @@ const AccountPageRender =  ({ initialData }:AccountPageProps) => {
                 <Grid.Col  span={{ base: 10, md: 10, lg: 6, xl: 6 }} >
                   <Text  size="sm">Password</Text>
                   <Text size="sm" c="dimmed">
-                    Your password is {hasPasswordSet()? 'set':'not set'}.
+                    Your password is {passwordSet? 'set':'not set'}.
                   </Text>
                 </Grid.Col>
                 <Grid.Col display="flex"  span={{ base: 2, md: 2, lg: 2, xl: 2 }}>
                   <Flex align="center">
-                    <Button leftSection={<IconEdit size={14} />} variant="default" size="xs">
+                    <Button leftSection={<IconEdit size={14} />} onClick={passwordModalActions.open} variant="default" size="xs">
                       Edit
                     </Button>
                   </Flex>
@@ -268,12 +583,12 @@ const AccountPageRender =  ({ initialData }:AccountPageProps) => {
                 <Grid.Col  span={{ base: 10, md: 10, lg: 6, xl: 6 }} >
                   <Text  size="sm">Email</Text>
                   <Text size="sm" c="dimmed">
-                    Your email is {hasEmailActive()? 'verified':'unverified'}:  <Space w="md" component="span" /> <b>{user?.account?.email}</b>
+                    Your email is {emailActive? 'verified':'unverified'}:  <Space w="md" component="span" /> <b>{user?.account?.email}</b>
                   </Text>
                 </Grid.Col>
                 <Grid.Col display="flex"  span={{ base: 2, md: 2, lg: 2, xl: 2 }}>
                   <Flex align="center">
-                    <Button leftSection={<IconEdit size={14} />} variant="default" size="xs">
+                    <Button leftSection={<IconEdit size={14} />} onClick={setEmailModalActions.open} variant="default" size="xs">
                       Edit
                     </Button>
                   </Flex>
@@ -291,11 +606,11 @@ const AccountPageRender =  ({ initialData }:AccountPageProps) => {
                 <Grid.Col  span={{ base: 10, md: 10, lg: 6, xl: 6 }} >
                   <Text  size="sm">Mobile Number</Text>
                   <Text size="sm" c="dimmed">
-                    Your mobile number is {hasMobileActive()? 'verified':'unverified'}:  <Space w="md" component="span" /> <b>{user?.account?.mobile}</b>
+                    Your mobile number is {mobileActive? 'verified':'unverified'}:  <Space w="md" component="span" /> <b>{user?.account?.mobile}</b>
                   </Text>
                 </Grid.Col>
                 <Grid.Col span={{ base: 2, md: 2, lg: 2, xl: 2 }}>
-                  <Button leftSection={<IconEdit size={14} />} size="xs" variant="default">
+                  <Button leftSection={<IconEdit size={14} />} onClick={setMobileModalActions.open} size="xs" variant="default">
                     Edit
                   </Button>
                 </Grid.Col>
@@ -352,7 +667,9 @@ const AccountPageRender =  ({ initialData }:AccountPageProps) => {
             label="Username"
             required
             placeholder="Enter new username"
+            key={usernameForm.key('username')}
             value={usernameForm.values.username}
+            {...usernameForm.getInputProps('username')}
             // onChange={(event) =>
             //   usernameForm.setFieldValue('username', event.currentTarget.value)
             // }
@@ -370,6 +687,172 @@ const AccountPageRender =  ({ initialData }:AccountPageProps) => {
             }
             error={usernameForm.errors.username}
           />
+          <Flex justify="flex-end" gap="sm" mt="lg">
+            <Button type="submit" disabled={loading}>Save</Button>
+          </Flex>
+        </form>
+      </Modal>
+
+      {/*独立的password*/}
+      <Modal
+        opened={passwordModalOpened}
+        title="Edit Password"
+        onClose={passwordModalActions.close}
+        size="md"
+      >
+        <form onSubmit={passwordForm.onSubmit(handlePasswordFormSubmit)}>
+          <PasswordInput
+            label="Current password"
+            required
+            placeholder="Current Password"
+            key={passwordForm.key('currentPassword')}
+            {...passwordForm.getInputProps('currentPassword')}
+          />
+
+          <PasswordInput
+            label="Password"
+            required
+            placeholder="Password"
+            key={passwordForm.key('password')}
+            {...passwordForm.getInputProps('password')}
+          />
+          <PasswordInput
+            mt="sm"
+            label="Confirm password"
+            required
+            placeholder="Confirm password"
+            key={passwordForm.key('confirmPassword')}
+            {...passwordForm.getInputProps('confirmPassword')}
+          />
+
+          <Flex justify="flex-end" gap="sm" mt="lg">
+            <Button type="submit" disabled={loading}>Save</Button>
+          </Flex>
+        </form>
+      </Modal>
+
+      {/*email修改窗口*/}
+      <Modal
+        opened={emailModalOpened}
+        title="Edit Email"
+        onClose={setEmailModalActions.close}
+        size="md"
+      >
+        <form onSubmit={emailForm.onSubmit(handleEmailFormSubmit)}>
+          <TextInput
+            label="Email"
+            required
+            placeholder="Enter new Email"
+            key={emailForm.key('email')}
+            value={emailForm.values.email}
+            {...emailForm.getInputProps('email')}
+            // onChange={(event) =>
+            //   usernameForm.setFieldValue('username', event.currentTarget.value)
+            // }
+            onChange={handleEmailChange}
+            rightSection={
+              checkEmailLoading ? (
+                <Loader size={16} />
+              ) : emailForm.values.email.trim() && emailForm.values.email.trim() !== user?.account?.email && emailAvailable !== null ? (
+                emailAvailable ? (
+                  <IconCheck color="green" size={16} />
+                ) : (
+                  <IconX color="red" size={16} />
+                )
+              ) : null
+            }
+            error={emailForm.errors.email}
+          />
+          {/* 验证码输入框和发送按钮 */}
+          <Flex justify="space-between" gap="xs">
+            <TextInput
+              required
+              label="Verification Code"
+              placeholder="Enter verification code"
+              value={emailForm.values.captcha}
+              onChange={(event) => emailForm.setFieldValue('captcha', event.currentTarget.value)}
+              error={emailForm.errors.captcha}
+              radius="md"
+              flex={3} // 占据3/4宽度
+            />
+            <Button
+              variant="outline"
+              radius="md"
+              onClick={handleEmailSendCaptcha}
+              disabled={loading || emailEditCountdown > 0}
+              flex={1} // 占据1/4宽度
+              style={{
+                minWidth: 120, // 设置最小宽度，防止文本溢出
+                alignSelf: 'flex-end', // 确保按钮与输入框底部对齐
+              }}
+            >
+              {emailEditCountdown > 0 ? `${emailEditCountdown} S` : 'Send Code'}
+            </Button>
+          </Flex>
+          <Flex justify="flex-end" gap="sm" mt="lg">
+            <Button type="submit" disabled={loading}>Save</Button>
+          </Flex>
+        </form>
+      </Modal>
+
+      {/*mobile修改窗口*/}
+      <Modal
+        opened={mobileModalOpened}
+        title="Edit Mobile"
+        onClose={setMobileModalActions.close}
+        size="md"
+      >
+        <form onSubmit={mobileForm.onSubmit(handleMobileFormSubmit)}>
+          <TextInput
+            label="Mobile"
+            required
+            placeholder="Enter new Mobile"
+            key={mobileForm.key('mobile')}
+            value={mobileForm.values.mobile}
+            {...mobileForm.getInputProps('mobile')}
+            // onChange={(event) =>
+            //   usernameForm.setFieldValue('username', event.currentTarget.value)
+            // }
+            onChange={handleMobileChange}
+            rightSection={
+              checkMobileLoading ? (
+                <Loader size={16} />
+              ) : mobileForm.values.mobile.trim() && mobileForm.values.mobile.trim() !== user?.account?.mobile && mobileAvailable !== null ? (
+                mobileAvailable ? (
+                  <IconCheck color="green" size={16} />
+                ) : (
+                  <IconX color="red" size={16} />
+                )
+              ) : null
+            }
+            error={mobileForm.errors.mobile}
+          />
+          {/* 验证码输入框和发送按钮 */}
+          <Flex justify="space-between" gap="xs">
+            <TextInput
+              required
+              label="Verification Code"
+              placeholder="Enter verification code"
+              value={mobileForm.values.captcha}
+              onChange={(event) => mobileForm.setFieldValue('captcha', event.currentTarget.value)}
+              error={mobileForm.errors.captcha}
+              radius="md"
+              flex={3} // 占据3/4宽度
+            />
+            <Button
+              variant="outline"
+              radius="md"
+              onClick={handleMobileSendCaptcha}
+              disabled={loading || mobileEditCountdown > 0}
+              flex={1} // 占据1/4宽度
+              style={{
+                minWidth: 120, // 设置最小宽度，防止文本溢出
+                alignSelf: 'flex-end', // 确保按钮与输入框底部对齐
+              }}
+            >
+              {mobileEditCountdown > 0 ? `${mobileEditCountdown} S` : 'Send Code'}
+            </Button>
+          </Flex>
           <Flex justify="flex-end" gap="sm" mt="lg">
             <Button type="submit" disabled={loading}>Save</Button>
           </Flex>
