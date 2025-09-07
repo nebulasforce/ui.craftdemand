@@ -14,3 +14,18 @@ export interface editMyUsernameData extends Result {
 }
 
 export interface editMyUsernameResponse extends Response<editMyUsernameData> {}
+
+
+export interface editMyAvatarData extends Result {
+  host: string;
+  key: string;
+  target: string;
+}
+
+
+export interface editMyAvatarResponse extends Response<editMyAvatarData> {}
+
+export interface sendVerifiedCodeData extends Result {}
+
+export interface sendEmailVerifiedCodeResponse extends Response<sendVerifiedCodeData> {}
+export interface sendMobileVerifiedCodeResponse extends Response<sendVerifiedCodeData> {}

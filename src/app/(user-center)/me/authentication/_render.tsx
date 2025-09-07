@@ -32,32 +32,57 @@ import {
   IconBrandWechat,
   IconBrandAlipay
 } from '@tabler/icons-react';
-import { editMyUsername } from '@/api/me/api';
+import { editMyUsername, sendEmailVerifiedCode, sendMobileVerifiedCode } from '@/api/me/api';
 import notify from '@/utils/notify';
 import useDebounce from '@/utils/debouce';
 import { check } from '@/api/auth/api';
+import { sendEmailVerifiedCodeRequest, sendMobileVerifiedCodeRequest } from '@/api/me/request';
 
 
 // sendMobileVerificationCode 假设这里有发送验证码的函数
 const sendMobileVerificationCode = async (mobile: string) => {
-  // 模拟发送验证码的逻辑
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      notify(`Verification code sent to ${mobile} successfully`, 'success');
-      resolve(true);
-    }, 1000);
-  });
+  try {
+    // 调用服务端接口
+    const response = await sendMobileVerifiedCode({
+      mobile,
+    } as sendMobileVerifiedCodeRequest);
+
+    if (response.code === 0) {
+      return true;
+    }
+    return false;
+
+  } catch (err) {
+    if (err instanceof Error) {
+      notify(err.message, 'error');
+    } else {
+      notify('系统错误', 'error');
+    }
+    return false;
+  }
 };
 
 // sendEmailVerificationCode 假设这里有发送验证码的函数
 const sendEmailVerificationCode = async (email: string) => {
-  // 模拟发送验证码的逻辑
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      notify(`Verification code sent to ${email} successfully`, 'success');
-      resolve(true);
-    }, 1000);
-  });
+  try {
+    // 调用服务端接口
+    const response = await sendEmailVerifiedCode({
+      email,
+    } as sendEmailVerifiedCodeRequest);
+
+    if (response.code === 0) {
+      return true;
+    }
+    return false;
+
+  } catch (err) {
+    if (err instanceof Error) {
+      notify(err.message, 'error');
+    } else {
+      notify('系统错误', 'error');
+    }
+    return false
+  }
 };
 
 interface AccountPageProps {
@@ -266,7 +291,6 @@ const AccountPageRender =  ({ initialData }:AccountPageProps) => {
   // 表单提交处理
   const handleUsernameFormSubmit = async (values: typeof usernameForm.values): Promise<void> => {
     if (!user) {return;} // 确保用户存在
-
     setLoading(true);
     try {
       // 处理表单数据，转换为API需要的格式
@@ -446,6 +470,9 @@ const AccountPageRender =  ({ initialData }:AccountPageProps) => {
       const success = await sendEmailVerificationCode(email);
       if (!success) {
         setEmailEditCountdown(0); // 发送失败则重置倒计时
+        notify(`Verification code sent to ${email} failed`, 'error');
+      }else {
+        notify(`Verification code sent to ${email} successfully`, 'success');
       }
     } catch (error) {
       setEmailEditCountdown(0);
@@ -468,8 +495,11 @@ const AccountPageRender =  ({ initialData }:AccountPageProps) => {
       setMobileEditCountdown(60); // 设置倒计时60秒
       const success = await sendMobileVerificationCode(mobile);
       if (!success) {
-        setMobileEditCountdown(0);
-      } // 发送失败则重置倒计时
+        setEmailEditCountdown(0); // 发送失败则重置倒计时
+        notify(`Verification code sent to ${mobile} failed`, 'error');
+      }else {
+        notify(`Verification code sent to ${mobile} successfully`, 'success');
+      }
     } catch (error) {
       setMobileEditCountdown(0);
     }

@@ -39,3 +39,11 @@ export interface editMyUsernameRequest {
 export interface editMyAvatarRequest {
   avatar: string;
 }
+
+export interface sendEmailVerifiedCodeRequest {
+  email: string;
+}
+
+export interface sendMobileVerifiedCodeRequest {
+  mobile: string;
+}
