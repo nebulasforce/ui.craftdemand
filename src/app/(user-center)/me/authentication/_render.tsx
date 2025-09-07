@@ -362,8 +362,7 @@ const AccountPageRender =  ({ initialData }:AccountPageProps) => {
       if (response.code === 0 && response.data?.registerAble) {
         setUsernameAvailable(response.data?.registerAble);
       } else {
-        notify(response.message || 'Failed to check username availability', 'error');
-        setUsernameAvailable(null);
+        setUsernameAvailable(false);
       }
     } catch (err) {
       notify('Error checking username availability', 'error');
@@ -390,8 +389,7 @@ const AccountPageRender =  ({ initialData }:AccountPageProps) => {
       if (response.code === 0 && response.data?.registerAble) {
         setEmailAvailable(response.data?.registerAble);
       } else {
-        notify(response.message || 'Failed to check email availability', 'error');
-        setEmailAvailable(null);
+        setEmailAvailable(false);
       }
     } catch (err) {
       notify('Error checking email availability', 'error');
@@ -418,8 +416,7 @@ const AccountPageRender =  ({ initialData }:AccountPageProps) => {
       if (response.code === 0 && response.data?.registerAble) {
         setMobileAvailable(response.data?.registerAble);
       } else {
-        notify(response.message || 'Failed to check mobile availability', 'error');
-        setMobileAvailable(null);
+        setMobileAvailable(false);
       }
     } catch (err) {
       notify('Error checking mobile availability', 'error');
