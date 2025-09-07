@@ -9,6 +9,11 @@ export interface editMyProfileData extends Result{
 export interface editMyProfileResponse extends Response<editMyProfileData> {}
 
 
+export interface editMyPasswordData extends Result{
+  id: string
+}
+export interface editMyPasswordResponse extends Response<editMyPasswordData> {}
+
 export interface editMyUsernameData extends Result {
   id: string
 }
@@ -29,3 +34,21 @@ export interface sendVerifiedCodeData extends Result {}
 
 export interface sendEmailVerifiedCodeResponse extends Response<sendVerifiedCodeData> {}
 export interface sendMobileVerifiedCodeResponse extends Response<sendVerifiedCodeData> {}
+
+
+// editMyEmailData
+export interface editMyEmailData extends Result {
+  id: string
+}
+
+// editMyEmailResponse
+export interface editMyEmailResponse extends Response<editMyEmailData> {}
+
+
+// editMyMobileData
+export interface editMyMobileData extends Result {
+  id: string
+}
+
+// editMyMobileResponse
+export interface editMyMobileResponse extends Response<editMyMobileData> {}

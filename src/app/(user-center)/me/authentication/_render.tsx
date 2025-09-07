@@ -9,7 +9,7 @@ import {
   Breadcrumbs,
   Button,
   Divider,
-  Flex,
+  Flex, FocusTrap,
   Grid, Loader,
   Modal,
   Paper, PasswordInput,
@@ -32,11 +32,23 @@ import {
   IconBrandWechat,
   IconBrandAlipay
 } from '@tabler/icons-react';
-import { editMyUsername, sendEmailVerifiedCode, sendMobileVerifiedCode } from '@/api/me/api';
+import {
+  editMyEmail,
+  editMyMobile,
+  editMyPassword,
+  editMyUsername,
+  sendEmailVerifiedCode,
+  sendMobileVerifiedCode,
+} from '@/api/me/api';
 import notify from '@/utils/notify';
 import useDebounce from '@/utils/debouce';
 import { check } from '@/api/auth/api';
-import { sendEmailVerifiedCodeRequest, sendMobileVerifiedCodeRequest } from '@/api/me/request';
+import {
+  editMyEmailRequest,
+  editMyMobileRequest, editMyPasswordRequest,
+  sendEmailVerifiedCodeRequest,
+  sendMobileVerifiedCodeRequest,
+} from '@/api/me/request';
 
 
 // sendMobileVerificationCode 假设这里有发送验证码的函数
@@ -107,7 +119,7 @@ const AccountPageRender =  ({ initialData }:AccountPageProps) => {
     if (user?.account?.active === undefined) {return false;}
     return (user.account.active & passwordSetFlag) !== 0;
   }
-  const [passwordSet, setPasswordSet] = useState<boolean>(hasPasswordSet());
+  const [passwordSet] = useState<boolean>(hasPasswordSet());
 
   const emailActiveFlag = 1 << 2;
   const hasEmailActive = () => {
@@ -122,7 +134,7 @@ const AccountPageRender =  ({ initialData }:AccountPageProps) => {
     if (user?.account?.active === undefined) {return false;}
     return (user.account.active & mobileActiveFlag) !== 0;
   }
-  const [mobileActive, setMobileActive] = useState<boolean>(hasMobileActive());
+  const [mobileActive,setMobileActive] = useState<boolean>(hasMobileActive());
 
   const items = [{ title: 'Home', href: '/' }, { title: 'Authentication' }];
   useEffect(() => {
@@ -181,7 +193,7 @@ const AccountPageRender =  ({ initialData }:AccountPageProps) => {
     }
   }, [usernameModalOpened]);
 
-  const [passwordModalOpened, passwordModalActions] = useDisclosure(false);
+  const [passwordModalOpened, setPasswordModalActions] = useDisclosure(false);
   const passwordForm = useForm({
     initialValues: {
       confirmPassword: '',
@@ -225,7 +237,7 @@ const AccountPageRender =  ({ initialData }:AccountPageProps) => {
   const emailForm = useForm({
     initialValues: {
       email: '',
-      captcha: '',
+      authCode: '',
     },
     validate: {
       email: (val) => {
@@ -234,7 +246,7 @@ const AccountPageRender =  ({ initialData }:AccountPageProps) => {
         }
         return null;
       },
-      captcha: (val) => {
+      authCode: (val) => {
         if (!val) {
           return 'This field is required';
         }
@@ -258,7 +270,7 @@ const AccountPageRender =  ({ initialData }:AccountPageProps) => {
   const mobileForm = useForm({
     initialValues: {
       mobile: '',
-      captcha: '',
+      authCode: '',
     },
     validate: {
       mobile: (val) => {
@@ -267,7 +279,7 @@ const AccountPageRender =  ({ initialData }:AccountPageProps) => {
         }
         return null;
       },
-      captcha: (val) => {
+      authCode: (val) => {
         if (!val) {
           return 'This field is required';
         }
@@ -334,15 +346,128 @@ const AccountPageRender =  ({ initialData }:AccountPageProps) => {
 
 
   const handlePasswordFormSubmit = async (values: typeof passwordForm.values): Promise<void> => {
-    console.log(values);
+    if (!user) {return;} // 确保用户存在
+    setLoading(true);
+
+    try {
+      // 处理表单数据，转换为API需要的格式
+      const params = {
+        ...values,
+      } as editMyPasswordRequest;
+
+      // 调用编辑个人资料API
+      const response = await editMyPassword(params);
+
+      if (response.code === 0) {
+        setPasswordModalActions.close()
+        // 更新本地用户上下文
+        notify('The password updated successfully', 'success');
+      } else {
+        notify(response.message || 'Failed to update the email', 'error');
+      }
+    } catch (err) {
+      if (err instanceof Error) {
+        notify(err.message, 'error');
+      } else {
+        notify('系统错误', 'error');
+      }
+    } finally {
+      setLoading(false);
+    }
   }
 
   const handleEmailFormSubmit = async (values: typeof emailForm.values): Promise<void> => {
-    console.log(values);
+    if (!user) {return;} // 确保用户存在
+    setLoading(true);
+    try {
+      // 处理表单数据，转换为API需要的格式
+      const params = {
+        ...values,
+      } as editMyEmailRequest;
+
+      // 调用编辑个人资料API
+      const response = await editMyEmail(params);
+
+      if (response.code === 0) {
+        setEmailModalActions.close()
+        // 更新本地用户上下文
+        if (updateUser && user) {
+          updateUser({
+            ...user,
+            account: {
+              ...user.account,
+              'email': params.email,
+            },
+            profile: {
+              ...user.profile,
+            }
+          })
+        }
+        notify('The email updated successfully', 'success');
+        emailForm.setFieldValue('authCode', '');
+        setEmailActive(true)
+        setTimeout(() => {
+          setEmailEditCountdown(-1);
+        }, 1000);
+      } else {
+        notify(response.message || 'Failed to update the email', 'error');
+      }
+    } catch (err) {
+      if (err instanceof Error) {
+        notify(err.message, 'error');
+      } else {
+        notify('系统错误', 'error');
+      }
+    } finally {
+      setLoading(false);
+    }
   }
 
   const handleMobileFormSubmit = async (values: typeof mobileForm.values): Promise<void> => {
-    console.log(values);
+    if (!user) {return;} // 确保用户存在
+    setLoading(true);
+    try {
+      // 处理表单数据，转换为API需要的格式
+      const params = {
+        ...values,
+      } as editMyMobileRequest;
+
+      // 调用编辑个人资料API
+      const response = await editMyMobile(params);
+
+      if (response.code === 0) {
+        setMobileModalActions.close()
+        // 更新本地用户上下文
+        if (updateUser && user) {
+          updateUser({
+            ...user,
+            account: {
+              ...user.account,
+              'mobile': params.mobile,
+            },
+            profile: {
+              ...user.profile,
+            }
+          })
+        }
+        notify('The mobile updated successfully', 'success');
+        mobileForm.setFieldValue('authCode', '');
+        setMobileActive(true)
+        setTimeout(() => {
+          setMobileEditCountdown(-1);
+        }, 1000);
+      } else {
+        notify(response.message || 'Failed to update the mobile', 'error');
+      }
+    } catch (err) {
+      if (err instanceof Error) {
+        notify(err.message, 'error');
+      } else {
+        notify('系统错误', 'error');
+      }
+    } finally {
+      setLoading(false);
+    }
   }
 
   // 防抖处理用户名校验，500ms延迟
@@ -592,7 +717,7 @@ const AccountPageRender =  ({ initialData }:AccountPageProps) => {
                 </Grid.Col>
                 <Grid.Col display="flex"  span={{ base: 2, md: 2, lg: 2, xl: 2 }}>
                   <Flex align="center">
-                    <Button leftSection={<IconEdit size={14} />} onClick={passwordModalActions.open} variant="default" size="xs">
+                    <Button leftSection={<IconEdit size={14} />} onClick={setPasswordModalActions.open} variant="default" size="xs">
                       Edit
                     </Button>
                   </Flex>
@@ -689,7 +814,8 @@ const AccountPageRender =  ({ initialData }:AccountPageProps) => {
         onClose={usernameModalActions.close}
         size="md"
       >
-        <form onSubmit={usernameForm.onSubmit(handleUsernameFormSubmit)}>
+        <FocusTrap active>
+          <form onSubmit={usernameForm.onSubmit(handleUsernameFormSubmit)}>
           <TextInput
             label="Username"
             required
@@ -718,16 +844,18 @@ const AccountPageRender =  ({ initialData }:AccountPageProps) => {
             <Button type="submit" disabled={loading}>Save</Button>
           </Flex>
         </form>
+        </FocusTrap>
       </Modal>
 
       {/*独立的password*/}
       <Modal
         opened={passwordModalOpened}
         title="Edit Password"
-        onClose={passwordModalActions.close}
+        onClose={setPasswordModalActions.close}
         size="md"
       >
-        <form onSubmit={passwordForm.onSubmit(handlePasswordFormSubmit)}>
+        <FocusTrap active>
+          <form onSubmit={passwordForm.onSubmit(handlePasswordFormSubmit)}>
           <PasswordInput
             label="Current password"
             required
@@ -756,6 +884,7 @@ const AccountPageRender =  ({ initialData }:AccountPageProps) => {
             <Button type="submit" disabled={loading}>Save</Button>
           </Flex>
         </form>
+        </FocusTrap>
       </Modal>
 
       {/*email修改窗口*/}
@@ -765,7 +894,8 @@ const AccountPageRender =  ({ initialData }:AccountPageProps) => {
         onClose={setEmailModalActions.close}
         size="md"
       >
-        <form onSubmit={emailForm.onSubmit(handleEmailFormSubmit)}>
+        <FocusTrap active>
+          <form onSubmit={emailForm.onSubmit(handleEmailFormSubmit)}>
           <TextInput
             label="Email"
             required
@@ -796,9 +926,9 @@ const AccountPageRender =  ({ initialData }:AccountPageProps) => {
               required
               label="Verification Code"
               placeholder="Enter verification code"
-              value={emailForm.values.captcha}
-              onChange={(event) => emailForm.setFieldValue('captcha', event.currentTarget.value)}
-              error={emailForm.errors.captcha}
+              value={emailForm.values.authCode}
+              onChange={(event) => emailForm.setFieldValue('authCode', event.currentTarget.value)}
+              error={emailForm.errors.authCode}
               radius="md"
               flex={3} // 占据3/4宽度
             />
@@ -820,6 +950,7 @@ const AccountPageRender =  ({ initialData }:AccountPageProps) => {
             <Button type="submit" disabled={loading}>Save</Button>
           </Flex>
         </form>
+        </FocusTrap>
       </Modal>
 
       {/*mobile修改窗口*/}
@@ -829,7 +960,8 @@ const AccountPageRender =  ({ initialData }:AccountPageProps) => {
         onClose={setMobileModalActions.close}
         size="md"
       >
-        <form onSubmit={mobileForm.onSubmit(handleMobileFormSubmit)}>
+        <FocusTrap active>
+          <form onSubmit={mobileForm.onSubmit(handleMobileFormSubmit)}>
           <TextInput
             label="Mobile"
             required
@@ -860,9 +992,9 @@ const AccountPageRender =  ({ initialData }:AccountPageProps) => {
               required
               label="Verification Code"
               placeholder="Enter verification code"
-              value={mobileForm.values.captcha}
-              onChange={(event) => mobileForm.setFieldValue('captcha', event.currentTarget.value)}
-              error={mobileForm.errors.captcha}
+              value={mobileForm.values.authCode}
+              onChange={(event) => mobileForm.setFieldValue('authCode', event.currentTarget.value)}
+              error={mobileForm.errors.authCode}
               radius="md"
               flex={3} // 占据3/4宽度
             />
@@ -884,6 +1016,7 @@ const AccountPageRender =  ({ initialData }:AccountPageProps) => {
             <Button type="submit" disabled={loading}>Save</Button>
           </Flex>
         </form>
+        </FocusTrap>
       </Modal>
     </Box>
   );

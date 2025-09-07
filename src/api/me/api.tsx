@@ -1,11 +1,23 @@
 import { Options } from '@/api/common/request';
-import { meRequest, editMyProfileRequest, editMyUsernameRequest, editMyAvatarRequest, sendMobileVerifiedCodeRequest, sendEmailVerifiedCodeRequest } from '@/api/me/request';
+import {
+  meRequest,
+  editMyProfileRequest,
+  editMyUsernameRequest,
+  editMyAvatarRequest,
+  sendMobileVerifiedCodeRequest,
+  sendEmailVerifiedCodeRequest,
+  editMyEmailRequest,
+  editMyMobileRequest, editMyPasswordRequest,
+} from '@/api/me/request';
 import {
   meResponse,
   editMyProfileResponse,
   editMyUsernameResponse,
   editMyAvatarResponse,
-  sendEmailVerifiedCodeResponse, sendMobileVerifiedCodeResponse,
+  sendEmailVerifiedCodeResponse,
+  sendMobileVerifiedCodeResponse,
+  editMyEmailResponse,
+  editMyMobileResponse, editMyPasswordResponse,
 } from '@/api/me/response';
 import request from '@/utils/request';
 
@@ -27,6 +39,19 @@ export async function me(req?:meRequest,options?:Options) {
 export async function editMyProfile(req?:editMyProfileRequest,options?:Options) {
   return request<editMyProfileResponse>({
     url: '/api/v1/me/profile',
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: req || {},
+    ...(options || {}),
+  });
+}
+
+// editMyProfile 修改我的个人资料
+export async function editMyPassword(req?:editMyPasswordRequest,options?:Options) {
+  return request<editMyPasswordResponse>({
+    url: '/api/v1/me/password',
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -63,6 +88,34 @@ export async function editMyUsername(req?:editMyUsernameRequest,options?:Options
     ...(options || {}),
   });
 }
+
+// editMyEmail 修改我的邮箱
+export async function editMyEmail(req?:editMyEmailRequest,options?:Options) {
+  return request<editMyEmailResponse>({
+    url: '/api/v1/me/email',
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: req || {},
+    ...(options || {}),
+  });
+}
+
+// editMyMobile 修改我的邮箱
+export async function editMyMobile(req?:editMyMobileRequest,options?:Options) {
+  return request<editMyMobileResponse>({
+    url: '/api/v1/me/mobile',
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: req || {},
+    ...(options || {}),
+  });
+}
+
+
 
 // sendEmailVerifiedCode 发送邮箱验证码
 export async function sendEmailVerifiedCode(req?:sendEmailVerifiedCodeRequest,options?:Options) {

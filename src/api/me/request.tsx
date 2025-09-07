@@ -36,6 +36,16 @@ export interface editMyUsernameRequest {
   username: string;
 }
 
+export interface editMyEmailRequest {
+  email: string;
+  authCode: string;
+}
+
+export interface editMyMobileRequest {
+  mobile: string;
+  authCode: string;
+}
+
 export interface editMyAvatarRequest {
   avatar: string;
 }
@@ -46,4 +56,10 @@ export interface sendEmailVerifiedCodeRequest {
 
 export interface sendMobileVerifiedCodeRequest {
   mobile: string;
+}
+
+export interface editMyPasswordRequest {
+  password: string; // 新密码
+  confirmPassword: string; // 确认密码
+  currentPassword: string; // 当前密码
 }
