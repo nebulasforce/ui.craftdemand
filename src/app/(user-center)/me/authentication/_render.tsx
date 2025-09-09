@@ -98,10 +98,11 @@ const sendEmailVerificationCode = async (email: string) => {
 };
 
 interface AccountPageProps {
-  initialData: any
+  initialData?: any
 }
 
-const AccountPageRender =  ({ initialData }:AccountPageProps) => {
+// eslint-disable-next-line no-empty-pattern
+const AccountPageRender =  ({  }:AccountPageProps) => {
   const { setActive, setSection } = useNavbar();
   const { user ,updateUser} = useUser();
   const [loading, setLoading] = useState(false);
