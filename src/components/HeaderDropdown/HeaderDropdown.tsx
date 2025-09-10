@@ -36,7 +36,7 @@ import {
 import { useMediaQuery } from '@mantine/hooks';
 import { listGroup } from '@/api/headDropdown/api';
 import { listGroupData } from '@/api/headDropdown/response';
-import { User } from '@/api/me/typings';
+import { User } from '@/api/my/typings';
 import { useAuth } from '@/contexts/AuthContext/AuthContext';
 import notify from '@/utils/notify';
 import { getImageUrl } from '@/utils/path';

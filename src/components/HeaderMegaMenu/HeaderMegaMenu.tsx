@@ -32,7 +32,7 @@ import {
   useMantineTheme,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { User } from '@/api/me/typings';
+import { User } from '@/api/my/typings';
 import { HeaderDropdown } from '@/components/HeaderDropdown/HeaderDropdown';
 import { Logo } from '@/components/Logo/Logo';
 import { useAuth } from '@/contexts/AuthContext/AuthContext';

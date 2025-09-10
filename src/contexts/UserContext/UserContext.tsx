@@ -1,7 +1,7 @@
 // @/contexts/UserContext.tsx
 'use client';
 import { createContext, useContext, ReactNode, useState } from 'react';
-import { User } from '@/api/me/typings';
+import { User } from '@/api/my/typings';
 import { useAuth } from '@/contexts/AuthContext/AuthContext';
 // 简化上下文类型，只支持对象形式的更新
 type UserContextType = {

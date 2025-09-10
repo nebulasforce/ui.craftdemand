@@ -1,5 +1,5 @@
 import { Response, Result } from '@/api/common/response';
-import { User } from '@/api/me/typings';
+import { User } from '@/api/my/typings';
 
 export interface meResponse extends  Response<User>{}
 

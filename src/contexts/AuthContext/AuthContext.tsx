@@ -7,8 +7,8 @@ import { useRouter } from 'next/navigation';
 import { login, logout, register } from '@/api/auth/api';
 import { loginRequest, registerRequest } from '@/api/auth/request';
 import { loginResponse, registerResponse } from '@/api/auth/response';
-import { me } from '@/api/me/api';
-import { User } from '@/api/me/typings';
+import { me } from '@/api/my/api';
+import { User } from '@/api/my/typings';
 import notify from '@/utils/notify';
 import Cookies from 'js-cookie';
 

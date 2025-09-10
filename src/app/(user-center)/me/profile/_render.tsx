@@ -35,7 +35,7 @@ import '@mantine/dates/styles.css';
 import { uploadRequest } from '@/api/file/request';
 import { IconCalendar, IconUpload } from '@tabler/icons-react';
 import { CityItem } from '@/api/data/typings';
-import { editMyProfile } from '@/api/me/api';
+import { editMyProfile } from '@/api/my/api';
 import notify from '@/utils/notify';
 import { upload } from '@/api/file/api';
 import { getImageUrl } from '@/utils/path';

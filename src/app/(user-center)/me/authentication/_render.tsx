@@ -39,7 +39,7 @@ import {
   editMyUsername,
   sendEmailVerifiedCode,
   sendMobileVerifiedCode,
-} from '@/api/me/api';
+} from '@/api/my/api';
 import notify from '@/utils/notify';
 import useDebounce from '@/utils/debouce';
 import { check } from '@/api/auth/api';
@@ -48,7 +48,7 @@ import {
   editMyMobileRequest, editMyPasswordRequest,
   sendEmailVerifiedCodeRequest,
   sendMobileVerifiedCodeRequest,
-} from '@/api/me/request';
+} from '@/api/my/request';
 
 
 // sendMobileVerificationCode 假设这里有发送验证码的函数

@@ -3,7 +3,7 @@
 import React from 'react';
 import { AppShell, AppShellHeader, AppShellMain, AppShellNavbar } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { User } from '@/api/me/typings';
+import { User } from '@/api/my/typings';
 import { listGroupData } from '@/api/navbar/response';
 import { HeaderMegaMenu } from '@/components/HeaderMegaMenu/HeaderMegaMenu';
 import { NavbarSegmented } from '@/components/NavbarSegmented/NavbarSegmented';

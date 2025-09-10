@@ -1,7 +1,7 @@
 import sRequest from '@/utils/sRequest';
-import { meRequest } from '@/api/me/request';
+import { meRequest } from '@/api/my/request';
 import { Options } from '@/api/common/request';
-import { meResponse } from '@/api/me/response';
+import { meResponse } from '@/api/my/response';
 
 
 
