@@ -156,10 +156,11 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
         <Box pos="relative">
           <Stack
             gap="lg"
+            justify="flex-end"
           >
             <LoadingOverlay visible={loading} />
             <ScrollArea>
-              <Table miw={800}  verticalSpacing="xs">
+              <Table  verticalSpacing="xs">
                 <Table.Thead>
                   <Table.Tr>
                     <Table.Th w={40}>
@@ -188,18 +189,22 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
                 </Table.Tbody>
               </Table>
             </ScrollArea>
-            <Flex
-
-              direction="row"
-              justify="space-between" align="center"
-            >
-              {/* 显示条目信息 */}
-              <Text size="sm" c="dimmed">
-                {calculateDisplayRange()}
-              </Text>
-              {/*分页控制*/}
-              <Pagination total={totalPage||0} withEdges value={page} onChange={handlePageChange}  siblings={2}  />
-            </Flex>
+            {/* 分页控制区 - 固定在底部 */}
+              <Flex direction="row" justify="space-between" align="center">
+                {/* 显示条目信息 */}
+                <Text size="sm" c="dimmed">
+                  {calculateDisplayRange()}
+                </Text>
+                {/* 分页控制 */}
+                <Pagination
+                  total={totalPage || 0}
+                  withEdges
+                  value={page}
+                  onChange={handlePageChange}
+                  siblings={2}
+                  disabled={loading || totalPage <= 1}
+                />
+              </Flex>
           </Stack>
         </Box>
       </Paper>
