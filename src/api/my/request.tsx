@@ -1,4 +1,5 @@
-// import { Query,Pager } from '@/api/common/request';
+import { Query,Pager } from '@/api/common/request';
+
 export interface loginRequest {
   loginId: string;
   password?: string;
@@ -15,6 +16,8 @@ export interface registerRequest {
 }
 
 export interface meRequest {}
+
+export interface myInfoRequest {}
 
 export interface editMyProfileRequest {
   nickname: string;
@@ -63,3 +66,7 @@ export interface editMyPasswordRequest {
   confirmPassword: string; // 确认密码
   currentPassword: string; // 当前密码
 }
+
+export interface mySubAccountListRequest extends Query,Pager {}
+
+export interface myAllSubAccountListRequest extends Query {}

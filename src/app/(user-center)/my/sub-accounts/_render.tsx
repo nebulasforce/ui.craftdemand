@@ -21,10 +21,7 @@ import { useEffect, useState } from 'react';
 import { useNavbar } from '@/contexts/NavbarContext/NavbarContext';
 import cx from 'clsx';
 import classes from './style.module.css'
-
-interface OrdersPageProps {
-  initialData: any
-}
+import { mySubAccountListData } from '@/api/my/response';
 
 const data = [
   {
@@ -70,7 +67,7 @@ const data = [
 ];
 
 interface SubAccountsProps {
-  initialData: any
+  initialData: mySubAccountListData | null;
 }
 
 const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
@@ -79,6 +76,9 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
     setSection('Account');
     setActive('Sub Accounts');
   }, []); // 合并依赖项
+
+
+  console.log("initialData",initialData);
 
   // 面包屑
   const items = [{ title: 'Home', href: '/' }, { title: 'Sub Accounts' }];

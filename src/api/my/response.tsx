@@ -1,7 +1,8 @@
-import { Response, Result } from '@/api/common/response';
+import { Pagination, Response, Result } from '@/api/common/response';
 import { User } from '@/api/my/typings';
 
 export interface meResponse extends  Response<User>{}
+export interface myInfoResponse extends Response<User> {}
 
 export interface editMyProfileData extends Result{
   id: string
@@ -27,7 +28,6 @@ export interface editMyAvatarData extends Result {
   target: string;
 }
 
-
 export interface editMyAvatarResponse extends Response<editMyAvatarData> {}
 
 export interface sendVerifiedCodeData extends Result {}
@@ -52,3 +52,13 @@ export interface editMyMobileData extends Result {
 
 // editMyMobileResponse
 export interface editMyMobileResponse extends Response<editMyMobileData> {}
+
+
+export interface mySubAccountListData extends Pagination<User> {
+}
+
+export interface mySubAccountListResponse extends Response<mySubAccountListData> {}
+
+
+export type myAllSubAccountListData = User[]
+export interface myAllSubAccountListResponse extends Response<myAllSubAccountListData> {}

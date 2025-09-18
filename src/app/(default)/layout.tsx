@@ -9,12 +9,12 @@ import "@/app/globals.css";
 import {FooterLinks} from '@/components/FooterLinks/FooterLinks'
 import React from 'react';
 import { HeaderMegaMenu } from '@/components/HeaderMegaMenu/HeaderMegaMenu';
-import { me } from '@/api/ssr/me';
+import { myInfo } from '@/api/ssr/my';
 
 // 在布局中获取数据（App Router 支持布局中的异步数据获取）
-async function geMe() {
+async function geMyInfo() {
   try {
-    const response = await me();
+    const response = await myInfo();
     return response.data || null;
   } catch (error) {
     return null;
@@ -23,7 +23,7 @@ async function geMe() {
 
 
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode; }>) {
-  const user = await geMe();
+  const user = await geMyInfo();
   return (
     <AppShell header={{ height: 60 }} padding="md">
       <AppShellHeader>

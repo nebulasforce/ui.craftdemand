@@ -51,7 +51,7 @@ export async function check(req?:checkRequest,options?:Options) {
     headers: {
       'Content-Type': 'application/json',
     },
-    data: req || {},
+    params:  {},
     ...(options || {}),
   });
 }

@@ -7,7 +7,8 @@ import {
   sendMobileVerifiedCodeRequest,
   sendEmailVerifiedCodeRequest,
   editMyEmailRequest,
-  editMyMobileRequest, editMyPasswordRequest,
+  editMyMobileRequest,
+  editMyPasswordRequest, mySubAccountListRequest, myAllSubAccountListRequest,
 } from '@/api/my/request';
 import {
   meResponse,
@@ -17,7 +18,8 @@ import {
   sendEmailVerifiedCodeResponse,
   sendMobileVerifiedCodeResponse,
   editMyEmailResponse,
-  editMyMobileResponse, editMyPasswordResponse,
+  editMyMobileResponse,
+  editMyPasswordResponse, mySubAccountListResponse, myAllSubAccountListResponse,
 } from '@/api/my/response';
 import request from '@/utils/request';
 
@@ -135,6 +137,34 @@ export async function sendMobileVerifiedCode(req?:sendMobileVerifiedCodeRequest,
   return request<sendMobileVerifiedCodeResponse>({
     url: '/api/v1/my/mobile/verified/code',
     method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: req || {},
+    ...(options || {}),
+  });
+}
+
+
+//  mySubAccountList 获取个人子账号分页列表
+export async function mySubAccountList(req?:mySubAccountListRequest,options?:Options) {
+  return request<mySubAccountListResponse>({
+    url: '/api/v1/my/sub-account',
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: req || {},
+    ...(options || {}),
+  });
+}
+
+
+// myAllSubAccountList 获取全部子账号列表
+export async function myAllSubAccountList(req?:myAllSubAccountListRequest,options?:Options) {
+  return request<myAllSubAccountListResponse>({
+    url: '/api/v1/my/all/sub-account',
+    method: 'GET',
     headers: {
       'Content-Type': 'application/json',
     },
