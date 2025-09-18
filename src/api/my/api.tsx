@@ -154,7 +154,7 @@ export async function mySubAccountList(req?:mySubAccountListRequest,options?:Opt
     headers: {
       'Content-Type': 'application/json',
     },
-    data: req || {},
+    params: req || {},
     ...(options || {}),
   });
 }
