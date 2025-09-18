@@ -14,7 +14,7 @@ import {
   Group,
   Table,
   ScrollArea,
-  Flex,
+  Flex, LoadingOverlay,
 } from '@mantine/core';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
@@ -157,8 +157,9 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
           <Stack
             gap="lg"
           >
+            <LoadingOverlay visible={loading} />
             <ScrollArea>
-              <Table miw={800} >
+              <Table miw={800}  verticalSpacing="xs">
                 <Table.Thead>
                   <Table.Tr>
                     <Table.Th w={40}>
@@ -174,7 +175,17 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
 
                   </Table.Tr>
                 </Table.Thead>
-                <Table.Tbody>{rows}</Table.Tbody>
+                <Table.Tbody>
+                  {rows.length > 0 ? (
+                    rows
+                  ) : (
+                    <Table.Tr>
+                      <Table.Td colSpan={4} align="center">
+                        <Text c="dimmed">No data available</Text>
+                      </Table.Td>
+                    </Table.Tr>
+                  )}
+                </Table.Tbody>
               </Table>
             </ScrollArea>
             <Flex
