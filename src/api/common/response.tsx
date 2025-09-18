@@ -3,7 +3,7 @@ export interface Pagination<T> {
   lists: T[];
   page: number;
   pageSize: number;
-  totalPages: number;
+  totalPage: number;
 }
 
 export interface Response<T> {

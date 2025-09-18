@@ -23,48 +23,6 @@ import cx from 'clsx';
 import classes from './style.module.css'
 import { mySubAccountListData } from '@/api/my/response';
 
-const data = [
-  {
-    id: '1',
-    avatar:
-      'https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-1.png',
-    name: 'Robert Wolfkisser',
-    job: 'Engineer',
-    email: 'rob_wolf@gmail.com',
-  },
-  {
-    id: '2',
-    avatar:
-      'https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-7.png',
-    name: 'Jill Jailbreaker',
-    job: 'Engineer',
-    email: 'jj@breaker.com',
-  },
-  {
-    id: '3',
-    avatar:
-      'https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-2.png',
-    name: 'Henry Silkeater',
-    job: 'Designer',
-    email: 'henry@silkeater.io',
-  },
-  {
-    id: '4',
-    avatar:
-      'https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-3.png',
-    name: 'Bill Horsefighter',
-    job: 'Designer',
-    email: 'bhorsefighter@gmail.com',
-  },
-  {
-    id: '5',
-    avatar:
-      'https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-10.png',
-    name: 'Jeremy Footviewer',
-    job: 'Manager',
-    email: 'jeremy@foot.dev',
-  },
-];
 
 interface SubAccountsProps {
   initialData: mySubAccountListData | null;
@@ -77,37 +35,38 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
     setActive('Sub Accounts');
   }, []); // 合并依赖项
 
-
-  console.log("initialData",initialData);
+  const data = initialData?.lists || [];
 
   // 面包屑
   const items = [{ title: 'Home', href: '/' }, { title: 'Sub Accounts' }];
 
-  const [selection, setSelection] = useState(['1']);
+
+  const [page, setPage] = useState(initialData?.page || 1);
+  const [selection, setSelection] = useState<string[]>([]);
   const toggleRow = (id: string) =>
     setSelection((current) =>
       current.includes(id) ? current.filter((item) => item !== id) : [...current, id]
     );
   const toggleAll = () =>
-    setSelection((current) => (current.length === data.length ? [] : data.map((item) => item.id)));
+    setSelection((current) => (current.length === data.length ? [] : data.map((item) => item.account.id)));
 
   const rows = data.map((item) => {
-    const selected = selection.includes(item.id);
+    const selected = selection.includes(item.account.id);
     return (
-      <Table.Tr key={item.id} className={cx({ [classes.rowSelected]: selected })}>
+      <Table.Tr key={item.account.id} className={cx({ [classes.rowSelected]: selected })}>
         <Table.Td>
-          <Checkbox checked={selection.includes(item.id)} onChange={() => toggleRow(item.id)} />
+          <Checkbox checked={selection.includes(item.account.id)} onChange={() => toggleRow(item.account.id)} />
         </Table.Td>
         <Table.Td>
           <Group gap="sm">
-            <Avatar size={26} src={item.avatar} radius={26} />
+            <Avatar size={26} src={item.profile.avatar} radius={26} />
             <Text size="sm" fw={500}>
-              {item.name}
+              {item.account.username}
             </Text>
           </Group>
         </Table.Td>
-        <Table.Td>{item.email}</Table.Td>
-        <Table.Td>{item.job}</Table.Td>
+        <Table.Td>{item.account.mobile}</Table.Td>
+        <Table.Td>{item.account.email}</Table.Td>
       </Table.Tr>
     );
   });
@@ -152,9 +111,10 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
                         indeterminate={selection.length > 0 && selection.length !== data.length}
                       />
                     </Table.Th>
-                    <Table.Th>User</Table.Th>
+                    <Table.Th>Username</Table.Th>
+                    <Table.Th>Mobile</Table.Th>
                     <Table.Th>Email</Table.Th>
-                    <Table.Th>Job</Table.Th>
+
                   </Table.Tr>
                 </Table.Thead>
                 <Table.Tbody>{rows}</Table.Tbody>
@@ -164,7 +124,7 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
               justify="flex-end"
               direction="row"
             >
-              <Pagination total={10} />
+              <Pagination total={initialData?.totalPage||0} withEdges value={page} onChange={setPage}  siblings={2}  />
             </Flex>
           </Stack>
         </Box>
