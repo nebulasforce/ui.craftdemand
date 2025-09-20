@@ -14,17 +14,21 @@ import {
   Group,
   Table,
   ScrollArea,
-  Flex, LoadingOverlay,
+  Flex,
+  LoadingOverlay,
+  ActionIcon,
 } from '@mantine/core';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavbar } from '@/contexts/NavbarContext/NavbarContext';
 import cx from 'clsx';
 import classes from './style.module.css'
 import { mySubAccountListData } from '@/api/my/response';
 import { mySubAccountList } from '@/api/my/api'; // 导入API
 import notify from '@/utils/notify'; // 导入通知工具
-import { useRouter } from 'next/navigation'; // 导入Next.js路由钩子
+import { formatTimestamp } from '@/utils/time'
+import { useRouter } from 'next/navigation';
+import { IconEdit, IconPlus, IconTrash } from '@tabler/icons-react'; // 导入Next.js路由钩子
 
 interface SubAccountsProps {
   initialData: mySubAccountListData | null;
@@ -124,6 +128,20 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
         </Table.Td>
         <Table.Td>{item.account.mobile}</Table.Td>
         <Table.Td>{item.account.email}</Table.Td>
+        <Table.Td>{formatTimestamp(item.account.lastLogin)}</Table.Td>
+        <Table.Td>
+          <ActionIcon.Group>
+            <ActionIcon variant="light" size="md" aria-label="Add">
+              <IconPlus size={14} stroke={1.5} />
+            </ActionIcon>
+            <ActionIcon variant="light" size="md" aria-label="Edit">
+              <IconEdit size={14} stroke={1.5} />
+            </ActionIcon>
+            <ActionIcon variant="light" size="md" aria-label="Delete">
+              <IconTrash size={14} stroke={1.5} />
+            </ActionIcon>
+          </ActionIcon.Group>
+        </Table.Td>
       </Table.Tr>
     );
   });
@@ -160,7 +178,7 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
           >
             <LoadingOverlay visible={loading} />
             <ScrollArea>
-              <Table  verticalSpacing="xs">
+              <Table  verticalSpacing="xs" highlightOnHover>
                 <Table.Thead>
                   <Table.Tr>
                     <Table.Th w={40}>
@@ -173,7 +191,8 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
                     <Table.Th>Username</Table.Th>
                     <Table.Th>Mobile</Table.Th>
                     <Table.Th>Email</Table.Th>
-
+                    <Table.Th>Last Login</Table.Th>
+                    <Table.Th>Actions</Table.Th>
                   </Table.Tr>
                 </Table.Thead>
                 <Table.Tbody>
