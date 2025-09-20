@@ -13,6 +13,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="en" {...mantineHtmlProps}>
       <head>
+        <title />
         <ColorSchemeScript />
       </head>
       <body className="antialiased">

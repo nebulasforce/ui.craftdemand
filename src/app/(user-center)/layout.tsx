@@ -42,9 +42,9 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   const user = await geMe();
   return (
     <UserProvider initialUser={user}>
-    <AppShellWrapper navbarData={navbarData} user={user} >
-      {children}
-    </AppShellWrapper>
-      </UserProvider>
+      <AppShellWrapper navbarData={navbarData} user={user} >
+        {children}
+      </AppShellWrapper>
+    </UserProvider>
   );
 }

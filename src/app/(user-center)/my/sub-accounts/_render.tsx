@@ -162,9 +162,9 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
           )
         )}
       </Breadcrumbs>
-      <Paper pt="lg" pb="lg">
+      <Paper pt="xs" pb="xs">
         {/* 页面容器 - 标题 */}
-        <Box mb="lg">
+        <Box mb="md">
           <Title order={3}>Sub Accounts</Title>
           <Text size="sm" c="dimmed">
             Manage and control sub-accounts under your main account.
@@ -172,10 +172,7 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
         </Box>
         <Divider mb="lg" my="xs" variant="dashed" />
         <Box pos="relative">
-          <Stack
-            gap="lg"
-            justify="flex-end"
-          >
+          <Stack gap="lg" justify="flex-end">
             <LoadingOverlay visible={loading} />
             <ScrollArea>
               <Table  verticalSpacing="xs" highlightOnHover>

@@ -308,9 +308,9 @@ const ProfilePageRender = ({ provinces, cities }: ProfilePageProps) => {
       </Breadcrumbs>
 
       {/* 页面容器 */}
-      <Paper pt="lg" pb="lg">
+      <Paper pt="xs" pb="xs">
         {/* 页面容器 - 标题 */}
-        <Box mb="lg">
+        <Box mb="md">
           <Title order={3}>User Profile</Title>
           <Text size="sm" c="dimmed">
             Enhance your profile to let us get to know you better.

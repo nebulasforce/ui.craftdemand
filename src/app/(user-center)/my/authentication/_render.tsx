@@ -673,9 +673,9 @@ const AccountPageRender =  ({  }:AccountPageProps) => {
         )}
       </Breadcrumbs>
 
-      <Paper pt="lg" pb="lg">
+      <Paper pt="xs" pb="xs">
         {/* 页面容器 - 标题 */}
-        <Box mb="lg">
+        <Box mb="md">
           <Title order={3}>Authentication</Title>
           <Text size="sm" c="dimmed">
             Verify your identity to enhance account security and access additional features.
