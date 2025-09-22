@@ -216,6 +216,7 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
                   total={totalPage || 0}
                   withEdges
                   value={page}
+                  size="sm"
                   onChange={handlePageChange}
                   siblings={2}
                   disabled={loading || totalPage <= 1}
