@@ -1,5 +1,6 @@
 // utils/notify.tsx
 import { NotificationData, notifications } from '@mantine/notifications';
+import '@mantine/notifications/styles.css';
 import {ReactNode} from 'react';
 import { IconX, IconCheck, IconAlertTriangle, IconInfoCircle, IconBell } from '@tabler/icons-react';
 
@@ -13,6 +14,7 @@ const notify = (message: ReactNode, type: NotificationType = 'success') => {
     message,
     autoClose: 3000,
     position: 'top-center',
+    radius:'xs'
   };
 
   const colorMap: Record<NotificationType, NotificationColor> = {
