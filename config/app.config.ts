@@ -10,6 +10,7 @@ const appConfig: AppConfig = {
     title: "CraftDemand.com",
     description: "Next App Mantine Tailwind Template",
   }
+
 }
 
 export default appConfig;

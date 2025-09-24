@@ -11,6 +11,7 @@ import { me } from '@/api/my/api';
 import { User } from '@/api/my/typings';
 import notify from '@/utils/notify';
 import Cookies from 'js-cookie';
+import wsService from '@/utils/websocket';
 
 
 interface AuthContextValue {
@@ -78,7 +79,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         Cookies.set('token', accessToken, {
           expires: 24
         });
-
+        //关键步骤：通知WebSocket服务重连以使用新token
+        wsService.reconnect();
         // 获取当前用户信息
         const resp = await me();
         if (resp.success && resp.data) {

@@ -4,6 +4,7 @@ import { ColorSchemeScript, mantineHtmlProps, MantineProvider } from '@mantine/c
 import theme from '@/app/theme';
 import '@/app/globals.css';
 import { AuthProvider } from '@/contexts/AuthContext/AuthContext';
+import { WebSocketProvider } from '@/contexts/WebSocketContext/WebSocketContext';
 import React from 'react';
 import { Notifications } from '@mantine/notifications';
 import appConfig from '../../config/app.config';
@@ -26,7 +27,11 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           <Notifications position="top-center" />
           {/* 添加路由监听器 */}
           {/*<NProgressListener />*/}
-          <AuthProvider>{children}</AuthProvider>
+          <AuthProvider>
+            <WebSocketProvider>
+              {children}
+            </WebSocketProvider>
+          </AuthProvider>
         </MantineProvider>
       </body>
     </html>
