@@ -65,7 +65,7 @@ const verifyToken = async (token: string): Promise<{ valid: boolean; error: stri
 
 // 定义需要认证的受保护路由（支持通配符）
 // 所有以 /me 开头的路由都需要认证
-const protectedRoutes = ['/me/*'];
+const protectedRoutes = ['/my/*'];
 
 // 定义无需认证的公开路由（可选，用于精确排除某些路由）
 const publicRoutes = ['/auth/login', '/auth/register', '/', '/about'];

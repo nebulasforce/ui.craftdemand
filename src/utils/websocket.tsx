@@ -8,6 +8,7 @@ class Websocket {
   private socket: WebSocket | null = null;
   private listeners = new Map<string, ((data: any) => void)[]>();
   private isAuthenticated: boolean = false; // 认证状态
+  private accountId: string = '';
 
   // 私有构造函数，防止直接实例化
   private constructor() {
@@ -52,6 +53,9 @@ class Websocket {
           // 处理认证
           if (data.type === apiConfig.websocket?.authMessageTypeKey) {
             this.isAuthenticated = data.data.result || false;
+            if (this.isAuthenticated) {
+              this.accountId = data.data.accountId;
+            }
           }
           this.dispatchEvent(data.type, data);
         }
@@ -64,6 +68,7 @@ class Websocket {
     this.socket.onclose = (event) => {
       this.dispatchEvent('close', event);
       this.isAuthenticated = false;
+      this.accountId = '';
       // 自动重连
       setTimeout(() => this.connect(), 3000);
     };
@@ -95,6 +100,7 @@ class Websocket {
       this.socket = null;
     }
     this.isAuthenticated = false;
+    this.accountId = '';
   }
 
   // 订阅事件
