@@ -190,14 +190,14 @@ export function HeaderMegaMenu({ user }: HeaderMegaMenuProps) {
         onClose={closeDrawer}
         size="100%"
         padding="md"
-        title="Navigation"
+        title="Navigation1"
         hiddenFrom="sm"
         zIndex={1000000}
       >
         <ScrollArea h="calc(100vh - 80px" mx="-md">
           <Divider my="sm" />
 
-          <Link href="/" className={classes.link} passHref>
+          <Link href="/" onClick={closeDrawer} className={classes.link} passHref>
             Home
           </Link>
           <UnstyledButton className={classes.link} onClick={toggleLinks}>
@@ -209,10 +209,10 @@ export function HeaderMegaMenu({ user }: HeaderMegaMenuProps) {
             </Center>
           </UnstyledButton>
           <Collapse in={linksOpened}>{links}</Collapse>
-          <Link href="#" className={classes.link}>
+          <Link href="#" onClick={closeDrawer} className={classes.link}>
             Learn
           </Link>
-          <Link href="#" className={classes.link}>
+          <Link href="#" onClick={closeDrawer} className={classes.link}>
             Academy
           </Link>
 
@@ -223,11 +223,11 @@ export function HeaderMegaMenu({ user }: HeaderMegaMenuProps) {
               <HeaderDropdown user={userDisplay} />
             ) : (
               <>
-                <Link href="/auth/login" passHref>
-                  <Button variant="default">Log in</Button>
+                <Link  href="/auth/login" passHref>
+                  <Button onClick={closeDrawer}  variant="default">Log in</Button>
                 </Link>
                 <Link href="/auth/register" passHref>
-                  <Button>Sign up</Button>
+                  <Button onClick={closeDrawer} >Sign up</Button>
                 </Link>
               </>
             )}

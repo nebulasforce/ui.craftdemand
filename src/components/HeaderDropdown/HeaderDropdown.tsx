@@ -32,6 +32,7 @@ import {
   Drawer,
   Stack,
   Divider,
+  NavLink,
 } from '@mantine/core';
 import { useMediaQuery } from '@mantine/hooks';
 import { listGroup } from '@/api/headDropdown/api';
@@ -40,6 +41,7 @@ import { User } from '@/api/my/typings';
 import { useAuth } from '@/contexts/AuthContext/AuthContext';
 import notify from '@/utils/notify';
 import { getImageUrl } from '@/utils/path';
+import Link from 'next/link';
 
 // TablerIcon 定义Tabler图标的类型（匹配实际的ForwardRef组件类型）
 type TablerIcon = ForwardRefExoticComponent<IconProps & RefAttributes<Icon>>;
@@ -48,7 +50,7 @@ type TablerIcon = ForwardRefExoticComponent<IconProps & RefAttributes<Icon>>;
 interface DropdownItem {
   label: string; // 菜单项文本
   icon?: TablerIcon; // 菜单项图标
-  url?: string; // 菜单项链接
+  url: string; // 菜单项链接
   color?: string; // 菜单项颜色
   rightSection?: ReactNode; // 菜单项右侧内容
   onClick?: () => void; // 菜单项点击事件
@@ -163,7 +165,7 @@ export function HeaderDropdown({ user }: HeaderDropdownProps) {
   // 移动端抽屉内容
   const renderDrawerContent = () => (
     <Stack gap="md">
-      <Group>
+      <Group align="center">
         <Avatar
           src={getImageUrl(user.profile.avatar) || '/avatar_default.png'}
           radius="xl"
@@ -192,37 +194,27 @@ export function HeaderDropdown({ user }: HeaderDropdownProps) {
           )}
 
           {/* 渲染分组内的菜单项 */}
-          <Stack gap={4}>
+          <Stack gap="1">
             {menuGroup.items.map((item, itemIndex) => (
-              <UnstyledButton
+              <NavLink
                 key={`item-${groupIndex}-${itemIndex}`}
-                component={item.url ? 'a' : 'div'}
-                href={item.url ? item.url : undefined}
+                component={Link}
+                href={item.url ? item.url : {}}
+                label={item.label}
                 c={item.color}
                 onClick={item.onClick}
                 py="xs"
                 px="sm"
-                style={{
-                  borderRadius: theme.radius.sm,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: theme.spacing.sm,
-                  '&:hover': {
-                    backgroundColor: theme.colors.gray[1],
-                  }
-                }}
-              >
-                {item.icon && <item.icon size={18} />}
-                <Text size="sm">{item.label}</Text>
-                {item.rightSection && (
-                  <Box ml="auto">{item.rightSection}</Box>
-                )}
-              </UnstyledButton>
+                // 左侧图标（NavLink原生支持，无需手动嵌套）
+                leftSection={item.icon ? <item.icon size={18} /> : null}
+                // 右侧内容
+                rightSection={item.rightSection || null}
+               />
             ))}
           </Stack>
 
           {/* 渲染分隔线（如果需要） */}
-          {menuGroup.isDivider && <Divider key={`divider-${groupIndex}`} my="sm" />}
+          {menuGroup.isDivider && <Divider key={`divider-${groupIndex}`} my="0"/>}
         </Fragment>
       ))}
     </Stack>
@@ -232,9 +224,20 @@ export function HeaderDropdown({ user }: HeaderDropdownProps) {
   const userInfoSection = (
     <UnstyledButton
       onClick={() => isMobile && setDrawerOpened(true)}
-      style={{ width: isMobile ? '100%' : 'auto' }}
+      style={{
+        width: isMobile ? '100%' : 'auto',
+        display: 'flex',
+        alignItems: 'center' // 确保按钮自身内容垂直居中
+      }}
     >
-      <Group>
+      <Group
+        align="center"
+        justify="flex-start"
+        style={{
+          float: 'left',
+          height: '100%',
+        }} // 占满按钮高度，确保垂直居中生效
+      >
         <Avatar
           src={getImageUrl(user.profile.avatar) || '/avatar_default.png'}
           radius="xl"
@@ -271,8 +274,8 @@ export function HeaderDropdown({ user }: HeaderDropdownProps) {
                 {menuGroup.items.map((item, itemIndex) => (
                   <Menu.Item
                     key={`item-${groupIndex}-${itemIndex}`}
-                    component={item.url ? 'a' : undefined}
-                    href={item.url ? item.url : undefined}
+                    component={item.url ? Link : undefined}
+                    href={item.url ? item.url : {}}
                     color={item.color as any}
                     onClick={item.onClick}
                     leftSection={item.icon ? <item.icon size={14} /> : null}
