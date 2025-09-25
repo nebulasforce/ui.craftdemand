@@ -4,7 +4,8 @@ export interface ApiConfig {
   timeout?: number;
   withCredentials?: boolean;
   websocket?: {
-    default: string
+    endpoint: string;
+    authMessageTypeKey: string;
   }
 }
 
@@ -17,7 +18,8 @@ const configs: Record<string, ApiConfig> = {
     timeout: 10000,
     withCredentials: false,
     websocket: {
-      default: 'ws://localhost:50000/api/v1/ws',
+      endpoint: 'ws://localhost:50000/api/v1/ws',
+      authMessageTypeKey:'authenticate', // 定义在服务端internal/application/objects/dto/ws/ws.go
     }
   },
   test: {
@@ -25,7 +27,8 @@ const configs: Record<string, ApiConfig> = {
     timeout: 10000,
     withCredentials: false,
     websocket: {
-      default: 'ws://test-api.yourdomain.com/api/v1/ws',
+      endpoint: 'ws://test-api.yourdomain.com/api/v1/ws',
+      authMessageTypeKey:'authenticate', // 定义在服务端internal/application/objects/dto/ws/ws.go
     }
   },
   production: {
@@ -33,7 +36,8 @@ const configs: Record<string, ApiConfig> = {
     timeout: 15000,
     withCredentials: false,
     websocket: {
-      default: 'ws://api.yourdomain.com/api/v1/ws',
+      endpoint: 'ws://api.yourdomain.com/api/v1/ws',
+      authMessageTypeKey:'authenticate', // 定义在服务端internal/application/objects/dto/ws/ws.go
     }
   },
 };
