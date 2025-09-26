@@ -9,6 +9,7 @@ class Websocket {
   private listeners = new Map<string, ((data: any) => void)[]>();
   private isAuthenticated: boolean = false; // 认证状态
   private accountId: string = '';
+  private expires: number = 0;
 
   // 私有构造函数，防止直接实例化
   private constructor() {
@@ -29,18 +30,20 @@ class Websocket {
       return; // 已连接则直接返回
     }
     // 安全起见，url中不再携带token
-    const endpoint = apiConfig.websocket?.endpoint || 'ws://localhost:50000/api/v1/ws';
-    // const token = localStorage.getItem('token');
-    // if (token) {
-    //   endpoint = `${endpoint}?token=${token}`;
-    // }
+    let endpoint = apiConfig.websocket?.endpoint || 'ws://localhost:50000/api/v1/ws';
+    if (this.isAuthenticated && this.accountId) {
+      endpoint = `${endpoint}?accountId=${this.accountId}`;
+    }
     this.socket = new WebSocket(endpoint);
 
     // 连接打开时
     this.socket.onopen = () => {
       this.dispatchEvent('open', null);
       // 建立连接后立马发送认证消息
-      this.authenticate()
+      const now = Math.floor(Date.now() / 1000)
+      if (!this.isAuthenticated || (now - this.expires > 0)) { // 未认证则认证
+        this.authenticate()
+      }
     };
 
     // 接收消息时
@@ -53,8 +56,10 @@ class Websocket {
           // 处理认证
           if (data.type === apiConfig.websocket?.authMessageTypeKey) {
             this.isAuthenticated = data.data.result || false;
-            if (this.isAuthenticated) {
+            if (this.isAuthenticated) { // 认证成功
               this.accountId = data.data.accountId;
+              this.expires = data.data.expires;
+             this.reconnect() // 重连
             }
           }
           this.dispatchEvent(data.type, data);
@@ -67,8 +72,6 @@ class Websocket {
     // 连接关闭时
     this.socket.onclose = (event) => {
       this.dispatchEvent('close', event);
-      this.isAuthenticated = false;
-      this.accountId = '';
       // 自动重连
       setTimeout(() => this.connect(), 3000);
     };
@@ -82,6 +85,12 @@ class Websocket {
   public reconnect(): void {
     if (this.socket) {
       this.socket.close();
+    }
+    const token = localStorage.getItem('token');
+    if (!token) { // 未登录.清空部分标识信息
+      this.accountId = '';
+      this.expires = 0;
+      this.isAuthenticated = false;
     }
     this.connect(); // 调用connect会自动使用最新的token
   }
@@ -99,8 +108,6 @@ class Websocket {
       this.socket.close();
       this.socket = null;
     }
-    this.isAuthenticated = false;
-    this.accountId = '';
   }
 
   // 订阅事件
@@ -126,7 +133,7 @@ class Websocket {
 
   private authenticate() {
     const token = localStorage.getItem('token');
-    if (token && this.socket && this.socket.readyState === WebSocket.OPEN && (!this.isAuthenticated)) { //
+    if (token && this.socket && this.socket.readyState === WebSocket.OPEN) { //
       const message:authenticateRequest = {
         type: apiConfig.websocket?.authMessageTypeKey || 'authenticate',
         data: {

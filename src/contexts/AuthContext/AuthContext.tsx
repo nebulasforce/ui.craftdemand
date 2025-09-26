@@ -119,12 +119,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const logoutFunc = async () => {
     try {
       await logout();
-      wsService.reconnect();
+
       // 清除本地存储和状态
       setUser(null);
       setIsAuthenticated(false);
       removeStored()
-
+      wsService.reconnect();
       notify('Logged out Successfully', 'success');
       router.push('/');
     } catch (error) {
