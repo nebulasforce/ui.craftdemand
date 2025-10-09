@@ -1,37 +1,54 @@
 'use client';
+
+import React, { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { IconChevronDown, IconChevronUp, IconEdit, IconPlus, IconSearch, IconTrash, IconX } from '@tabler/icons-react';
+// 导入Next.js路由钩子
+import cx from 'clsx';
 import {
+  ActionIcon,
   Anchor,
+  Avatar,
   Box,
-  Stack,
   Breadcrumbs,
+  Button,
+  Checkbox,
+  Collapse,
   Divider,
+  Flex,
+  Grid,
+  Group,
+  LoadingOverlay,
   Pagination,
   Paper,
-  Text,
-  Title,
-  Avatar,
-  Checkbox,
-  Group,
-  Table,
   ScrollArea,
-  Flex,
-  LoadingOverlay,
-  ActionIcon,
+  Select,
+  SimpleGrid,
+  Stack,
+  Table,
+  Text,
+  TextInput,
+  Title,
 } from '@mantine/core';
-import Link from 'next/link';
-import React, { useEffect, useState } from 'react';
-import { useNavbar } from '@/contexts/NavbarContext/NavbarContext';
-import cx from 'clsx';
-import classes from './style.module.css'
-import { mySubAccountListData } from '@/api/my/response';
 import { mySubAccountList } from '@/api/my/api'; // 导入API
+import { mySubAccountListData } from '@/api/my/response';
+import { useNavbar } from '@/contexts/NavbarContext/NavbarContext';
 import notify from '@/utils/notify'; // 导入通知工具
-import { formatTimestamp } from '@/utils/time'
-import { useRouter } from 'next/navigation';
-import { IconEdit, IconPlus, IconTrash } from '@tabler/icons-react'; // 导入Next.js路由钩子
+import { formatTimestamp } from '@/utils/time';
+import classes from './style.module.css';
+
 
 interface SubAccountsProps {
   initialData: mySubAccountListData | null;
+}
+
+// 定义高级搜索条件接口
+interface AdvancedSearchFilters {
+  username: string;
+  mobile: string;
+  email: string;
+  status: string;
 }
 
 const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
@@ -48,6 +65,18 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
   // 面包屑
   const items = [{ title: 'Home', href: '/' }, { title: 'Sub Accounts' }];
 
+  // 基础搜索状态
+  const [searchKeyword, setSearchKeyword] = useState('');
+  const [searchTimer, setSearchTimer] = useState<NodeJS.Timeout | null>(null);
+
+  // 高级搜索状态
+  const [advancedSearchOpen, setAdvancedSearchOpen] = useState(false);
+  const [advancedFilters, setAdvancedFilters] = useState<AdvancedSearchFilters>({
+    username: '',
+    mobile: '',
+    email: '',
+    status: '',
+  });
 
   // 状态管理
   const [data, setData] = useState(initialData?.lists || []);
@@ -86,20 +115,30 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
     return `${start}-${end} of ${count}`;
   };
 
-  // 处理分页变化
-  const handlePageChange = async (newPage: number) => {
-    if (newPage === page || loading) {return;}
+  // 数据加载方法，同时支持基础搜索和高级搜索
+  const loadData = async (newPage?: number) => {
+    const currentPage = newPage ?? page;
 
     setLoading(true);
     try {
-      const response = await mySubAccountList({ page: newPage,pageSize });
+      // 构建搜索参数 - 优先使用高级搜索条件，如果有值的话
+      const searchParams = {
+        page: currentPage,
+        pageSize,
+        // 如果使用高级搜索且有字段填写，则不使用基础搜索关键词
+        keyword: advancedSearchOpen && Object.values(advancedFilters).some(v => v)
+          ? ''
+          : searchKeyword,
+        ...(advancedSearchOpen ? advancedFilters : {})
+      };
+
+      const response = await mySubAccountList(searchParams);
       if (response.code === 0 && response.data) {
-        setPage(newPage);
+        setPage(currentPage);
         setData(response.data.lists || []);
         setTotalPage(response.data.totalPage || 0);
         setCount(response.data.count || 0);
-        setSelection([]); // 清空选择状态
-        // 滚动到表格顶部
+        setSelection([]);
         window.scrollTo({ top: 0, behavior: 'smooth' });
       } else {
         notify(response.message || 'Failed to load data', 'error');
@@ -109,6 +148,11 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
     } finally {
       setLoading(false);
     }
+  };
+
+  // 处理分页变化
+  const handlePageChange = async (newPage: number) => {
+    await loadData(newPage);
   };
 
   const rows = data.map((item) => {
@@ -146,6 +190,45 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
     );
   });
 
+// 处理高级搜索字段变化
+  const handleAdvancedFilterChange = (field: keyof AdvancedSearchFilters, value: string) => {
+    setAdvancedFilters(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  // 重置高级搜索条件
+  const resetAdvancedFilters = () => {
+    setAdvancedFilters({
+      username: '',
+      mobile: '',
+      email: '',
+      status: '',
+    });
+  };
+
+  // 处理基础搜索输入
+  const handleSearchChange = (value: string) => {
+    // 清除之前的计时器
+    if (searchTimer) {
+      clearTimeout(searchTimer);
+    }
+
+    setSearchKeyword(value);
+
+    // 设置新的防抖计时器
+    setSearchTimer(setTimeout(() => {
+      // 搜索时重置到第一页
+      loadData(1).then();
+    }, 500)); // 500ms防抖
+  };
+
+  // 处理高级搜索提交
+  const handleAdvancedSearch = () => {
+    loadData(1).then();
+  };
+
   return (
     <Box>
       {/* 面包屑 */}
@@ -171,6 +254,101 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
           </Text>
         </Box>
         <Divider mb="lg" my="xs" variant="dashed" />
+        <Grid
+          gutter="md"
+          mb="lg"
+        >
+          <Grid.Col span={{ base: 12, sm: 9 }}>
+            {/* 基础搜索组件 */}
+            <Box mb="lg">
+              <TextInput
+                placeholder="Search by username, mobile or email..."
+                value={searchKeyword}
+                onChange={(e) => handleSearchChange(e.target.value)}
+                leftSection={<IconSearch size={16} stroke={1.5} />}
+                rightSection={
+                  searchKeyword && (
+                    <ActionIcon
+                      variant="default"
+                      size="sm"
+                      onClick={() => handleSearchChange('')}
+                      aria-label="Clear search"
+                    >
+                      <IconX size={14} stroke={1.5} />
+                    </ActionIcon>
+                  )
+                }
+                radius="md"
+                disabled={loading}
+              />
+            </Box>
+          </Grid.Col>
+
+          <Grid.Col  span={{ base: 12, sm: 3 }} >
+            {/* 高级搜索切换按钮 */}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setAdvancedSearchOpen(!advancedSearchOpen)}
+              leftSection={advancedSearchOpen ? <IconChevronUp size={16} /> : <IconChevronDown size={16} />}
+              mb="md"
+              fullWidth
+            >
+              {advancedSearchOpen ? 'Hide Advanced Search' : 'Advanced Search'}
+            </Button>
+          </Grid.Col>
+        </Grid>
+
+        {/* 高级搜索部分 - 可折叠 */}
+        <Collapse in={advancedSearchOpen} transitionDuration={200}>
+          <Paper p="md" mb="lg" withBorder>
+            <Title order={5} mb="md">Advanced Filters</Title>
+            <SimpleGrid cols={{ base: 1, sm: 2, md: 4 }} spacing="md">
+              <TextInput
+                label="Username"
+                value={advancedFilters.username}
+                onChange={(e) => handleAdvancedFilterChange('username', e.target.value)}
+                placeholder="Search by username"
+                disabled={loading}
+              />
+              <TextInput
+                label="Mobile"
+                value={advancedFilters.mobile}
+                onChange={(e) => handleAdvancedFilterChange('mobile', e.target.value)}
+                placeholder="Search by mobile number"
+                disabled={loading}
+              />
+              <TextInput
+                label="Email"
+                value={advancedFilters.email}
+                onChange={(e) => handleAdvancedFilterChange('email', e.target.value)}
+                placeholder="Search by email"
+              />
+              <Select
+                label="Status"
+                value={advancedFilters.status}
+                onChange={(value) => handleAdvancedFilterChange('status', value || '')}
+                placeholder="Select status"
+                data={[
+                  { value: 'active', label: 'Active' },
+                  { value: 'inactive', label: 'Inactive' },
+                  { value: 'suspended', label: 'Suspended' },
+                ]}
+                disabled={loading}
+              />
+            </SimpleGrid>
+
+            <Group gap="sm" mt="md" justify="flex-end">
+              <Button variant="ghost" onClick={resetAdvancedFilters} disabled={loading}>
+                Reset
+              </Button>
+              <Button onClick={handleAdvancedSearch} disabled={loading}>
+                Apply Filters
+              </Button>
+            </Group>
+          </Paper>
+        </Collapse>
+        <Divider mb="lg" my="xs" variant="dashed" />
         <Box pos="relative">
           <Stack gap="lg" justify="flex-end">
             <LoadingOverlay visible={loading} />
@@ -185,10 +363,10 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
                         indeterminate={selection.length > 0 && selection.length !== data.length}
                       />
                     </Table.Th>
-                    <Table.Th>Username</Table.Th>
+                    <Table.Th miw={150}>Username</Table.Th>
                     <Table.Th>Mobile</Table.Th>
                     <Table.Th>Email</Table.Th>
-                    <Table.Th>Last Login</Table.Th>
+                    <Table.Th miw={180}>Last Login</Table.Th>
                     <Table.Th>Actions</Table.Th>
                   </Table.Tr>
                 </Table.Thead>
