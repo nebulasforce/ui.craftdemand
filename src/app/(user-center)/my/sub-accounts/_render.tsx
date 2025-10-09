@@ -254,13 +254,9 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
           </Text>
         </Box>
         <Divider mb="lg" my="xs" variant="dashed" />
-        <Grid
-          gutter="md"
-          mb="lg"
-        >
-          <Grid.Col span={{ base: 12, sm: 9 }}>
-            {/* 基础搜索组件 */}
-            <Box mb="lg">
+        <Grid>
+          <Grid.Col  span={{ base: 12, sm: 9 }} mb="xs">
+              {/* 基础搜索组件 */}
               <TextInput
                 placeholder="Search by username, mobile or email..."
                 value={searchKeyword}
@@ -281,22 +277,19 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
                 radius="md"
                 disabled={loading}
               />
-            </Box>
-          </Grid.Col>
-
-          <Grid.Col  span={{ base: 12, sm: 3 }} >
-            {/* 高级搜索切换按钮 */}
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setAdvancedSearchOpen(!advancedSearchOpen)}
-              leftSection={advancedSearchOpen ? <IconChevronUp size={16} /> : <IconChevronDown size={16} />}
-              mb="md"
-              fullWidth
-            >
-              {advancedSearchOpen ? 'Hide Advanced Search' : 'Advanced Search'}
-            </Button>
-          </Grid.Col>
+            </Grid.Col>
+          <Grid.Col  span={{ base: 12, sm: 3 }} mb="xs">
+              {/* 高级搜索切换按钮 */}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setAdvancedSearchOpen(!advancedSearchOpen)}
+                leftSection={advancedSearchOpen ? <IconChevronUp size={16} /> : <IconChevronDown size={16} />}
+                fullWidth
+              >
+                {advancedSearchOpen ? 'Hide Advanced Search' : 'Advanced Search'}
+              </Button>
+            </Grid.Col>
         </Grid>
 
         {/* 高级搜索部分 - 可折叠 */}
