@@ -13,7 +13,6 @@ import notify from '@/utils/notify';
 import Cookies from 'js-cookie';
 import wsService from '@/utils/websocket';
 
-
 interface AuthContextValue {
   user: User | null;
   isLoading: boolean;

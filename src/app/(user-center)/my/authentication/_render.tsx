@@ -50,7 +50,6 @@ import {
   sendMobileVerifiedCodeRequest,
 } from '@/api/my/request';
 
-
 // sendMobileVerificationCode 假设这里有发送验证码的函数
 const sendMobileVerificationCode = async (mobile: string) => {
   try {
@@ -690,7 +689,10 @@ const AccountPageRender =  ({  }:AccountPageProps) => {
                 <Grid.Col  span={{ base: 10, md: 10, lg: 6, xl: 6 }} >
                   <Text  size="sm">Username</Text>
                   <Text size="sm" c="dimmed">
-                    Username can only be set once:  <Space w="md" component="span" /> <b>{user?.account?.username}</b>
+                    Username can only be set once:  <Space w="md" component="span" />
+                    <Text inherit c="blue" fw={700} component="span">
+                      {user?.account?.username}
+                    </Text>
                   </Text>
                 </Grid.Col>
                 <Grid.Col display="flex"  span={{ base: 2, md: 2, lg: 2, xl: 2 }}>
@@ -736,7 +738,10 @@ const AccountPageRender =  ({  }:AccountPageProps) => {
                 <Grid.Col  span={{ base: 10, md: 10, lg: 6, xl: 6 }} >
                   <Text  size="sm">Email</Text>
                   <Text size="sm" c="dimmed">
-                    Your email is {emailActive? 'verified':'unverified'}:  <Space w="md" component="span" /> <b>{user?.account?.email}</b>
+                    Your email is {emailActive? 'verified':'unverified'}:  <Space w="md" component="span" />
+                    <Text inherit c="blue" component="span">
+                      <b>{user?.account?.email}</b>
+                    </Text>
                   </Text>
                 </Grid.Col>
                 <Grid.Col display="flex"  span={{ base: 2, md: 2, lg: 2, xl: 2 }}>
@@ -759,7 +764,10 @@ const AccountPageRender =  ({  }:AccountPageProps) => {
                 <Grid.Col  span={{ base: 10, md: 10, lg: 6, xl: 6 }} >
                   <Text  size="sm">Mobile Number</Text>
                   <Text size="sm" c="dimmed">
-                    Your mobile number is {mobileActive? 'verified':'unverified'}:  <Space w="md" component="span" /> <b>{user?.account?.mobile}</b>
+                    Your mobile number is {mobileActive? 'verified':'unverified'}:  <Space w="md" component="span" />
+                    <Text inherit c="blue" component="span">
+                      <b>{user?.account?.mobile}</b>
+                    </Text>
                   </Text>
                 </Grid.Col>
                 <Grid.Col span={{ base: 2, md: 2, lg: 2, xl: 2 }}>
