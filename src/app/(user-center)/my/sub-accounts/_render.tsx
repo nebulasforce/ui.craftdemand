@@ -173,6 +173,7 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
         <Table.Td>{item.account.mobile}</Table.Td>
         <Table.Td>{item.account.email}</Table.Td>
         <Table.Td>{formatTimestamp(item.account.lastLogin)}</Table.Td>
+        <Table.Td>{item.account.status}</Table.Td>
         <Table.Td>
           <ActionIcon.Group>
             <ActionIcon variant="light" size="md" aria-label="Add">
@@ -360,6 +361,7 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
                     <Table.Th>Mobile</Table.Th>
                     <Table.Th>Email</Table.Th>
                     <Table.Th miw={180}>Last Login</Table.Th>
+                    <Table.Th>Status</Table.Th>
                     <Table.Th>Actions</Table.Th>
                   </Table.Tr>
                 </Table.Thead>
