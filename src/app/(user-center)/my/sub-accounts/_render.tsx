@@ -43,6 +43,35 @@ interface SubAccountsProps {
   initialData: mySubAccountListData | null;
 }
 
+// 定义状态项接口
+interface statusItem {
+  label: string;
+  color: string;
+}
+
+const statusMap:{[key:number]:statusItem} = {
+  0: { label: 'Active', color: 'green' },
+  1: { label: 'Disabled', color: 'orange' },
+  2: { label: 'Deleted', color: 'red' },
+}
+// 状态选项数据 - 用于下拉选择器
+const statusOptions = Object.entries(statusMap).map(([value, { label }]) => ({
+  value,
+  label,
+}));
+
+// 获取状态显示文本
+const getStatusLabel = (status: number | string) => {
+  const statusNumber = typeof status === 'string' ? parseInt(status, 10) : status;
+  return statusMap[statusNumber]?.label || '未知';
+};
+
+// 获取状态显示颜色
+const getStatusColor = (status: number | string) => {
+  const statusNumber = typeof status === 'string' ? parseInt(status, 10) : status;
+  return statusMap[statusNumber]?.color || 'gray';
+};
+
 // 定义高级搜索条件接口
 interface AdvancedSearchFilters {
   username: string;
@@ -50,6 +79,8 @@ interface AdvancedSearchFilters {
   email: string;
   status: string;
 }
+
+
 
 const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
   const { setActive, setSection } = useNavbar();
@@ -121,16 +152,29 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
 
     setLoading(true);
     try {
-      // 构建搜索参数 - 优先使用高级搜索条件，如果有值的话
-      const searchParams = {
+      // 先构建基础参数
+      const baseParams = {
         page: currentPage,
         pageSize,
-        // 如果使用高级搜索且有字段填写，则不使用基础搜索关键词
-        keyword: advancedSearchOpen && Object.values(advancedFilters).some(v => v)
-          ? ''
-          : searchKeyword,
-        ...(advancedSearchOpen ? advancedFilters : {})
       };
+
+      // 动态构建搜索参数
+      const searchParams: Record<string, any> = { ...baseParams };
+
+      // 只有在非高级搜索或高级搜索无有效字段时，才添加keyword（且keyword有值）
+      const useKeyword = !(advancedSearchOpen && Object.values(advancedFilters).some(v => v));
+      if (useKeyword && searchKeyword) {
+        searchParams.keyword = searchKeyword;
+      }
+
+      // 添加高级搜索参数（只包含有值的字段）
+      if (advancedSearchOpen) {
+        Object.entries(advancedFilters).forEach(([key, value]) => {
+          if (value) {
+            searchParams[key] = value;
+          }
+        });
+      }
 
       const response = await mySubAccountList(searchParams);
       if (response.code === 0 && response.data) {
@@ -173,7 +217,11 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
         <Table.Td>{item.account.mobile}</Table.Td>
         <Table.Td>{item.account.email}</Table.Td>
         <Table.Td>{formatTimestamp(item.account.lastLogin)}</Table.Td>
-        <Table.Td>{item.account.status}</Table.Td>
+        <Table.Td>
+          <Text c={getStatusColor(item.account.status)}>
+            {getStatusLabel(item.account.status)}
+          </Text>
+        </Table.Td>
         <Table.Td>
           <ActionIcon.Group>
             <ActionIcon variant="light" size="md" aria-label="Add">
@@ -323,11 +371,7 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
                 value={advancedFilters.status}
                 onChange={(value) => handleAdvancedFilterChange('status', value || '')}
                 placeholder="Select status"
-                data={[
-                  { value: 'active', label: 'Active' },
-                  { value: 'inactive', label: 'Inactive' },
-                  { value: 'suspended', label: 'Suspended' },
-                ]}
+                data={statusOptions}
                 disabled={loading}
               />
             </SimpleGrid>
