@@ -18,6 +18,7 @@ const getInitialStateFromPath = (
   pathname: string,
   navbarData: navbarGroupData
 ): { section: SectionType; active: string } => {
+
   // 遍历所有 section
   for (const [section, items] of Object.entries(navbarData) as [SectionType, any[]][]) {
     // 查找当前路径匹配的导航项

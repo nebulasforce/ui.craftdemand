@@ -136,7 +136,11 @@ const AccountPageRender =  ({  }:AccountPageProps) => {
   }
   const [mobileActive,setMobileActive] = useState<boolean>(hasMobileActive());
 
-  const items = [{ title: 'Home', href: '/' }, { title: 'Authentication' }];
+  const items = [
+    { title: 'Home', href: '/' },
+    { title: 'Account' },
+    { title: 'Authentication' }
+  ];
   useEffect(() => {
     setSection('Account');
     setActive('Authentication');

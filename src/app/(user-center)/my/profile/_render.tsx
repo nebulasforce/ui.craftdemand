@@ -232,7 +232,11 @@ const ProfilePageRender = ({ provinces, cities }: ProfilePageProps) => {
     }
   }, [file]);
 
-  const items = [{ title: 'Home', href: '/' }, { title: 'User Profile' }];
+  const items = [
+    { title: 'Home', href: '/' },
+    { title: 'Account' },
+    { title: 'User Profile' }
+  ];
 
   const form = useForm({
     initialValues: {

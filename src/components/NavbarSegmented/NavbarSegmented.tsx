@@ -67,6 +67,8 @@ export function NavbarSegmented({ data }: NavbarSegmentedProps) {
   const [segments, setSegments] = useState<{ label: string; value: SectionType }[]>(
     generateSegments(data)
   );
+  // 将usePathname移到组件顶层调用
+  const pathname = usePathname(); // 这里是正确的位置
 
   const { active, setActive, section, setSection } = useNavbar();
   const { logout } = useAuth();
@@ -87,7 +89,7 @@ export function NavbarSegmented({ data }: NavbarSegmentedProps) {
         .map((item) => {
           const IconComponent = iconMap[item.icon as keyof typeof iconMap] || (() => null);
           // 即使 active 为空，也基于 item.url 和当前路由判断是否激活（双重保障）
-          const isActive = active === item.name || usePathname().startsWith(item.url);
+          const isActive = active === item.name || pathname.startsWith(item.url);
           return (
             <Link
               className={classes.link}

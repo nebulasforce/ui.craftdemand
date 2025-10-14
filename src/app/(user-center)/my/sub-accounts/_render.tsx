@@ -94,7 +94,11 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
 
 
   // 面包屑
-  const items = [{ title: 'Home', href: '/' }, { title: 'Sub Accounts' }];
+  const items = [
+    { title: 'Home', href: '/' },
+    { title: 'Account' },
+    { title: 'Sub Accounts' }
+  ];
 
   // 基础搜索状态
   const [searchKeyword, setSearchKeyword] = useState('');
