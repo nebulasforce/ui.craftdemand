@@ -1,3 +1,7 @@
 .rowSelected {
     background-color: var(--mantine-color-blue-light);
 }
+
+.classes {
+    text-align: center;
+}

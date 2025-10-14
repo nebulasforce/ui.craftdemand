@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Avatar, Checkbox, Group, Table, Title, Text, ScrollArea } from '@mantine/core';
+import { Avatar, Checkbox, Group, Table, Text, ScrollArea } from '@mantine/core';
 import { useNavbar } from '@/contexts/NavbarContext/NavbarContext';
 import cx from 'clsx';
 import classes from './style.css';
