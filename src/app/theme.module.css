@@ -1,0 +1,17 @@
+
+.root {
+    &[data-variant='danger'] {
+        background-color: var(--mantine-color-red-9);
+        color: var(--mantine-color-red-0);
+
+        &:hover {
+            background-color: var(--mantine-color-red-8);
+        }
+
+        &[data-disabled] {
+            opacity: 0.7;
+            background-color: var(--mantine-color-red-9);
+            filter: brightness(0.8); /* 颜色变暗关键属性 */
+        }
+    }
+}

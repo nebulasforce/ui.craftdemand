@@ -228,9 +228,6 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
         </Table.Td>
         <Table.Td>
           <ActionIcon.Group>
-            <ActionIcon variant="light" size="md" aria-label="Add">
-              <IconPlus size={14} stroke={1.5} />
-            </ActionIcon>
             <ActionIcon variant="light" size="md" aria-label="Edit">
               <IconEdit size={14} stroke={1.5} />
             </ActionIcon>
@@ -391,6 +388,32 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
           </Paper>
         </Collapse>
         <Divider mb="lg" my="xs" variant="dashed" />
+
+        <SimpleGrid mb="sm">
+          <Flex
+            justify="flex-end"
+            align="center"
+            direction="row"
+          >
+            <Group>
+              <Button
+                variant="danger"
+                leftSection={<IconTrash size={16} stroke={1.5} />}
+                disabled={selection.length === 0 || loading}
+              >
+                Delete Selected
+              </Button>
+              <Button
+                leftSection={<IconPlus size={16} stroke={1.5} />}
+                disabled={loading}
+              >
+                Add Sub Account
+              </Button>
+            </Group>
+          </Flex>
+        </SimpleGrid>
+
+
         <Box pos="relative">
           <Stack gap="lg" justify="flex-end">
             <LoadingOverlay visible={loading} />

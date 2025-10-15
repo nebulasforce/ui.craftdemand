@@ -1,38 +1,21 @@
-import {
-  ForwardRefExoticComponent,
-  Fragment,
-  ReactNode,
-  RefAttributes,
-  useEffect,
-  useState,
-} from 'react';
-import {
-  IconArrowsLeftRight,
-  IconChevronRight,
-  IconLogout,
-  IconMessageCircle,
-  IconPhoto,
-  IconSearch,
-  IconSettings,
-  IconUser,
-  IconUserCog,
-  type Icon,
-  type IconProps,
-} from '@tabler/icons-react';
+import { ForwardRefExoticComponent, Fragment, ReactNode, RefAttributes, useEffect, useState } from 'react';
+import Link from 'next/link';
+import { IconArrowsLeftRight, IconChevronRight, IconLogout, IconMessageCircle, IconPhoto, IconSearch, IconSettings, IconUser, IconUserCog, type Icon, type IconProps } from '@tabler/icons-react';
 import {
   Avatar,
   Box,
+  Divider,
+  Drawer,
+  em,
   Group,
+  Kbd,
   LoadingOverlay,
   Menu,
+  NavLink,
+  Stack,
   Text,
   UnstyledButton,
   useMantineTheme,
-  em,
-  Drawer,
-  Stack,
-  Divider,
-  NavLink,
 } from '@mantine/core';
 import { useMediaQuery } from '@mantine/hooks';
 import { listGroup } from '@/api/headDropdown/api';
@@ -41,7 +24,7 @@ import { User } from '@/api/my/typings';
 import { useAuth } from '@/contexts/AuthContext/AuthContext';
 import notify from '@/utils/notify';
 import { getImageUrl } from '@/utils/path';
-import Link from 'next/link';
+
 
 // TablerIcon 定义Tabler图标的类型（匹配实际的ForwardRef组件类型）
 type TablerIcon = ForwardRefExoticComponent<IconProps & RefAttributes<Icon>>;
@@ -68,6 +51,25 @@ export interface HeaderDropdownProps {
   user: User;
   dropdowns?: DropdownGroup[];
 }
+
+
+// 转换函数：将逗号分隔的按键字符串转为<Kbd>组件组合
+const convertKeysToKbd = (keysString?: string): ReactNode => {
+  if (!keysString) {return null;}
+
+  // 分割字符串并过滤空值
+  const keys = keysString.split(',').map(key => key.trim()).filter(Boolean);
+
+  if (keys.length === 0) {return null;}
+
+  // 生成<Kbd>组件数组，用+连接
+  return keys.map((key, index) => (
+    <Fragment key={key}>
+      <Kbd size="xs">{key}</Kbd>
+      {index < keys.length - 1 && <span className="mx-1">+</span>}
+    </Fragment>
+  ));
+};
 
 export function HeaderDropdown({ user }: HeaderDropdownProps) {
   const [data, setData] = useState<listGroupData>();
@@ -144,7 +146,7 @@ export function HeaderDropdown({ user }: HeaderDropdownProps) {
           icon: IconComponent,
           url: item.url,
           color: item.color || undefined,
-          rightSection: item.rightSection || undefined,
+          rightSection: convertKeysToKbd(item.rightSection) || undefined,
           onClick: handleEvent ? () => {
             handleEvent();
             setDrawerOpened(false);

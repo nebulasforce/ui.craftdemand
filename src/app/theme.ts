@@ -1,6 +1,11 @@
-import { createTheme } from '@mantine/core';
-
+import {  createTheme } from '@mantine/core';
+import classes from './theme.module.css';
 const theme = createTheme({
+  components: {
+    Button: {
+      classNames: classes
+    }
+  },
   breakpoints: {
     xs: "36em",
     sm: "48em",
@@ -21,6 +26,6 @@ const theme = createTheme({
       "#003a8c",
       "#002766",
     ],
-  },
+  }
 });
 export default theme;
