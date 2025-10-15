@@ -6,7 +6,8 @@ export interface ApiConfig {
   websocket?: {
     endpoint: string;
     authMessageTypeKey: string;
-  }
+    notificationTypeKey: string;
+  };
 }
 
 // 根据不同环境导出不同配置
@@ -19,8 +20,9 @@ const configs: Record<string, ApiConfig> = {
     withCredentials: false,
     websocket: {
       endpoint: 'ws://localhost:50000/api/v1/ws',
-      authMessageTypeKey:'authenticate', // 定义在服务端internal/application/objects/dto/ws/ws.go
-    }
+      authMessageTypeKey: 'authenticate', // 定义在服务端internal/application/objects/dto/ws/ws.go
+      notificationTypeKey: 'notification',
+    },
   },
   test: {
     baseURL: 'https://test-api.yourdomain.com',
@@ -28,8 +30,9 @@ const configs: Record<string, ApiConfig> = {
     withCredentials: false,
     websocket: {
       endpoint: 'ws://test-api.yourdomain.com/api/v1/ws',
-      authMessageTypeKey:'authenticate', // 定义在服务端internal/application/objects/dto/ws/ws.go
-    }
+      authMessageTypeKey: 'authenticate', // 定义在服务端internal/application/objects/dto/ws/ws.go
+      notificationTypeKey: 'notification',
+    },
   },
   production: {
     baseURL: 'https://api.yourdomain.com',
@@ -37,8 +40,9 @@ const configs: Record<string, ApiConfig> = {
     withCredentials: false,
     websocket: {
       endpoint: 'ws://api.yourdomain.com/api/v1/ws',
-      authMessageTypeKey:'authenticate', // 定义在服务端internal/application/objects/dto/ws/ws.go
-    }
+      authMessageTypeKey: 'authenticate', // 定义在服务端internal/application/objects/dto/ws/ws.go
+      notificationTypeKey: 'notification',
+    },
   },
 };
 

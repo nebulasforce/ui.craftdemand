@@ -8,6 +8,7 @@ import { WebSocketProvider } from '@/contexts/WebSocketContext/WebSocketContext'
 import React from 'react';
 import { Notifications } from '@mantine/notifications';
 import appConfig from '../../config/app.config';
+import { NotificationProvider } from '@/contexts/NotificationContext/NotificationContext';
 // 引入NProgress监听器
 //import { NProgressListener } from '@/components/NProgressListener/NProgressListener';
 
@@ -29,7 +30,9 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           {/*<NProgressListener />*/}
           <AuthProvider>
             <WebSocketProvider>
-              {children}
+              <NotificationProvider> {/* 添加这一行 */}
+                {children}
+              </NotificationProvider>
             </WebSocketProvider>
           </AuthProvider>
         </MantineProvider>

@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { IconArrowsLeftRight, IconChevronRight, IconLogout, IconMessageCircle, IconPhoto, IconSearch, IconSettings, IconUser, IconUserCog, type Icon, type IconProps } from '@tabler/icons-react';
 import {
   Avatar,
+  Badge,
   Box,
   Divider,
   Drawer,
@@ -24,6 +25,8 @@ import { User } from '@/api/my/typings';
 import { useAuth } from '@/contexts/AuthContext/AuthContext';
 import notify from '@/utils/notify';
 import { getImageUrl } from '@/utils/path';
+import { useNotifications } from '@/contexts/NotificationContext/NotificationContext';
+import classes from './HeaderDropdown.module.css'
 
 
 // TablerIcon 定义Tabler图标的类型（匹配实际的ForwardRef组件类型）
@@ -163,7 +166,8 @@ export function HeaderDropdown({ user }: HeaderDropdownProps) {
   };
 
   const menuGroups = getMenuGroups();
-
+  const { unreadCount } = useNotifications();
+  // const unreadCount = 99 // 测试样式
   // 移动端抽屉内容
   const renderDrawerContent = () => (
     <Stack gap="md">
@@ -172,8 +176,8 @@ export function HeaderDropdown({ user }: HeaderDropdownProps) {
           src={getImageUrl(user.profile.avatar) || '/avatar_default.png'}
           radius="xl"
           alt={user.account.username}
-          size="md"
-        />
+          style={{ position: 'relative' }}
+         />
         <div style={{ flex: 1 }}>
           <Text size="sm" fw={500}>
             {user.account.username}
@@ -240,11 +244,24 @@ export function HeaderDropdown({ user }: HeaderDropdownProps) {
           height: '100%',
         }} // 占满按钮高度，确保垂直居中生效
       >
-        <Avatar
-          src={getImageUrl(user.profile.avatar) || '/avatar_default.png'}
-          radius="xl"
-          alt={user.account.username}
-        />
+        <Box pos="relative">
+          <Avatar
+            src={getImageUrl(user.profile.avatar) || '/avatar_default.png'}
+            radius="xl"
+            alt={user.account.username}
+            style={{ position: 'relative' }}
+          />
+          {unreadCount > 0 && (
+            <Badge
+              size="sm"
+              variant="filled"
+              color="red"
+              className={classes.notificationBadge}
+            >
+              {unreadCount > 9 ? '9+' : unreadCount}
+            </Badge>
+          )}
+        </Box>
         <div style={{ flex: 1 }}>
           <Text size="sm" fw={500}>
             {user.account.username}

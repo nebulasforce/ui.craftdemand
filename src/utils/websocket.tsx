@@ -53,16 +53,24 @@ class Websocket {
         this.dispatchEvent('message', data);
         // 可以根据消息类型分发到不同的事件
         if (data.type) {
-          // 处理认证
-          if (data.type === apiConfig.websocket?.authMessageTypeKey) {
-            this.isAuthenticated = data.data.result || false;
-            if (this.isAuthenticated) { // 认证成功
-              this.accountId = data.data.accountId;
-              this.expires = data.data.expires;
-             this.reconnect() // 重连
+            switch (data.type) {
+              case apiConfig.websocket?.authMessageTypeKey:
+                // 处理认证
+                this.isAuthenticated = data.data.result || false;
+                if (this.isAuthenticated) { // 认证成功
+                  this.accountId = data.data.accountId;
+                  this.expires = data.data.expires;
+                  this.reconnect() // 重连
+                }
+                break;
+                case apiConfig.websocket?.notificationTypeKey:
+                  break;
             }
-          }
+
+
           this.dispatchEvent(data.type, data);
+
+
         }
       } catch (error) {
         this.dispatchEvent('error', error);
