@@ -166,8 +166,8 @@ export function HeaderDropdown({ user }: HeaderDropdownProps) {
   };
 
   const menuGroups = getMenuGroups();
-  // const { unreadCount } = useNotifications();
-  const unreadCount = 2 // 测试样式
+  const { unreadCount } = useNotifications();
+  // const unreadCount = 2 // 测试样式
   // 移动端抽屉内容
   const renderDrawerContent = () => (
     <Stack gap="md">
