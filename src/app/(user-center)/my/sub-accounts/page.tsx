@@ -13,8 +13,6 @@ async function getMySubAccountList(params?: mySubAccountListRequest) {
   }
 }
 
-
-
 // 关键：不直接解构 searchParams，而是通过 props 整体获取
 const SubAccountsPage = async ({ searchParams } :any) => {
   const params = convertParams(await searchParams);

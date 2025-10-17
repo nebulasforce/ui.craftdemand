@@ -8,7 +8,10 @@ import {
   sendEmailVerifiedCodeRequest,
   editMyEmailRequest,
   editMyMobileRequest,
-  editMyPasswordRequest, mySubAccountListRequest, myAllSubAccountListRequest,
+  editMyPasswordRequest,
+  mySubAccountListRequest,
+  myAllSubAccountListRequest,
+  myUnreadMessageCountRequest,
 } from '@/api/my/request';
 import {
   meResponse,
@@ -19,7 +22,10 @@ import {
   sendMobileVerifiedCodeResponse,
   editMyEmailResponse,
   editMyMobileResponse,
-  editMyPasswordResponse, mySubAccountListResponse, myAllSubAccountListResponse,
+  editMyPasswordResponse,
+  mySubAccountListResponse,
+  myAllSubAccountListResponse,
+  myUnreadMessageCountResponse,
 } from '@/api/my/response';
 import request from '@/utils/request';
 
@@ -77,7 +83,6 @@ export async function editMyAvatar(req?:editMyAvatarRequest,options?:Options) {
   });
 }
 
-
 // editMyUsername 修改我的用户名
 export async function editMyUsername(req?:editMyUsernameRequest,options?:Options) {
   return request<editMyUsernameResponse>({
@@ -117,8 +122,6 @@ export async function editMyMobile(req?:editMyMobileRequest,options?:Options) {
   });
 }
 
-
-
 // sendEmailVerifiedCode 发送邮箱验证码
 export async function sendEmailVerifiedCode(req?:sendEmailVerifiedCodeRequest,options?:Options) {
   return request<sendEmailVerifiedCodeResponse>({
@@ -145,7 +148,6 @@ export async function sendMobileVerifiedCode(req?:sendMobileVerifiedCodeRequest,
   });
 }
 
-
 //  mySubAccountList 获取个人子账号分页列表
 export async function mySubAccountList(req?:mySubAccountListRequest,options?:Options) {
   return request<mySubAccountListResponse>({
@@ -159,7 +161,6 @@ export async function mySubAccountList(req?:mySubAccountListRequest,options?:Opt
   });
 }
 
-
 // myAllSubAccountList 获取全部子账号列表
 export async function myAllSubAccountList(req?:myAllSubAccountListRequest,options?:Options) {
   return request<myAllSubAccountListResponse>({
@@ -169,6 +170,19 @@ export async function myAllSubAccountList(req?:myAllSubAccountListRequest,option
       'Content-Type': 'application/json',
     },
     data: req || {},
+    ...(options || {}),
+  });
+}
+
+// myUnreadMessageCount 获取我的未读消息数量
+export async function myUnreadMessageCount(req?: myUnreadMessageCountRequest, options?: Options) {
+  return request<myUnreadMessageCountResponse>({
+    url: '/api/v1/my/unread-message-count',
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    params: req || {},
     ...(options || {}),
   });
 }

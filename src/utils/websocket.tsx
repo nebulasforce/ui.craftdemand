@@ -51,6 +51,8 @@ class Websocket {
       try {
         const data: authenticateResponse= JSON.parse(event.data);
         this.dispatchEvent('message', data);
+
+        // 在这里处理不同类型的消息
         // 可以根据消息类型分发到不同的事件
         if (data.type) {
             switch (data.type) {
@@ -64,6 +66,7 @@ class Websocket {
                 }
                 break;
                 case apiConfig.websocket?.notificationTypeKey:
+                  // 设置顶部消息数量setUnreadCount
                   break;
             }
 

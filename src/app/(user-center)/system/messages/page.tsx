@@ -1,6 +1,6 @@
 import { convertParams } from '@/api/common/functions';
 import { messageListRequest } from '@/api/message/request';
-import { messageList } from '@/api/message/api';
+import { messageList } from '@/api/ssr/message';
 import MessagesPageRender from './_render';
 
 // getMySubAccountList 从服务端获取子账户列表数据

@@ -18,25 +18,25 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
 
   return (
     <html lang="en" {...mantineHtmlProps}>
-      <head>
-        <title />
-        <ColorSchemeScript />
-      </head>
-      <body className="antialiased">
-        <MantineProvider theme={theme}>
-          {/*<NavigationProgress />*/}
-          <Notifications position="top-center" />
-          {/* 添加路由监听器 */}
-          {/*<NProgressListener />*/}
-          <AuthProvider>
-            <WebSocketProvider>
-              <NotificationProvider> {/* 添加这一行 */}
-                {children}
-              </NotificationProvider>
-            </WebSocketProvider>
-          </AuthProvider>
-        </MantineProvider>
-      </body>
+    <head>
+      <title />
+      <ColorSchemeScript />
+    </head>
+    <body className="antialiased">
+    <MantineProvider theme={theme}>
+      {/*<NavigationProgress />*/}
+      <Notifications position="top-center" />
+      {/* 添加路由监听器 */}
+      {/*<NProgressListener />*/}
+      <AuthProvider>
+        <WebSocketProvider>
+          <NotificationProvider> {/* 添加这一行 */}
+            {children}
+          </NotificationProvider>
+        </WebSocketProvider>
+      </AuthProvider>
+    </MantineProvider>
+    </body>
     </html>
   );
 }

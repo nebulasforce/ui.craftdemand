@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Anchor, Box, Breadcrumbs } from '@mantine/core';
 import { messageListData } from '@/api/message/response';
 import { useNavbar } from '@/contexts/NavbarContext/NavbarContext';
+import { useNotifications } from '@/contexts/NotificationContext/NotificationContext';
 
 
 interface MessagesProps {
@@ -13,10 +14,17 @@ interface MessagesProps {
 
 const MessagesPageRender =  ({ initialData }:MessagesProps) => {
   const { setActive, setSection } = useNavbar();
+  const { markAsRead } = useNotifications();
+
   useEffect(() => {
     setSection('System');
     setActive('Messages');
   }, []); // 添加缺失的依赖项
+
+
+  useEffect(() => {
+    markAsRead();
+  }, [markAsRead]);
 
 
   // 面包屑

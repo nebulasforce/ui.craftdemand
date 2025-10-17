@@ -62,3 +62,11 @@ export interface mySubAccountListResponse extends Response<mySubAccountListData>
 
 export type myAllSubAccountListData = User[]
 export interface myAllSubAccountListResponse extends Response<myAllSubAccountListData> {}
+
+
+export interface myUnreadMessageCountData {
+  result: boolean;
+  count: number;
+}
+
+export interface myUnreadMessageCountResponse extends Response<myUnreadMessageCountData> {}

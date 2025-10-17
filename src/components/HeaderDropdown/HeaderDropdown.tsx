@@ -122,7 +122,7 @@ export function HeaderDropdown({ user }: HeaderDropdownProps) {
 
   const eventMap = {
     logout: () => {
-      logout();
+      logout().then();
       setDrawerOpened(false);
     },
   };

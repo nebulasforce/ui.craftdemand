@@ -70,3 +70,5 @@ export interface editMyPasswordRequest {
 export interface mySubAccountListRequest extends Query,Pager {}
 
 export interface myAllSubAccountListRequest extends Query {}
+
+export interface myUnreadMessageCountRequest extends Query,Pager {}
