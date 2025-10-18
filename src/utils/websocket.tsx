@@ -50,8 +50,8 @@ class Websocket {
     this.socket.onmessage = (event) => {
       try {
         const data: authenticateResponse= JSON.parse(event.data);
-        this.dispatchEvent('message', data);
-
+        // 分发默认时间
+        this.dispatchEvent('default', data);
         // 在这里处理不同类型的消息
         // 可以根据消息类型分发到不同的事件
         if (data.type) {
@@ -65,15 +65,9 @@ class Websocket {
                   this.reconnect() // 重连
                 }
                 break;
-                case apiConfig.websocket?.notificationTypeKey:
-                  // 设置顶部消息数量setUnreadCount
-                  break;
             }
 
-
-          this.dispatchEvent(data.type, data);
-
-
+          this.dispatchEvent(data.type, data.data);
         }
       } catch (error) {
         this.dispatchEvent('error', error);

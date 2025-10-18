@@ -8,18 +8,19 @@ import { useAuth } from '@/contexts/AuthContext/AuthContext';
 import { useWebSocket } from '@/contexts/WebSocketContext/WebSocketContext';
 import notify from '@/utils/notify';
 import ws from '@/utils/websocket';
+import { myUnreadMessageCountData } from '@/api/my/response';
 
 
 interface NotificationContextType {
   unreadCount: number;
   markAsRead: () => void;
   isLoading: boolean; // 标记是否正在加载未读数量
+  updateUnreadCount: (count: number) => void;
 }
 
 interface NotificationProviderProps {
   children: ReactNode;
 }
-
 
 async function fetchUnreadMessageCount() {
   try {
@@ -44,6 +45,12 @@ export function NotificationProvider( { children }: NotificationProviderProps) {
   const { isAuthenticated } = useAuth(); // 获取登录状态
   const { isConnected } = useWebSocket();
 
+  const updateUnreadCount = (count: number ) => {
+    if (count >= 0){
+      setUnreadCount(count);
+    }
+  }
+
 
   // 监听登录状态变化：登录后自动获取
   useEffect( () => {
@@ -58,16 +65,19 @@ export function NotificationProvider( { children }: NotificationProviderProps) {
     }
   }, [isAuthenticated]); // 仅当登录状态变化时触发
 
-  // handleNotification 处理通知消息
-  const handleNotification = (data: any) => {
-    // TODO 修改
+  // handleNotification 处理通知消息 - 消息来源于src/utils/websocket.tsx 根据类型分发的事件
+  const handleNotification = (data: myUnreadMessageCountData) => {
     console.log('NotificationProvider', data);
-    setUnreadCount(prev => prev + 1);
+    // 根据收到的data中的数量处理
+    if(data.count >= 0 && isAuthenticated){
+      setUnreadCount(data.count);
+    }
   };
 
   useEffect(() => {
     // 处理通知
     const key = apiConfig.websocket?.notificationTypeKey || 'notification'
+
     // 订阅WebSocket通知事件
     ws.on(key, handleNotification);
     return () => {
@@ -89,7 +99,7 @@ export function NotificationProvider( { children }: NotificationProviderProps) {
   };
 
   return (
-    <NotificationContext.Provider value={{ unreadCount, markAsRead, isLoading }}>
+    <NotificationContext.Provider value={{ unreadCount, markAsRead, isLoading,updateUnreadCount }}>
       {children}
     </NotificationContext.Provider>
   );
