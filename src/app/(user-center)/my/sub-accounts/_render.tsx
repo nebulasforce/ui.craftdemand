@@ -305,7 +305,7 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
         </Box>
         <Divider mb="lg" my="xs" variant="dashed" />
         <Grid>
-          <Grid.Col  span={{ base: 12, sm: 9 }} mb="xs">
+          <Grid.Col span={{ base: 12, sm: 9 }} mb="xs">
               {/* 基础搜索组件 */}
               <TextInput
                 placeholder="Search by username, mobile or email..."
@@ -328,7 +328,7 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
                 disabled={loading}
               />
             </Grid.Col>
-          <Grid.Col  span={{ base: 12, sm: 3 }} mb="xs">
+            <Grid.Col  span={{ base: 12, sm: 3 }} mb="xs">
               {/* 高级搜索切换按钮 */}
               <Button
                 variant="ghost"

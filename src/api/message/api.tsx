@@ -7,7 +7,7 @@ import request from '@/utils/request';
 //  messageList 获取消息列表
 export async function messageList(req?:messageListRequest,options?:Options) {
   return request<messageListResponse>({
-    url: '/api/v1/my/sub-account',
+    url: '/api/v1/message',
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
