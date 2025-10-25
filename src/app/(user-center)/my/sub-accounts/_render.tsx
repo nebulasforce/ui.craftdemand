@@ -1,36 +1,12 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { IconChevronDown, IconChevronUp, IconEdit, IconPlus, IconSearch, IconTrash, IconX } from '@tabler/icons-react';
 // 导入Next.js路由钩子
 import cx from 'clsx';
-import {
-  ActionIcon,
-  Anchor,
-  Avatar,
-  Box,
-  Breadcrumbs,
-  Button,
-  Checkbox,
-  Collapse,
-  Divider,
-  Flex,
-  Grid,
-  Group,
-  LoadingOverlay,
-  Pagination,
-  Paper,
-  ScrollArea,
-  Select,
-  SimpleGrid,
-  Stack,
-  Table,
-  Text,
-  TextInput,
-  Title,
-} from '@mantine/core';
+import { ActionIcon, Anchor, Avatar, Box, Breadcrumbs, Button, Checkbox, Collapse, Divider, Flex, Grid, Group, LoadingOverlay, Pagination, Paper, ScrollArea, Select, SimpleGrid, Stack, Table, Text, TextInput, Title } from '@mantine/core';
 import { mySubAccountList } from '@/api/my/api'; // 导入API
 import { mySubAccountListData } from '@/api/my/response';
 import { useNavbar } from '@/contexts/NavbarContext/NavbarContext';
@@ -102,7 +78,14 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
 
   // 基础搜索状态
   const [searchKeyword, setSearchKeyword] = useState('');
+  const searchKeywordRef = useRef(searchKeyword);
   const [searchTimer, setSearchTimer] = useState<NodeJS.Timeout | null>(null);
+
+  // 当searchKeyword变化时更新ref
+  useEffect(() => {
+    searchKeywordRef.current = searchKeyword;
+  }, [searchKeyword]);
+
 
   // 高级搜索状态
   const [advancedSearchOpen, setAdvancedSearchOpen] = useState(false);
@@ -116,7 +99,7 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
   // 状态管理
   const [data, setData] = useState(initialData?.lists || []);
   const [page, setPage] = useState(initialData?.page || 1);
-  const [pageSize, ] = useState(initialData?.pageSize || 10);
+  const [pageSize] = useState(initialData?.pageSize || 10);
   const [totalPage, setTotalPage] = useState(initialData?.totalPage || 0);
   const [count, setCount] = useState(initialData?.count || 0);
   const [loading, setLoading] = useState(false);
@@ -151,8 +134,9 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
   };
 
   // 数据加载方法，同时支持基础搜索和高级搜索
-  const loadData = async (newPage?: number) => {
+  const loadData = async (newPage?: number,keyword?:string) => {
     const currentPage = newPage ?? page;
+    const currentKeyword = searchKeywordRef.current;
 
     setLoading(true);
     try {
@@ -168,7 +152,7 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
       // 只有在非高级搜索或高级搜索无有效字段时，才添加keyword（且keyword有值）
       const useKeyword = !(advancedSearchOpen && Object.values(advancedFilters).some(v => v));
       if (useKeyword && searchKeyword) {
-        searchParams.keyword = searchKeyword;
+        searchParams.keyword = currentKeyword.toLowerCase();
       }
 
       // 添加高级搜索参数（只包含有值的字段）
@@ -258,20 +242,22 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
     });
   };
 
+
   // 处理基础搜索输入
   const handleSearchChange = (value: string) => {
     // 清除之前的计时器
     if (searchTimer) {
       clearTimeout(searchTimer);
     }
-
+console.log("ss",value)
     setSearchKeyword(value);
-
     // 设置新的防抖计时器
-    setSearchTimer(setTimeout(() => {
+    const timer = setTimeout(() => {
       // 搜索时重置到第一页
       loadData(1).then();
-    }, 500)); // 500ms防抖
+    }, 500); // 500ms防抖
+
+    setSearchTimer(timer);
   };
 
   // 处理高级搜索提交
