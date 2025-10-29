@@ -21,8 +21,8 @@ export function DeleteConfirm({
                                 ...props
                               }: DeleteConfirmProps) {
   const description = itemName
-    ? `Are you sure you want to delete "${itemName}"?`
-    : "Are you sure you want to delete this？";
+    ? `Are you sure to delete "${itemName}"?`
+    : "Are you sure to delete this？";
 
   return (
     <PopConfirm
