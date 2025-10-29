@@ -1,32 +1,6 @@
 import { Options } from '@/api/common/request';
-import {
-  meRequest,
-  editMyProfileRequest,
-  editMyUsernameRequest,
-  editMyAvatarRequest,
-  sendMobileVerifiedCodeRequest,
-  sendEmailVerifiedCodeRequest,
-  editMyEmailRequest,
-  editMyMobileRequest,
-  editMyPasswordRequest,
-  mySubAccountListRequest,
-  myAllSubAccountListRequest,
-  myUnreadMessageCountRequest,
-} from '@/api/my/request';
-import {
-  meResponse,
-  editMyProfileResponse,
-  editMyUsernameResponse,
-  editMyAvatarResponse,
-  sendEmailVerifiedCodeResponse,
-  sendMobileVerifiedCodeResponse,
-  editMyEmailResponse,
-  editMyMobileResponse,
-  editMyPasswordResponse,
-  mySubAccountListResponse,
-  myAllSubAccountListResponse,
-  myUnreadMessageCountResponse,
-} from '@/api/my/response';
+import { deleteMySubAccountRequest, editMyAvatarRequest, editMyEmailRequest, editMyMobileRequest, editMyPasswordRequest, editMyProfileRequest, editMyUsernameRequest, meRequest, myAllSubAccountListRequest, mySubAccountListRequest, myUnreadMessageCountRequest, sendEmailVerifiedCodeRequest, sendMobileVerifiedCodeRequest } from '@/api/my/request';
+import { deleteMySubAccountResponse, editMyAvatarResponse, editMyEmailResponse, editMyMobileResponse, editMyPasswordResponse, editMyProfileResponse, editMyUsernameResponse, meResponse, myAllSubAccountListResponse, mySubAccountListResponse, myUnreadMessageCountResponse, sendEmailVerifiedCodeResponse, sendMobileVerifiedCodeResponse } from '@/api/my/response';
 import request from '@/utils/request';
 
 
@@ -183,6 +157,20 @@ export async function myUnreadMessageCount(req?: myUnreadMessageCountRequest, op
       'Content-Type': 'application/json',
     },
     params: req || {},
+    ...(options || {}),
+  });
+}
+
+
+// deleteMySubAccount 删除我的子账号
+export async function deleteMySubAccount(req?:deleteMySubAccountRequest,options?:Options) {
+  return request<deleteMySubAccountResponse>({
+    url: '/api/v1/my/sub-account/delete',
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: req || {},
     ...(options || {}),
   });
 }

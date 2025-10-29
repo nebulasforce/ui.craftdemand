@@ -26,6 +26,7 @@
     "@mantine/ds": "^6.0.22",
     "@mantine/form": "^8.3.5",
     "@mantine/hooks": "^8.3.5",
+    "@mantine/modals": "^8.3.5",
     "@mantine/notifications": "^8.3.5",
     "@mantine/nprogress": "^8.3.1",
     "@mantine/utils": "^6.0.22",

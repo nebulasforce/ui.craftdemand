@@ -6,13 +6,17 @@ import { useRouter } from 'next/navigation';
 import { IconChevronDown, IconChevronUp, IconEdit, IconPlus, IconSearch, IconTrash, IconX } from '@tabler/icons-react';
 // 导入Next.js路由钩子
 import cx from 'clsx';
-import { ActionIcon, Anchor, Avatar, Box, Breadcrumbs, Button, Checkbox, Collapse, Divider, Flex, Grid, Group, LoadingOverlay, Pagination, Paper, ScrollArea, Select, SimpleGrid, Stack, Table, Text, TextInput, Title } from '@mantine/core';
+import { ActionIcon, Anchor, Avatar, Box, Breadcrumbs, Button, Checkbox, Collapse, Divider, Flex, FocusTrap, Grid, Group, LoadingOverlay, Modal, Pagination, Paper, ScrollArea, Select, SimpleGrid, Stack, Table, Text, TextInput, Title } from '@mantine/core';
+import { useForm } from '@mantine/form';
+import { useDisclosure } from '@mantine/hooks';
 import { mySubAccountList } from '@/api/my/api'; // 导入API
 import { mySubAccountListData } from '@/api/my/response';
+import { User } from '@/api/my/typings';
 import { useNavbar } from '@/contexts/NavbarContext/NavbarContext';
 import notify from '@/utils/notify'; // 导入通知工具
 import { formatTimestamp } from '@/utils/time';
 import classes from './style.module.css';
+import { DeleteConfirm } from '@/components/DeleteConfirm/DeleteConfirm';
 
 
 interface SubAccountsProps {
@@ -23,6 +27,11 @@ interface SubAccountsProps {
 interface statusItem {
   label: string;
   color: string;
+}
+
+interface openAddEditModalParams {
+  action: 'add' | 'edit';
+  user?: User;
 }
 
 const statusMap:{[key:number]:statusItem} = {
@@ -57,7 +66,6 @@ interface AdvancedSearchFilters {
 }
 
 
-
 const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
   const { setActive, setSection } = useNavbar();
   const router = useRouter();
@@ -66,7 +74,6 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
     setSection('Account');
     setActive('Sub Accounts');
   }, []); // 合并依赖项
-
 
 
   // 面包屑
@@ -100,10 +107,10 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
   const [data, setData] = useState(initialData?.lists || []);
   const [page, setPage] = useState(initialData?.page || 1);
   const [pageSize] = useState(initialData?.pageSize || 10);
-  const [totalPage, setTotalPage] = useState(initialData?.totalPage || 0);
   const [count, setCount] = useState(initialData?.count || 0);
   const [loading, setLoading] = useState(false);
   const [selection, setSelection] = useState<string[]>([]);
+  const [totalPage, setTotalPage] = useState(initialData?.totalPage || 0);
 
   // 当page变化时更新URL
   useEffect(() => {
@@ -134,7 +141,7 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
   };
 
   // 数据加载方法，同时支持基础搜索和高级搜索
-  const loadData = async (newPage?: number,keyword?:string) => {
+  const loadData = async (newPage?: number) => {
     const currentPage = newPage ?? page;
     const currentKeyword = searchKeywordRef.current;
 
@@ -212,12 +219,14 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
         </Table.Td>
         <Table.Td>
           <ActionIcon.Group>
-            <ActionIcon variant="light" size="md" aria-label="Edit">
+            <ActionIcon onClick={()=>{openAddEditModal({action:'edit',user:item})}} variant="light" size="md" aria-label="Edit">
               <IconEdit size={14} stroke={1.5} />
             </ActionIcon>
-            <ActionIcon variant="light" size="md" aria-label="Delete">
-              <IconTrash size={14} stroke={1.5} />
-            </ActionIcon>
+            <DeleteConfirm onConfirm={()=>{handleDeleteOneSubAccount(item)}} itemName={item.account.username}>
+              <ActionIcon variant="light" size="md" aria-label="Delete">
+                <IconTrash size={14} stroke={1.5} />
+              </ActionIcon>
+            </DeleteConfirm>
           </ActionIcon.Group>
         </Table.Td>
       </Table.Tr>
@@ -249,7 +258,6 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
     if (searchTimer) {
       clearTimeout(searchTimer);
     }
-console.log("ss",value)
     setSearchKeyword(value);
     // 设置新的防抖计时器
     const timer = setTimeout(() => {
@@ -264,6 +272,121 @@ console.log("ss",value)
   const handleAdvancedSearch = () => {
     loadData(1).then();
   };
+
+
+  const [addEditAction, setAddEditAction] = useState<'add' | 'edit'>('add');
+  const [addEditModalOpened, addEditModalActions] = useDisclosure(false);
+  const [editingAccount, setEditingAccount] = useState<User|null>(null);
+
+  // 打开表单模态窗口
+  const openAddEditModal = ({action, user}: openAddEditModalParams) => {
+    setAddEditAction(action);
+
+    if (action === 'edit' && user) {
+      // 编辑模式：填充现有数据
+      setEditingAccount(user);
+      // 重置表单为account的值
+      addEditForm.setValues({
+        username: user.account.username,
+        email: user.account.email,
+        mobile: user.account.mobile,
+        status: user.account.status,
+      });
+    } else {
+      // 新增模式：重置表单
+      setEditingAccount(null);
+      addEditForm.setValues({
+        username: '',
+        email: '',
+        mobile: '',
+        status: 0,
+      });
+    }
+
+    addEditModalActions.open();
+  };
+
+  const handleDeleteOneSubAccount =   (user: User) => {
+    console.log('删除账户:', user);
+  }
+
+  // const closeAddEditModal = () => {
+  //   setEditingAccount(null);
+  //   addEditModalActions.close();
+  // }
+
+  const addEditForm = useForm({
+    initialValues: {
+      username: editingAccount?.account?.username || '',
+      email: editingAccount?.account?.email || '',
+      mobile: editingAccount?.account?.mobile || '',
+      status: editingAccount?.account?.status || 0,
+    },
+    validate: {
+      username: (val) => {
+        if (!val) {
+          return 'This field is required';
+        }
+        return null;
+      },
+      email: (val) => {
+        if (!val) {
+          return 'This field is required';
+        }
+        return null;
+      },
+      mobile: (val) => {
+        if (!val) {
+          return 'This field is required';
+        }
+        return null;
+      },
+      status: (val) => {
+        if (!val) {
+          return 'This field is required';
+        }
+        return null;
+      }
+    },
+  });
+
+  const handleAdEditFormSubmit = async (values: typeof addEditForm.values): Promise<void> => {
+    if (addEditAction === 'add'){
+      // TODO add
+      console.log('add');
+
+    }else if(addEditAction === 'edit'){
+      if (!editingAccount) {return;} // 确保用户存在
+      setLoading(true);
+      try {
+        // 处理表单数据，转换为API需要的格式
+        const formattedData = {
+          ...values,
+        };
+
+        // 根据编辑还是新增来确定响应内容
+        // 调用编辑个人资料API
+        const response = await editMyProfile(formattedData);
+
+        if (response.code === 0) {
+          // TODO 根据编辑还是新增来确定响应内容
+          notify('Profile updated successfully', 'success');
+        } else {
+          notify(response.message || 'Failed to update profile', 'error');
+        }
+      } catch (err) {
+        if (err instanceof Error) {
+          notify(err.message, 'error');
+        } else {
+          notify('系统错误', 'error');
+        }
+      } finally {
+        setLoading(false);
+      }
+    }
+    addEditForm.reset();
+  };
+
 
   return (
     <Box>
@@ -292,46 +415,50 @@ console.log("ss",value)
         <Divider mb="lg" my="xs" variant="dashed" />
         <Grid>
           <Grid.Col span={{ base: 12, sm: 9 }} mb="xs">
-              {/* 基础搜索组件 */}
-              <TextInput
-                placeholder="Search by username, mobile or email..."
-                value={searchKeyword}
-                onChange={(e) => handleSearchChange(e.target.value)}
-                leftSection={<IconSearch size={16} stroke={1.5} />}
-                rightSection={
-                  searchKeyword && (
-                    <ActionIcon
-                      variant="default"
-                      size="sm"
-                      onClick={() => handleSearchChange('')}
-                      aria-label="Clear search"
-                    >
-                      <IconX size={14} stroke={1.5} />
-                    </ActionIcon>
-                  )
-                }
-                radius="md"
-                disabled={loading}
-              />
-            </Grid.Col>
-            <Grid.Col  span={{ base: 12, sm: 3 }} mb="xs">
-              {/* 高级搜索切换按钮 */}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setAdvancedSearchOpen(!advancedSearchOpen)}
-                leftSection={advancedSearchOpen ? <IconChevronUp size={16} /> : <IconChevronDown size={16} />}
-                fullWidth
-              >
-                {advancedSearchOpen ? 'Hide Advanced Search' : 'Advanced Search'}
-              </Button>
-            </Grid.Col>
+            {/* 基础搜索组件 */}
+            <TextInput
+              placeholder="Search by username, mobile or email..."
+              value={searchKeyword}
+              onChange={(e) => handleSearchChange(e.target.value)}
+              leftSection={<IconSearch size={16} stroke={1.5} />}
+              rightSection={
+                searchKeyword && (
+                  <ActionIcon
+                    variant="default"
+                    size="sm"
+                    onClick={() => handleSearchChange('')}
+                    aria-label="Clear search"
+                  >
+                    <IconX size={14} stroke={1.5} />
+                  </ActionIcon>
+                )
+              }
+              radius="md"
+              disabled={loading}
+            />
+          </Grid.Col>
+          <Grid.Col span={{ base: 12, sm: 3 }} mb="xs">
+            {/* 高级搜索切换按钮 */}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setAdvancedSearchOpen(!advancedSearchOpen)}
+              leftSection={
+                advancedSearchOpen ? <IconChevronUp size={16} /> : <IconChevronDown size={16} />
+              }
+              fullWidth
+            >
+              {advancedSearchOpen ? 'Hide Advanced Search' : 'Advanced Search'}
+            </Button>
+          </Grid.Col>
         </Grid>
 
         {/* 高级搜索部分 - 可折叠 */}
         <Collapse in={advancedSearchOpen} transitionDuration={200}>
           <Paper p="md" mb="lg" withBorder>
-            <Title order={5} mb="md">Advanced Filters</Title>
+            <Title order={5} mb="md">
+              Advanced Filters
+            </Title>
             <SimpleGrid cols={{ base: 1, sm: 2, md: 4 }} spacing="md">
               <TextInput
                 label="Username"
@@ -376,11 +503,7 @@ console.log("ss",value)
         <Divider mb="lg" my="xs" variant="dashed" />
 
         <SimpleGrid mb="sm">
-          <Flex
-            justify="flex-end"
-            align="center"
-            direction="row"
-          >
+          <Flex justify="flex-end" align="center" direction="row">
             <Group>
               <Button
                 variant="danger"
@@ -392,6 +515,7 @@ console.log("ss",value)
               <Button
                 leftSection={<IconPlus size={16} stroke={1.5} />}
                 disabled={loading}
+                onClick={() => openAddEditModal({action:'add'})}
               >
                 Add Sub Account
               </Button>
@@ -399,12 +523,11 @@ console.log("ss",value)
           </Flex>
         </SimpleGrid>
 
-
         <Box pos="relative">
           <Stack gap="lg" justify="flex-end">
             <LoadingOverlay visible={loading} />
             <ScrollArea>
-              <Table  verticalSpacing="xs" highlightOnHover>
+              <Table verticalSpacing="xs" highlightOnHover>
                 <Table.Thead>
                   <Table.Tr>
                     <Table.Th w={40}>
@@ -436,25 +559,87 @@ console.log("ss",value)
               </Table>
             </ScrollArea>
             {/* 分页控制区 - 固定在底部 */}
-              <Flex direction="row" justify="space-between" align="center">
-                {/* 显示条目信息 */}
-                <Text size="sm" c="dimmed">
-                  {calculateDisplayRange()}
-                </Text>
-                {/* 分页控制 */}
-                <Pagination
-                  total={totalPage || 0}
-                  withEdges
-                  value={page}
-                  size="sm"
-                  onChange={handlePageChange}
-                  siblings={2}
-                  disabled={loading || totalPage <= 1}
-                />
-              </Flex>
+            <Flex direction="row" justify="space-between" align="center">
+              {/* 显示条目信息 */}
+              <Text size="sm" c="dimmed">
+                {calculateDisplayRange()}
+              </Text>
+              {/* 分页控制 */}
+              <Pagination
+                total={totalPage || 0}
+                withEdges
+                value={page}
+                size="sm"
+                onChange={handlePageChange}
+                siblings={2}
+                disabled={loading || totalPage <= 1}
+              />
+            </Flex>
           </Stack>
         </Box>
       </Paper>
+
+      {/*独立的添加/编辑弹窗*/}
+      <Modal
+        opened={addEditModalOpened}
+        title={addEditAction === 'add' ? 'Add Sub Account' : 'Edit Sub Account'}
+        onClose={addEditModalActions.close}
+        size="md"
+      >
+        <Box pos="relative">
+          <LoadingOverlay visible={loading} />
+          <FocusTrap active>
+            <form onSubmit={addEditForm.onSubmit(handleAdEditFormSubmit)}>
+              <TextInput
+                required
+                data-autofocus
+                label="Username"
+                placeholder="Input your username"
+                value={addEditForm.values.username}
+                onChange={(event) =>
+                  addEditForm.setFieldValue('username', event.currentTarget.value)
+                }
+                error={addEditForm.errors.username}
+                radius="md"
+              />
+              <TextInput
+                required
+                label="Email"
+                placeholder="Input your email"
+                value={addEditForm.values.email}
+                onChange={(event) =>
+                  addEditForm.setFieldValue('email', event.currentTarget.value)
+                }
+                error={addEditForm.errors.email}
+                radius="md"
+              />
+              <TextInput
+                required
+                label="Mobile"
+                placeholder="Input your mobile number"
+                value={addEditForm.values.mobile}
+                onChange={(event) =>
+                  addEditForm.setFieldValue('mobile', event.currentTarget.value)
+                }
+                error={addEditForm.errors.mobile}
+                radius="md"
+              />
+              <Select
+                label="Status"
+                value={addEditForm.values.status.toString()}
+                onChange={(value) => addEditForm.setFieldValue('status', parseInt(value||'0',10))}
+                placeholder="Select status"
+                data={statusOptions}
+                disabled={loading}
+              />
+              <Flex justify="flex-end" gap="sm" mt="lg">
+                <Button type="submit" disabled={loading}>Save</Button>
+              </Flex>
+            </form>
+          </FocusTrap>
+        </Box>
+      </Modal>
+
     </Box>
   );
 }

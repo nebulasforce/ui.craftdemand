@@ -70,3 +70,10 @@ export interface myUnreadMessageCountData {
 }
 
 export interface myUnreadMessageCountResponse extends Response<myUnreadMessageCountData> {}
+
+
+export interface deleteMySubAccountData extends Result {
+  count: number;
+}
+
+export interface deleteMySubAccountResponse extends Response<deleteMySubAccountData> {}

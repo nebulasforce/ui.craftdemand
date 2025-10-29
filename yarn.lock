@@ -3664,6 +3664,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@mantine/modals@npm:^8.3.5":
+  version: 8.3.5
+  resolution: "@mantine/modals@npm:8.3.5"
+  peerDependencies:
+    "@mantine/core": 8.3.5
+    "@mantine/hooks": 8.3.5
+    react: ^18.x || ^19.x
+    react-dom: ^18.x || ^19.x
+  checksum: 10c0/30b92d13f8de049c101ac0d8e12735427aca30ba5bccc5f5a3e69abd26cabdf600c6f5905b99b3f4a1de6f6ad234bf7aec5524c9eb0defec22649b07e5f1e9f1
+  languageName: node
+  linkType: hard
+
 "@mantine/notifications@npm:^8.3.5":
   version: 8.3.5
   resolution: "@mantine/notifications@npm:8.3.5"
@@ -13600,6 +13612,7 @@ __metadata:
     "@mantine/ds": "npm:^6.0.22"
     "@mantine/form": "npm:^8.3.5"
     "@mantine/hooks": "npm:^8.3.5"
+    "@mantine/modals": "npm:^8.3.5"
     "@mantine/notifications": "npm:^8.3.5"
     "@mantine/nprogress": "npm:^8.3.1"
     "@mantine/prism": "npm:^6.0.22"
