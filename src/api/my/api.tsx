@@ -1,11 +1,26 @@
 import { Options } from '@/api/common/request';
-import { deleteMySubAccountRequest, editMyAvatarRequest, editMyEmailRequest, editMyMobileRequest, editMyPasswordRequest, editMyProfileRequest, editMyUsernameRequest, meRequest, myAllSubAccountListRequest, mySubAccountListRequest, myUnreadMessageCountRequest, sendEmailVerifiedCodeRequest, sendMobileVerifiedCodeRequest } from '@/api/my/request';
-import { deleteMySubAccountResponse, editMyAvatarResponse, editMyEmailResponse, editMyMobileResponse, editMyPasswordResponse, editMyProfileResponse, editMyUsernameResponse, meResponse, myAllSubAccountListResponse, mySubAccountListResponse, myUnreadMessageCountResponse, sendEmailVerifiedCodeResponse, sendMobileVerifiedCodeResponse } from '@/api/my/response';
+import { deleteMySubAccountRequest, editMyAvatarRequest, editMyEmailRequest, editMyMobileRequest, editMyPasswordRequest, editMyProfileRequest, editMySubAccountRequest, editMyUsernameRequest, getMySubAccountRequest, meRequest, myAllSubAccountListRequest, mySubAccountListRequest, myUnreadMessageCountRequest, sendEmailVerifiedCodeRequest, sendMobileVerifiedCodeRequest } from '@/api/my/request';
+import {
+  deleteMySubAccountResponse,
+  editMyAvatarResponse,
+  editMyEmailResponse,
+  editMyMobileResponse,
+  editMyPasswordResponse,
+  editMyProfileResponse,
+  editMySubAccountResponse,
+  editMyUsernameResponse,
+  getMySubAccountResponse,
+  meResponse,
+  myAllSubAccountListResponse,
+  mySubAccountListResponse,
+  myUnreadMessageCountResponse,
+  sendEmailVerifiedCodeResponse,
+  sendMobileVerifiedCodeResponse,
+} from '@/api/my/response';
 import request from '@/utils/request';
 
-
 // me 获取个人信息
-export async function me(req?:meRequest,options?:Options) {
+export async function me(req?: meRequest, options?: Options) {
   return request<meResponse>({
     url: '/api/v1/my/info',
     method: 'GET',
@@ -171,6 +186,34 @@ export async function deleteMySubAccount(req?:deleteMySubAccountRequest,options?
       'Content-Type': 'application/json',
     },
     data: req || {},
+    ...(options || {}),
+  });
+}
+
+
+// editMySubAccount 编辑我的子账号
+export async function editMySubAccount(req?:editMySubAccountRequest,options?:Options) {
+  return request<editMySubAccountResponse>({
+    url: `/api/v1/my/sub-account/${req?.id}`,
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: req || {},
+    ...(options || {}),
+  });
+}
+
+
+// getMySubAccount 获取我的子账号详情
+export async function getMySubAccount(req?: getMySubAccountRequest, options?: Options) {
+  return request<getMySubAccountResponse>({
+    url: `/api/v1/my/sub-account/${req?.id}`,
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    params: req || {},
     ...(options || {}),
   });
 }

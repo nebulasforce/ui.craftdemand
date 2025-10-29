@@ -77,3 +77,13 @@ export interface deleteMySubAccountData extends Result {
 }
 
 export interface deleteMySubAccountResponse extends Response<deleteMySubAccountData> {}
+
+export interface editMySubAccountData extends Result {
+  id: string;
+}
+
+export interface editMySubAccountResponse extends Response<editMySubAccountData> {}
+
+export type getMySubAccountData = User;
+
+export interface getMySubAccountResponse extends Response<getMySubAccountData> {}

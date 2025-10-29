@@ -9,14 +9,15 @@ import cx from 'clsx';
 import { ActionIcon, Anchor, Avatar, Box, Breadcrumbs, Button, Checkbox, Collapse, Divider, Flex, FocusTrap, Grid, Group, LoadingOverlay, Modal, Pagination, Paper, ScrollArea, Select, SimpleGrid, Stack, Table, Text, TextInput, Title } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useDisclosure } from '@mantine/hooks';
-import { mySubAccountList } from '@/api/my/api'; // 导入API
+import { editMySubAccount, mySubAccountList } from '@/api/my/api'; // 导入API
 import { mySubAccountListData } from '@/api/my/response';
 import { User } from '@/api/my/typings';
+import { DeleteConfirm } from '@/components/DeleteConfirm/DeleteConfirm';
 import { useNavbar } from '@/contexts/NavbarContext/NavbarContext';
 import notify from '@/utils/notify'; // 导入通知工具
 import { formatTimestamp } from '@/utils/time';
 import classes from './style.module.css';
-import { DeleteConfirm } from '@/components/DeleteConfirm/DeleteConfirm';
+import { editMySubAccountRequest } from '@/api/my/request';
 
 
 interface SubAccountsProps {
@@ -178,7 +179,7 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
         setTotalPage(response.data.totalPage || 0);
         setCount(response.data.count || 0);
         setSelection([]);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        // window.scrollTo({ top: 0, behavior: 'smooth' });
       } else {
         notify(response.message || 'Failed to load data', 'error');
       }
@@ -287,6 +288,7 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
       setEditingAccount(user);
       // 重置表单为account的值
       addEditForm.setValues({
+        id: user.account.id,
         username: user.account.username,
         email: user.account.email,
         mobile: user.account.mobile,
@@ -296,6 +298,7 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
       // 新增模式：重置表单
       setEditingAccount(null);
       addEditForm.setValues({
+        id: '',
         username: '',
         email: '',
         mobile: '',
@@ -317,6 +320,7 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
 
   const addEditForm = useForm({
     initialValues: {
+      id: editingAccount?.account.id || '',
       username: editingAccount?.account?.username || '',
       email: editingAccount?.account?.email || '',
       mobile: editingAccount?.account?.mobile || '',
@@ -339,10 +343,14 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
         if (!val) {
           return 'This field is required';
         }
+        // 添加手机号格式验证（根据需求调整）
+        if (!/^\d+$/.test(val)) {
+          return 'Mobile number should contain only digits';
+        }
         return null;
       },
       status: (val) => {
-        if (!val) {
+        if (val === undefined || val === null) {
           return 'This field is required';
         }
         return null;
@@ -354,25 +362,24 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
     if (addEditAction === 'add'){
       // TODO add
       console.log('add');
-
+      loadData(1).then();
     }else if(addEditAction === 'edit'){
       if (!editingAccount) {return;} // 确保用户存在
       setLoading(true);
       try {
         // 处理表单数据，转换为API需要的格式
-        const formattedData = {
+        const formattedData: editMySubAccountRequest = {
           ...values,
         };
-
         // 根据编辑还是新增来确定响应内容
         // 调用编辑个人资料API
-        const response = await editMyProfile(formattedData);
+        const response = await editMySubAccount(formattedData);
 
         if (response.code === 0) {
-          // TODO 根据编辑还是新增来确定响应内容
-          notify('Profile updated successfully', 'success');
+          loadData(page).then()
+          notify('Sub account updated successfully', 'success');
         } else {
-          notify(response.message || 'Failed to update profile', 'error');
+          notify(response.message || 'Failed to update the sub account', 'error');
         }
       } catch (err) {
         if (err instanceof Error) {
@@ -380,8 +387,10 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
         } else {
           notify('系统错误', 'error');
         }
+
       } finally {
         setLoading(false);
+        addEditModalActions.close();
       }
     }
     addEditForm.reset();
@@ -626,6 +635,7 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
               />
               <Select
                 label="Status"
+                required
                 value={addEditForm.values.status.toString()}
                 onChange={(value) => addEditForm.setFieldValue('status', parseInt(value||'0',10))}
                 placeholder="Select status"

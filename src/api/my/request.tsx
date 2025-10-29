@@ -76,3 +76,16 @@ export interface myUnreadMessageCountRequest extends Query,Pager {}
 export interface deleteMySubAccountRequest {
   ids: string[];
 }
+
+export interface editMySubAccountRequest {
+  id: string;
+  username: string;
+  email: string;
+  mobile: string;
+  status: number;
+}
+
+
+export interface getMySubAccountRequest extends Query {
+  id: string;
+}
