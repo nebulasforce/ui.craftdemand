@@ -442,7 +442,7 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
                 )
               }
               radius="md"
-              disabled={loading}
+              // disabled={loading}
             />
           </Grid.Col>
           <Grid.Col span={{ base: 12, sm: 3 }} mb="xs">
@@ -473,14 +473,14 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
                 value={advancedFilters.username}
                 onChange={(e) => handleAdvancedFilterChange('username', e.target.value)}
                 placeholder="Search by username"
-                disabled={loading}
+                // disabled={loading}
               />
               <TextInput
                 label="Mobile"
                 value={advancedFilters.mobile}
                 onChange={(e) => handleAdvancedFilterChange('mobile', e.target.value)}
                 placeholder="Search by mobile number"
-                disabled={loading}
+                // disabled={loading}
               />
               <TextInput
                 label="Email"
@@ -494,15 +494,15 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
                 onChange={(value) => handleAdvancedFilterChange('status', value || '')}
                 placeholder="Select status"
                 data={statusOptions}
-                disabled={loading}
+                // disabled={loading}
               />
             </SimpleGrid>
 
             <Group gap="sm" mt="md" justify="flex-end">
-              <Button variant="ghost" onClick={resetAdvancedFilters} disabled={loading}>
+              <Button variant="ghost" onClick={resetAdvancedFilters} /* disabled={loading}*/>
                 Reset
               </Button>
-              <Button onClick={handleAdvancedSearch} disabled={loading}>
+              <Button onClick={handleAdvancedSearch}/* disabled={loading}*/>
                 Apply Filters
               </Button>
             </Group>
@@ -516,13 +516,13 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
               <Button
                 variant="danger"
                 leftSection={<IconTrash size={16} stroke={1.5} />}
-                disabled={selection.length === 0 || loading}
+                disabled={selection.length === 0 }
               >
                 Delete Selected
               </Button>
               <Button
                 leftSection={<IconPlus size={16} stroke={1.5} />}
-                disabled={loading}
+                // disabled={loading}
                 onClick={() => openAddEditModal({action:'add'})}
               >
                 Add Sub Account
