@@ -65,7 +65,7 @@ export function RegisterForm(props: PaperProps) {
 
     validate: {
       username: (val) => {
-        if (val?.length < 3) {
+        if (val.trim()?.length < 3) {
           return 'Username must be at least 3 characters';
         }
         return null;

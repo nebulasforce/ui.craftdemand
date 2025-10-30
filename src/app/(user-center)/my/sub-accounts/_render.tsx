@@ -10,6 +10,8 @@ import { ActionIcon, Anchor, Avatar, Box, Breadcrumbs, Button, Checkbox, Collaps
 import { useForm } from '@mantine/form';
 import { useDisclosure } from '@mantine/hooks';
 import { editMySubAccount, mySubAccountList } from '@/api/my/api'; // 导入API
+
+import { editMySubAccountRequest } from '@/api/my/request';
 import { mySubAccountListData } from '@/api/my/response';
 import { User } from '@/api/my/typings';
 import { DeleteConfirm } from '@/components/DeleteConfirm/DeleteConfirm';
@@ -17,7 +19,6 @@ import { useNavbar } from '@/contexts/NavbarContext/NavbarContext';
 import notify from '@/utils/notify'; // 导入通知工具
 import { formatTimestamp } from '@/utils/time';
 import classes from './style.module.css';
-import { editMySubAccountRequest } from '@/api/my/request';
 
 
 interface SubAccountsProps {
@@ -328,23 +329,21 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
     },
     validate: {
       username: (val) => {
-        if (!val) {
+        if (!val || val.trim() === '') {
           return 'This field is required';
         }
         return null;
       },
       email: (val) => {
-        if (!val) {
-          return 'This field is required';
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(val)) {
+          return null;
         }
-        return null;
       },
       mobile: (val) => {
-        if (!val) {
-          return 'This field is required';
-        }
         // 添加手机号格式验证（根据需求调整）
-        if (!/^\d+$/.test(val)) {
+        const cleaned = val.replace(/[^\d+]/g, '');
+        if (!/^\+?[\d]+$/.test(cleaned)) {
           return 'Mobile number should contain only digits';
         }
         return null;

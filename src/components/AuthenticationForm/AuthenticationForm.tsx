@@ -70,7 +70,7 @@ export function AuthenticationForm(props: PaperProps) {
     validate: {
       loginId: (val) => {
         if (type === 'login') {
-          if (!val) {
+          if (!val || val.trim() === '') {
             return 'This field is required';
           }
         }
@@ -92,7 +92,7 @@ export function AuthenticationForm(props: PaperProps) {
           : null,
 
       password: (val) => {
-        if (!val) {
+        if (!val || val.trim() === '') {
           return 'Password is required';
         }
         if (val.length < 6) {

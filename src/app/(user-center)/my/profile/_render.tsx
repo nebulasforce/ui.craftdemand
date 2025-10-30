@@ -251,37 +251,37 @@ const ProfilePageRender = ({ provinces, cities }: ProfilePageProps) => {
     },
     validate: {
       nickname: (val) => {
-        if (!val) {
+        if (!val || val.trim() === '') {
           return 'This field is required';
         }
         return null;
       },
       signature: (val) => {
-        if (!val) {
+        if (!val || val.trim() === '') {
           return 'This field is required';
         }
         return null;
       },
       birthday: (val) => {
-        if (!val) {
+        if (!val || val.trim() === '') {
           return 'This field is required';
         }
         return null;
       },
       province: (val) => {
-        if (!val) {
-          return 'Please select a province';
+        if (!val || val.trim() === '') {
+          return 'This field is required';
         }
         return null;
       },
       city: (val) => {
-        if (!val) {
-          return 'Please select a city';
+        if (!val || val.trim() === '') {
+          return 'This field is required';
         }
         return null;
       },
       address: (val) => {
-        if (!val) {
+        if (!val || val.trim() === '') {
           return 'This field is required';
         }
         return null;

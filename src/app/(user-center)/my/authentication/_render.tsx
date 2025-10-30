@@ -178,7 +178,7 @@ const AccountPageRender =  ({  }:AccountPageProps) => {
     },
     validate: {
       username: (val) => {
-        if (!val) {
+        if (!val || val.trim() === '') {
           return 'This field is required';
         }
         return null;
@@ -206,7 +206,7 @@ const AccountPageRender =  ({  }:AccountPageProps) => {
     },
     validate: {
       confirmPassword: (val) => {
-        if (!val) {
+        if (!val || val.trim() === '') {
           return 'This field is required';
         }
         return null;
@@ -245,7 +245,7 @@ const AccountPageRender =  ({  }:AccountPageProps) => {
     },
     validate: {
       email: (val) => {
-        if (!val) {
+        if (!val || val.trim() === '') {
           return 'This field is required';
         }
         return null;
@@ -278,7 +278,7 @@ const AccountPageRender =  ({  }:AccountPageProps) => {
     },
     validate: {
       mobile: (val) => {
-        if (!val) {
+        if (!val || val.trim() === '') {
           return 'This field is required';
         }
         return null;

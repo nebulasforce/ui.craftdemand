@@ -75,7 +75,7 @@ export function LoginForm(props: PaperProps) {
 
     validate: {
       loginId: (val) => {
-        if (!val) {
+        if (!val || val.trim() === '') {
           return 'This field is required';
         }
         return null;
