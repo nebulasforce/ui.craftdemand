@@ -1,3 +1,13 @@
+// .eslintrc.json
 {
-  "extends": ["eslint-config-mantine"]
+  "extends": [
+    "mantine",
+    "next/core-web-vitals",
+    "plugin:storybook/recommended"
+  ],
+  "rules": {
+    // 项目自定义 ESLint 规则（替换原 next.config.mjs 中的 eslint 配置）
+    "react/prop-types": "off",
+    "no-console": "warn"
+  }
 }
