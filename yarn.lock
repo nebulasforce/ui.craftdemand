@@ -2635,22 +2635,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mantine/ds@npm:^6.0.22":
-  version: 6.0.22
-  resolution: "@mantine/ds@npm:6.0.22"
-  dependencies:
-    "@mantine/utils": "npm:6.0.22"
-  peerDependencies:
-    "@mantine/core": 6.0.22
-    "@mantine/hooks": 6.0.22
-    "@mantine/prism": 6.0.22
-    "@tabler/icons-react": "*"
-    react: ">=16.8.0"
-    react-dom: ">=16.8.0"
-  checksum: 10c0/40a56ed6ca4f9e4e4d5d57077ad576e9ec36a64073ca9d60597f27b01d107bd4b56fb2c2090c119e8bcb5fd72480edadfb95413ca348f0ae3e2eb9817cd78f3d
-  languageName: node
-  linkType: hard
-
 "@mantine/form@npm:^8.3.6":
   version: 8.3.6
   resolution: "@mantine/form@npm:8.3.6"
@@ -2713,36 +2697,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mantine/prism@npm:^6.0.22":
-  version: 6.0.22
-  resolution: "@mantine/prism@npm:6.0.22"
-  dependencies:
-    "@mantine/utils": "npm:6.0.22"
-    prism-react-renderer: "npm:^1.2.1"
-  peerDependencies:
-    "@mantine/core": 6.0.22
-    "@mantine/hooks": 6.0.22
-    react: ">=16.8.0"
-    react-dom: ">=16.8.0"
-  checksum: 10c0/d96abf67c03c9b109e0b5c0059b5c9a704913fe786f10b3991221add8ee8e08c04b042baeec3e3a30a2d3751083c8ee9b609d6aa71840b048e1a80e1c31a3c6c
-  languageName: node
-  linkType: hard
-
 "@mantine/store@npm:8.3.6":
   version: 8.3.6
   resolution: "@mantine/store@npm:8.3.6"
   peerDependencies:
     react: ^18.x || ^19.x
   checksum: 10c0/796e47cae538b336bbaf6e7bfbe14d6ad84138603f04b42fbed10b052a2ebf1c069cdd89020d0c6318309a3f79e299a9905c8ec710a014e71375049e985889e0
-  languageName: node
-  linkType: hard
-
-"@mantine/utils@npm:6.0.22, @mantine/utils@npm:^6.0.22":
-  version: 6.0.22
-  resolution: "@mantine/utils@npm:6.0.22"
-  peerDependencies:
-    react: ">=16.8.0"
-  checksum: 10c0/ac7ec0022f35d6752f198c013b44009d1c24eaeb7f84979a9e08cc078effa05834112c4595962553580b89e8dfddb6d3dc969b9d8e3dbf08fafed065cd636eaa
   languageName: node
   linkType: hard
 
@@ -3686,13 +3646,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/prop-types@npm:*":
-  version: 15.7.15
-  resolution: "@types/prop-types@npm:15.7.15"
-  checksum: 10c0/b59aad1ad19bf1733cf524fd4e618196c6c7690f48ee70a327eb450a42aab8e8a063fbe59ca0a5701aebe2d92d582292c0fb845ea57474f6a15f6994b0e260b2
-  languageName: node
-  linkType: hard
-
 "@types/react-typist@npm:^2.0.6":
   version: 2.0.6
   resolution: "@types/react-typist@npm:2.0.6"
@@ -3702,22 +3655,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react@npm:*":
+"@types/react@npm:*, @types/react@npm:^19.2.2":
   version: 19.2.2
   resolution: "@types/react@npm:19.2.2"
   dependencies:
     csstype: "npm:^3.0.2"
   checksum: 10c0/f830b1204aca4634ce3c6cb3477b5d3d066b80a4dd832a4ee0069acb504b6debd2416548a43a11c1407c12bc60e2dc6cf362934a18fe75fe06a69c0a98cba8ab
-  languageName: node
-  linkType: hard
-
-"@types/react@npm:^18.0.0":
-  version: 18.3.26
-  resolution: "@types/react@npm:18.3.26"
-  dependencies:
-    "@types/prop-types": "npm:*"
-    csstype: "npm:^3.0.2"
-  checksum: 10c0/7b62d91c33758f14637311921c92db6045b6328e2300666a35ef8130d06385e39acada005eaf317eee93228edc10ea5f0cd34a0385654d2014d24699a65bfeef
   languageName: node
   linkType: hard
 
@@ -4988,7 +4931,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"axios@npm:^1.7.7":
+"axios@npm:^1.13.1":
   version: 1.13.1
   resolution: "axios@npm:1.13.1"
   dependencies:
@@ -10347,14 +10290,11 @@ __metadata:
     "@ianvs/prettier-plugin-sort-imports": "npm:^4.4.2"
     "@mantine/core": "npm:^8.3.6"
     "@mantine/dates": "npm:^8.3.6"
-    "@mantine/ds": "npm:^6.0.22"
     "@mantine/form": "npm:^8.3.6"
     "@mantine/hooks": "npm:^8.3.6"
     "@mantine/modals": "npm:^8.3.6"
     "@mantine/notifications": "npm:^8.3.6"
     "@mantine/nprogress": "npm:^8.3.6"
-    "@mantine/prism": "npm:^6.0.22"
-    "@mantine/utils": "npm:^6.0.22"
     "@mantinex/dev-icons": "npm:^2.0.0"
     "@mantinex/mantine-logo": "npm:^2.0.0"
     "@next/bundle-analyzer": "npm:^15.3.3"
@@ -10372,10 +10312,10 @@ __metadata:
     "@types/js-cookie": "npm:^3"
     "@types/node": "npm:^22.13.11"
     "@types/nprogress": "npm:^0"
-    "@types/react": "npm:^18.0.0"
+    "@types/react": "npm:^19.2.2"
     "@types/react-typist": "npm:^2.0.6"
     autoprefixer: "npm:^10.4.21"
-    axios: "npm:^1.7.7"
+    axios: "npm:^1.13.1"
     babel-loader: "npm:^10.0.0"
     cookie: "npm:^1.0.2"
     dayjs: "npm:^1.11.15"
@@ -10398,7 +10338,6 @@ __metadata:
     react: "npm:^19.2.0"
     react-dom: "npm:^19.2.0"
     react-typewriter-effect: "npm:^1.1.0"
-    react-typist: "npm:^2.0.5"
     storybook: "npm:^9.1.4"
     storybook-dark-mode: "npm:^4.0.2"
     stylelint: "npm:^16.20.0"
@@ -11899,15 +11838,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prism-react-renderer@npm:^1.2.1":
-  version: 1.3.5
-  resolution: "prism-react-renderer@npm:1.3.5"
-  peerDependencies:
-    react: ">=0.14.9"
-  checksum: 10c0/9caada97fa7325fc99484cff409a84ed947a061615851bd0aedf4fcfd4b3496e2eff4b252dbfd4465dd6ea7310134ed67d737cabf0c78b192969c3c7da383237
-  languageName: node
-  linkType: hard
-
 "proc-log@npm:^5.0.0":
   version: 5.0.0
   resolution: "proc-log@npm:5.0.0"
@@ -11946,7 +11876,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prop-types@npm:^15.5.10, prop-types@npm:^15.6.2, prop-types@npm:^15.8.1":
+"prop-types@npm:^15.6.2, prop-types@npm:^15.8.1":
   version: 15.8.1
   resolution: "prop-types@npm:15.8.1"
   dependencies:
@@ -12269,18 +12199,6 @@ __metadata:
   peerDependencies:
     react: ^16.10.2
   checksum: 10c0/6fbc4a96b79656e39586b84ddfc11c792ab0413f3eabca5f6607fc37d64b1744ea7ad41ee85ce20b290c036a97eeff59c2a5dd890bb786b37339cee2a1a281d8
-  languageName: node
-  linkType: hard
-
-"react-typist@npm:^2.0.5":
-  version: 2.0.5
-  resolution: "react-typist@npm:2.0.5"
-  dependencies:
-    prop-types: "npm:^15.5.10"
-  peerDependencies:
-    react: ^0.14 || ^15.0 || ^16.0
-    react-dom: "*"
-  checksum: 10c0/1c105a87d324e3d296f8013a2a0529857224c55aedf3c6dc179027eeb86a97b5a970c250143cb469b4911eb4a6ef6c6aef8cd5dc87b6fdedf3943557686e78f6
   languageName: node
   linkType: hard
 

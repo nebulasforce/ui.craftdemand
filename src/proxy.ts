@@ -70,7 +70,7 @@ const protectedRoutes = ['/my/*'];
 // 定义无需认证的公开路由（可选，用于精确排除某些路由）
 const publicRoutes = ['/auth/login', '/auth/register', '/', '/about'];
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   // 1. 获取当前访问的路径
   const currentPath = request.nextUrl.pathname;
   // 2 从 cookie 中获取认证 token（与前端存储的 cookie 键名一致）
