@@ -85,7 +85,16 @@ export interface editMySubAccountRequest {
   status: number;
 }
 
-
 export interface getMySubAccountRequest extends Query {
   id: string;
 }
+
+
+export interface createMySubAccountRequest {
+  username: string;
+  password: string;
+  email: string;
+  mobile: string;
+  status: number;
+}
+

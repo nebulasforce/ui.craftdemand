@@ -47,7 +47,7 @@ export function LoginForm(props: PaperProps) {
       if (err instanceof Error) {
         notify(err.message, 'error');
       } else {
-        notify('系统错误', 'error');
+        notify('Internal Error', 'error');
       }
     }
   };

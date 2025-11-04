@@ -84,6 +84,12 @@ export interface editMySubAccountData extends Result {
 
 export interface editMySubAccountResponse extends Response<editMySubAccountData> {}
 
+export interface createMySubAccountData extends Result {
+  id: string;
+}
+
+export interface createMySubAccountResponse extends Response<createMySubAccountData> {}
+
 export type getMySubAccountData = User;
 
 export interface getMySubAccountResponse extends Response<getMySubAccountData> {}

@@ -93,7 +93,7 @@ export function HeaderDropdown({ user }: HeaderDropdownProps) {
       if (err instanceof Error) {
         notify(err.message, 'error');
       } else {
-        notify('系统错误', 'error');
+        notify('Internal Error', 'error');
       }
     }
   };

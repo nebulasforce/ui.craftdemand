@@ -132,7 +132,7 @@ const ProfilePageRender = ({ provinces, cities }: ProfilePageProps) => {
       if (err instanceof Error) {
         notify(err.message, 'error');
       } else {
-        notify('系统错误', 'error');
+        notify('Internal Error', 'error');
       }
     } finally {
       setLoading(false);
@@ -207,7 +207,7 @@ const ProfilePageRender = ({ provinces, cities }: ProfilePageProps) => {
       if (err instanceof Error) {
         notify(err.message, 'error');
       } else {
-        notify('系统错误', 'error');
+        notify('Internal Error', 'error');
       }
     }
   }

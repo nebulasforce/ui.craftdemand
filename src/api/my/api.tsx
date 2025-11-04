@@ -1,6 +1,7 @@
 import { Options } from '@/api/common/request';
-import { deleteMySubAccountRequest, editMyAvatarRequest, editMyEmailRequest, editMyMobileRequest, editMyPasswordRequest, editMyProfileRequest, editMySubAccountRequest, editMyUsernameRequest, getMySubAccountRequest, meRequest, myAllSubAccountListRequest, mySubAccountListRequest, myUnreadMessageCountRequest, sendEmailVerifiedCodeRequest, sendMobileVerifiedCodeRequest } from '@/api/my/request';
+import { createMySubAccountRequest, deleteMySubAccountRequest, editMyAvatarRequest, editMyEmailRequest, editMyMobileRequest, editMyPasswordRequest, editMyProfileRequest, editMySubAccountRequest, editMyUsernameRequest, getMySubAccountRequest, meRequest, myAllSubAccountListRequest, mySubAccountListRequest, myUnreadMessageCountRequest, sendEmailVerifiedCodeRequest, sendMobileVerifiedCodeRequest } from '@/api/my/request';
 import {
+  createMySubAccountResponse,
   deleteMySubAccountResponse,
   editMyAvatarResponse,
   editMyEmailResponse,
@@ -195,6 +196,19 @@ export async function deleteMySubAccount(req?:deleteMySubAccountRequest,options?
 export async function editMySubAccount(req?:editMySubAccountRequest,options?:Options) {
   return request<editMySubAccountResponse>({
     url: `/api/v1/my/sub-account/${req?.id}`,
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: req || {},
+    ...(options || {}),
+  });
+}
+
+// createMySubAccount 编辑我的子账号
+export async function createMySubAccount(req?:createMySubAccountRequest,options?:Options) {
+  return request<createMySubAccountResponse>({
+    url: `/api/v1/my/sub-account`,
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

@@ -67,7 +67,7 @@ const sendMobileVerificationCode = async (mobile: string) => {
     if (err instanceof Error) {
       notify(err.message, 'error');
     } else {
-      notify('系统错误', 'error');
+      notify('Internal Error', 'error');
     }
     return false;
   }
@@ -90,7 +90,7 @@ const sendEmailVerificationCode = async (email: string) => {
     if (err instanceof Error) {
       notify(err.message, 'error');
     } else {
-      notify('系统错误', 'error');
+      notify('Internal Error', 'error');
     }
     return false
   }
@@ -341,7 +341,7 @@ const AccountPageRender =  ({  }:AccountPageProps) => {
       if (err instanceof Error) {
         notify(err.message, 'error');
       } else {
-        notify('系统错误', 'error');
+        notify('Internal Error', 'error');
       }
     } finally {
       setLoading(false);
@@ -373,7 +373,7 @@ const AccountPageRender =  ({  }:AccountPageProps) => {
       if (err instanceof Error) {
         notify(err.message, 'error');
       } else {
-        notify('系统错误', 'error');
+        notify('Internal Error', 'error');
       }
     } finally {
       setLoading(false);
@@ -420,7 +420,7 @@ const AccountPageRender =  ({  }:AccountPageProps) => {
       if (err instanceof Error) {
         notify(err.message, 'error');
       } else {
-        notify('系统错误', 'error');
+        notify('Internal Error', 'error');
       }
     } finally {
       setLoading(false);
@@ -467,7 +467,7 @@ const AccountPageRender =  ({  }:AccountPageProps) => {
       if (err instanceof Error) {
         notify(err.message, 'error');
       } else {
-        notify('系统错误', 'error');
+        notify('Internal Error', 'error');
       }
     } finally {
       setLoading(false);

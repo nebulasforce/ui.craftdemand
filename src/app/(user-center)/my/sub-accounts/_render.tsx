@@ -9,9 +9,9 @@ import cx from 'clsx';
 import { ActionIcon, Anchor, Avatar, Box, Breadcrumbs, Button, Checkbox, Collapse, Divider, Flex, FocusTrap, Grid, Group, LoadingOverlay, Modal, Pagination, Paper, ScrollArea, Select, SimpleGrid, Stack, Table, Text, TextInput, Title } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useDisclosure } from '@mantine/hooks';
-import { editMySubAccount, mySubAccountList } from '@/api/my/api'; // 导入API
+import { createMySubAccount, editMySubAccount, mySubAccountList } from '@/api/my/api'; // 导入API
 
-import { editMySubAccountRequest } from '@/api/my/request';
+import { createMySubAccountRequest, editMySubAccountRequest } from '@/api/my/request';
 import { mySubAccountListData } from '@/api/my/response';
 import { User } from '@/api/my/typings';
 import { DeleteConfirm } from '@/components/DeleteConfirm/DeleteConfirm';
@@ -50,7 +50,7 @@ const statusOptions = Object.entries(statusMap).map(([value, { label }]) => ({
 // 获取状态显示文本
 const getStatusLabel = (status: number | string) => {
   const statusNumber = typeof status === 'string' ? parseInt(status, 10) : status;
-  return statusMap[statusNumber]?.label || '未知';
+  return statusMap[statusNumber]?.label || 'Unknown';
 };
 
 // 获取状态显示颜色
@@ -205,7 +205,7 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
         </Table.Td>
         <Table.Td>
           <Group gap="sm">
-            <Avatar size={26} src={item.profile.avatar} radius={26} />
+            <Avatar size={26} src={item.profile?.avatar!==''?item.profile?.avatar:'/avatar_default.png'} radius={26} />
             <Text size="sm" fw={500}>
               {item.account.username}
             </Text>
@@ -283,7 +283,6 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
   // 打开表单模态窗口
   const openAddEditModal = ({action, user}: openAddEditModalParams) => {
     setAddEditAction(action);
-
     if (action === 'edit' && user) {
       // 编辑模式：填充现有数据
       setEditingAccount(user);
@@ -301,6 +300,7 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
       addEditForm.setValues({
         id: '',
         username: '',
+        password: '',
         email: '',
         mobile: '',
         status: 0,
@@ -323,6 +323,7 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
     initialValues: {
       id: editingAccount?.account.id || '',
       username: editingAccount?.account?.username || '',
+      password: '',
       email: editingAccount?.account?.email || '',
       mobile: editingAccount?.account?.mobile || '',
       status: editingAccount?.account?.status || 0,
@@ -334,11 +335,28 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
         }
         return null;
       },
+      password: (val) => {
+        // 如果值为空，不进行验证
+        if (val && val.trim() !== '') {
+          const password = val.trim();
+          // 基础密码验证：至少6位
+          if (password.length < 6) {
+            return 'Password must be at least 6 characters long.';
+          }
+        }
+
+        // 验证通过
+        return null;
+      },
       email: (val) => {
+        if (!val || val.trim() === '') {
+          return 'This field is required';
+        }
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(val)) {
-          return null;
+          return 'Invalid email format';
         }
+        return null;
       },
       mobile: (val) => {
         // 添加手机号格式验证（根据需求调整）
@@ -359,9 +377,33 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
 
   const handleAdEditFormSubmit = async (values: typeof addEditForm.values): Promise<void> => {
     if (addEditAction === 'add'){
-      // TODO add
-      console.log('add');
-      loadData(1).then();
+      setLoading(true);
+      try {
+        // 处理表单数据，转换为API需要的格式
+        const formattedData: createMySubAccountRequest = {
+          ...values,
+        };
+        // 根据编辑还是新增来确定响应内容
+        // 调用编辑个人资料API
+        const response = await createMySubAccount(formattedData);
+
+        if (response.code === 0) {
+          loadData(page).then()
+          notify('Sub account add successfully', 'success');
+        } else {
+          notify(response.message || 'Failed to add the sub account', 'error');
+        }
+      } catch (err){
+        if (err instanceof Error) {
+          notify(err.message, 'error');
+        } else {
+          notify('Internal Error', 'error');
+        }
+      } finally {
+        setLoading(false);
+        addEditModalActions.close();
+      }
+
     }else if(addEditAction === 'edit'){
       if (!editingAccount) {return;} // 确保用户存在
       setLoading(true);
@@ -384,9 +426,8 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
         if (err instanceof Error) {
           notify(err.message, 'error');
         } else {
-          notify('系统错误', 'error');
+          notify('Internal Error', 'error');
         }
-
       } finally {
         setLoading(false);
         addEditModalActions.close();
@@ -621,6 +662,21 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
                 error={addEditForm.errors.email}
                 radius="md"
               />
+              {
+                addEditAction === 'add' &&(
+                  <TextInput
+                    required
+                    label="Password"
+                    placeholder="Input your password"
+                    value={addEditForm.values.password}
+                    onChange={(event) =>
+                      addEditForm.setFieldValue('password', event.currentTarget.value)
+                    }
+                    error={addEditForm.errors.password}
+                    radius="md"
+                  />
+                )
+              }
               <TextInput
                 required
                 label="Mobile"
