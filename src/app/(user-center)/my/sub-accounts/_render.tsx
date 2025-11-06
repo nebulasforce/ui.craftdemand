@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { IconChevronDown, IconChevronUp, IconEdit, IconPlus, IconSearch, IconTrash, IconX } from '@tabler/icons-react';
+import { IconChevronDown, IconChevronUp, IconEdit, IconPlus, IconSearch, IconTrash, IconUserCog, IconX } from '@tabler/icons-react';
 // 导入Next.js路由钩子
 import cx from 'clsx';
 import { ActionIcon, Anchor, Avatar, Box, Breadcrumbs, Button, Checkbox, Collapse, Divider, Flex, FocusTrap, Grid, Group, LoadingOverlay, Modal, Pagination, Paper, ScrollArea, Select, SimpleGrid, Stack, Table, Text, TextInput, Title } from '@mantine/core';
@@ -224,6 +224,9 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
             <ActionIcon onClick={()=>{openAddEditModal({action:'edit',user:item})}} variant="light" size="md" aria-label="Edit">
               <IconEdit size={14} stroke={1.5} />
             </ActionIcon>
+            <ActionIcon onClick={()=>{handleSettingSubAccount(item)}} variant="light" size="md" aria-label="Setting">
+              <IconUserCog size={14} stroke={1.5} />
+            </ActionIcon>
             <DeleteConfirm onConfirm={()=>{handleDeleteOneSubAccount(item)}} itemName={item.account.username}>
               <ActionIcon variant="light" size="md" aria-label="Delete">
                 <IconTrash size={14} stroke={1.5} />
@@ -312,6 +315,10 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
 
   const handleDeleteOneSubAccount =   (user: User) => {
     console.log('删除账户:', user);
+  }
+
+  const handleSettingSubAccount = (user: User) => {
+    console.log('设置账户:', user);
   }
 
   // const closeAddEditModal = () => {
