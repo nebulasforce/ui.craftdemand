@@ -1,4 +1,5 @@
-import { Pager, Query } from '@/api/common/request';
+import { Query,Pager } from '@/api/common/request';
 
 
 export interface listRequest extends Query,Pager {}
+

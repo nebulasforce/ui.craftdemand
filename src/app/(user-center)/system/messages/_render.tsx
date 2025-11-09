@@ -1,37 +1,32 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { IconChevronDown, IconChevronUp, IconSearch, IconX } from '@tabler/icons-react';
-import {
-  ActionIcon,
-  Anchor,
-  Box,
-  Breadcrumbs,
-  Button,
-  Collapse,
-  Divider,
-  Grid,
-  Group,
-  Paper,
-  Select,
-  SimpleGrid,
-  Text,
-  TextInput,
-  Title,
-} from '@mantine/core';
-import { messageList } from '@/api/message/api';
-import { messageListData } from '@/api/message/response';
+import cx from 'clsx';
+import { ActionIcon, Anchor, Avatar, Box, Breadcrumbs, Button, Checkbox, Collapse, Divider, Flex, FocusTrap, Grid, Group, LoadingOverlay, Modal, Pagination, Paper, ScrollArea, Select, SimpleGrid, Stack, Table, Text, TextInput, Title } from '@mantine/core';
+import { useForm } from '@mantine/form';
+import { useDisclosure } from '@mantine/hooks';
+
+import { list as messageList } from '@/api/message/api';
+import { Message } from '@/api/message/typings';
+import { listData } from '@/api/message/response';
 import { useNavbar } from '@/contexts/NavbarContext/NavbarContext';
 import notify from '@/utils/notify';
-
-
-// import { useNotifications } from '@/contexts/NotificationContext/NotificationContext';
+import { formatTimestamp } from '@/utils/time';
+import classes from './style.module.css';
 
 
 interface MessagesProps {
-  initialData: messageListData | null;
+  initialData: listData | null;
+}
+
+
+// 定义状态项接口
+interface statusItem {
+  label: string;
+  color: string;
 }
 
 // 定义高级搜索条件接口
@@ -40,6 +35,11 @@ interface AdvancedSearchFilters {
   status: string;
 }
 
+
+interface openAddEditModalParams {
+  action: 'add' | 'edit';
+  message?: Message;
+}
 
 const statusMap:{[key:number]:statusItem} = {
   0: { label: 'Active', color: 'green' },
@@ -51,7 +51,6 @@ const statusOptions = Object.entries(statusMap).map(([value, { label }]) => ({
   value,
   label,
 }));
-
 
 const MessagesPageRender =  ({ initialData }:MessagesProps) => {
   const { setActive, setSection } = useNavbar();

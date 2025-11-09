@@ -1,7 +1,7 @@
 import { Pagination, Response } from '@/api/common/response';
-import { Message } from '@/api/message/typings';
+import { Account } from '@/api/account/typings';
 
-export interface listData extends Pagination<Message> {
+export interface listData extends Pagination<Account> {
 }
 
 export interface listResponse extends Response<listData> {}
