@@ -20,6 +20,7 @@ interface LogoProps {
   radius?: string | number;
   isSvg?: boolean; // 允许手动覆盖检测结果
   wrap?: React.CSSProperties['flexWrap'];
+  hideText?: boolean; // 新增：是否隐藏文字
   textProps?: Omit<TextProps, 'children' | 'size'>& { // 扩展textProps
     gradient?: { from: string; to: string; direction?: number };
     verticalAlign?: 'top' | 'center' | 'bottom';
@@ -37,6 +38,7 @@ export const Logo = ({
                        radius = 'md',
                        isSvg: manualIsSvg, // 重命名用于内部逻辑
                        wrap = 'nowrap',
+                       hideText = false, // 新增：是否隐藏文字
                        textProps = {}, // 默认空对象
                        imageProps = {}, // 默认空对象
                      }: LogoProps) => {
@@ -95,7 +97,7 @@ export const Logo = ({
           {...imageProps} // 展开所有Image属性
         />
       )}
-      {text && (
+      {text && !hideText && (
         <div style={textVerticalStyles}>  {/* 包裹文字的容器 */}
           <Text
             size={typeof size === 'number' ? rem(size * 0.8) : size}

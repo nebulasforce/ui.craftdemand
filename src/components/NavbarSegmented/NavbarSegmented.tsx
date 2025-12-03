@@ -60,9 +60,10 @@ const generateSegments = (data: listGroupData) => {
 
 interface NavbarSegmentedProps {
   data: listGroupData;
+  collapsed?: boolean;
 }
 
-export function NavbarSegmented({ data }: NavbarSegmentedProps) {
+export function NavbarSegmented({ data, collapsed = false }: NavbarSegmentedProps) {
   // 初始化时就使用data生成segments，减少一次更新
   const [segments, setSegments] = useState<{ label: string; value: SectionType }[]>(
     generateSegments(data)
@@ -94,12 +95,14 @@ export function NavbarSegmented({ data }: NavbarSegmentedProps) {
             <Link
               className={classes.link}
               data-active={isActive || undefined}
+              data-collapsed={collapsed || undefined}
               href={item.url}
               key={item.code}
               onClick={() => setActive(item.name)}
+              title={collapsed ? item.name : undefined}
             >
               <IconComponent className={classes.linkIcon} stroke={1.5} />
-              <span>{item.name}</span>
+              {!collapsed && <span>{item.name}</span>}
             </Link>
           );
         });
@@ -107,35 +110,49 @@ export function NavbarSegmented({ data }: NavbarSegmentedProps) {
   };
 
   return (
-    <nav className={classes.navbar}>
+    <nav className={classes.navbar} data-collapsed={collapsed || undefined}>
       <Box pos="relative" className={classes.top}>
-        <div>
-          <Text fw={500} size="sm" className={classes.title} c="dimmed" mb="xs">
-            bgluesticker@mantine.dev
-          </Text>
+        {!collapsed && (
+          <div>
+            <Text fw={500} size="sm" className={classes.title} c="dimmed" mb="xs">
+              bgluesticker@mantine.dev
+            </Text>
 
-          <SegmentedControl
-            value={section}
-            onChange={(value: any) => setSection(value)}
-            transitionTimingFunction="ease"
-            fullWidth
-            data={segments}
-          />
-        </div>
+            <SegmentedControl
+              value={section}
+              onChange={(value: any) => setSection(value)}
+              transitionTimingFunction="ease"
+              fullWidth
+              data={segments}
+            />
+          </div>
+        )}
 
         <div className={classes.navbarMain}>{getLinks()}</div>
       </Box>
 
       <Box className={classes.footerContainer}>
         <div className={classes.footer}>
-          <Link href="#" className={classes.link} onClick={(event) => event.preventDefault()}>
+          <Link
+            href="#"
+            className={classes.link}
+            onClick={(event) => event.preventDefault()}
+            data-collapsed={collapsed || undefined}
+            title={collapsed ? 'Change account' : undefined}
+          >
             <IconSwitchHorizontal className={classes.linkIcon} stroke={1.5} />
-            <span>Change account</span>
+            {!collapsed && <span>Change account</span>}
           </Link>
 
-          <Link href="#" className={classes.link} onClick={logout}>
+          <Link
+            href="#"
+            className={classes.link}
+            onClick={logout}
+            data-collapsed={collapsed || undefined}
+            title={collapsed ? 'Logout' : undefined}
+          >
             <IconLogout className={classes.linkIcon} stroke={1.5} />
-            <span>Logout</span>
+            {!collapsed && <span>Logout</span>}
           </Link>
         </div>
       </Box>

@@ -16,22 +16,29 @@ interface AppShellWrapperProps {
 }
 
 export function AppShellWrapper({ navbarData, children, user }: AppShellWrapperProps) {
-  const [opened] = useDisclosure();
+  const [mobileOpened, { toggle: toggleMobile }] = useDisclosure();
+  const [desktopOpened, { toggle: toggleDesktop }] = useDisclosure(true);
 
   return (
     <NavbarProvider navbarData={navbarData}>
       <AppShell
         header={{ height: 60 }}
-        navbar={{ width: 300, breakpoint: 'sm', collapsed: { mobile: !opened } }}
+        navbar={{
+          width: desktopOpened ? 300 : 80,
+          breakpoint: 'sm',
+          collapsed: { mobile: !mobileOpened, desktop: !desktopOpened },
+        }}
         padding="md"
       >
         <AppShellHeader>
-          {/*<HeaderMegaMenu />*/}
-          <HeaderMegaMenu user={user} />
+          <HeaderMegaMenu
+            user={user}
+            navbarCollapsed={!desktopOpened}
+            onNavbarToggle={toggleDesktop}
+          />
         </AppShellHeader>
         <AppShellNavbar>
-          {/* 将数据传递给NavbarSegmented组件 */}
-          <NavbarSegmented data={navbarData} />
+          <NavbarSegmented data={navbarData} collapsed={!desktopOpened} />
         </AppShellNavbar>
         <AppShellMain>{children}</AppShellMain>
       </AppShell>

@@ -30,7 +30,9 @@ import {
   ThemeIcon,
   UnstyledButton,
   useMantineTheme,
+  ActionIcon,
 } from '@mantine/core';
+import { IconLayoutSidebarLeftCollapse, IconLayoutSidebarLeftExpand } from '@tabler/icons-react';
 import { useDisclosure } from '@mantine/hooks';
 import { User } from '@/api/my/typings';
 import { HeaderDropdown } from '@/components/HeaderDropdown/HeaderDropdown';
@@ -73,9 +75,11 @@ const mockdata = [
 
 interface HeaderMegaMenuProps {
   user: User | null;
+  navbarCollapsed?: boolean;
+  onNavbarToggle?: () => void;
 }
 
-export function HeaderMegaMenu({ user }: HeaderMegaMenuProps) {
+export function HeaderMegaMenu({ user, navbarCollapsed = false, onNavbarToggle }: HeaderMegaMenuProps) {
   const [drawerOpened, { toggle: toggleDrawer, close: closeDrawer }] = useDisclosure(false);
   const [linksOpened, { toggle: toggleLinks }] = useDisclosure(false);
   const theme = useMantineTheme();
@@ -108,7 +112,24 @@ export function HeaderMegaMenu({ user }: HeaderMegaMenuProps) {
     <Box>
       <header className={classes.header}>
         <Group justify="space-between" h="100%">
-          <Logo size={30} src="/avatar.png" />
+          <Group gap="xs">
+            <Logo size={30} src="/avatar.png" hideText={navbarCollapsed} />
+            {onNavbarToggle && (
+              <ActionIcon
+                variant="subtle"
+                onClick={onNavbarToggle}
+                size="lg"
+                aria-label={navbarCollapsed ? 'Open sidebar' : 'Close sidebar'}
+                visibleFrom="sm"
+              >
+                {navbarCollapsed ? (
+                  <IconLayoutSidebarLeftExpand size={20} />
+                ) : (
+                  <IconLayoutSidebarLeftCollapse size={20} />
+                )}
+              </ActionIcon>
+            )}
+          </Group>
 
           <Group h="100%" gap={0} visibleFrom="sm" ml="md" pos="relative">
             <Link href="/" passHref className={classes.link}>
