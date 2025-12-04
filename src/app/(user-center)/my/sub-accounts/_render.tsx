@@ -8,9 +8,9 @@ import cx from 'clsx';
 import { ActionIcon, Anchor, Avatar, Box, Breadcrumbs, Button, Checkbox, Collapse, Divider, Flex, FocusTrap, Grid, Group, LoadingOverlay, Modal, Pagination, Paper, ScrollArea, Select, SimpleGrid, Stack, Table, Text, TextInput, Title } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useDisclosure } from '@mantine/hooks';
-import { createMySubAccount, editMySubAccount, mySubAccountList } from '@/api/my/api'; // 导入API
+import { createMySubAccount, deleteMySubAccount, editMySubAccount, mySubAccountList } from '@/api/my/api'; // 导入API
 
-import { createMySubAccountRequest, editMySubAccountRequest } from '@/api/my/request';
+import { createMySubAccountRequest, deleteMySubAccountRequest, editMySubAccountRequest } from '@/api/my/request';
 import { mySubAccountListData } from '@/api/my/response';
 import { User } from '@/api/my/typings';
 import { DeleteConfirm } from '@/components/DeleteConfirm/DeleteConfirm';
@@ -253,6 +253,8 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
       email: '',
       status: '',
     });
+    // 手动触发 Select 组件的 onChange 来确保状态更新
+    handleAdvancedFilterChange('status', '');
   };
 
 
@@ -312,9 +314,57 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
     addEditModalActions.open();
   };
 
-  const handleDeleteOneSubAccount =   (user: User) => {
-    console.log('删除账户:', user);
-  }
+  const handleDeleteOneSubAccount = async (user: User) => {
+    setLoading(true);
+    try {
+      const requestData: deleteMySubAccountRequest = {
+        ids: [user.account.id],
+      };
+      const response = await deleteMySubAccount(requestData);
+      if (response.code === 0) {
+        notify('Sub account deleted successfully', 'success');
+        await loadData(page);
+      } else {
+        notify(response.message || 'Failed to delete the sub account', 'error');
+      }
+    } catch (err) {
+      if (err instanceof Error) {
+        notify(err.message, 'error');
+      } else {
+        notify('Internal Error', 'error');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 批量删除选中的子账号
+  const handleDeleteSelected = async () => {
+    if (selection.length === 0) {
+      return;
+    }
+    setLoading(true);
+    try {
+      const requestData: deleteMySubAccountRequest = {
+        ids: selection,
+      };
+      const response = await deleteMySubAccount(requestData);
+      if (response.code === 0) {
+        notify(`Successfully deleted ${response.data?.count || selection.length} sub account(s)`, 'success');
+        await loadData(page);
+      } else {
+        notify(response.message || 'Failed to delete the sub accounts', 'error');
+      }
+    } catch (err) {
+      if (err instanceof Error) {
+        notify(err.message, 'error');
+      } else {
+        notify('Internal Error', 'error');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSettingSubAccount = (user: User) => {
     console.log('设置账户:', user);
@@ -537,10 +587,11 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
               />
               <Select
                 label="Status"
-                value={advancedFilters.status}
+                value={advancedFilters.status || null}
                 onChange={(value) => handleAdvancedFilterChange('status', value || '')}
                 placeholder="Select status"
                 data={statusOptions}
+                clearable
                 // disabled={loading}
               />
             </SimpleGrid>
@@ -560,13 +611,19 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
         <SimpleGrid mb="sm">
           <Flex justify="flex-end" align="center" direction="row">
             <Group>
-              <Button
-                variant="danger"
-                leftSection={<IconTrash size={16} stroke={1.5} />}
-                disabled={selection.length === 0 }
+              <DeleteConfirm
+                onConfirm={handleDeleteSelected}
+                itemName={selection.length === 1 ? data.find(item => selection.includes(item.account.id))?.account.username : `${selection.length} sub accounts`}
+                title="Delete Selected Sub Accounts"
               >
-                Delete Selected
-              </Button>
+                <Button
+                  variant="danger"
+                  leftSection={<IconTrash size={16} stroke={1.5} />}
+                  disabled={selection.length === 0 || loading}
+                >
+                  Delete Selected
+                </Button>
+              </DeleteConfirm>
               <Button
                 leftSection={<IconPlus size={16} stroke={1.5} />}
                 // disabled={loading}

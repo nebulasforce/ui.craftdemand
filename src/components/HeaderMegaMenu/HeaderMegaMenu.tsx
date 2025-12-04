@@ -112,11 +112,11 @@ export function HeaderMegaMenu({ user, navbarCollapsed = false, onNavbarToggle }
     <Box>
       <header className={classes.header}>
         <Group justify="space-between" h="100%">
-          <Group gap="xs">
-            <Logo size={30} src="/avatar.png" hideText={navbarCollapsed} />
+          <Group gap="xs" align="center">
+            <Logo text="CraftDemand™" size={30} src="/avatar.png" />
             {onNavbarToggle && (
               <ActionIcon
-                variant="subtle"
+                variant="transparent"
                 onClick={onNavbarToggle}
                 size="lg"
                 aria-label={navbarCollapsed ? 'Open sidebar' : 'Close sidebar'}
@@ -131,7 +131,7 @@ export function HeaderMegaMenu({ user, navbarCollapsed = false, onNavbarToggle }
             )}
           </Group>
 
-          <Group h="100%" gap={0} visibleFrom="sm" ml="md" pos="relative">
+          <Group h="100%" gap={0} visibleFrom="sm" ml={onNavbarToggle ? "md" : "calc(var(--mantine-spacing-md) + 2.75rem)"} pos="relative">
             <Link href="/" passHref className={classes.link}>
               Home
             </Link>
@@ -146,7 +146,6 @@ export function HeaderMegaMenu({ user, navbarCollapsed = false, onNavbarToggle }
                   </Center>
                 </Link>
               </HoverCard.Target>
-
               <HoverCard.Dropdown style={{ overflow: 'hidden' }}>
                 <Group justify="space-between" px="md">
                   <Text fw={500}>Features</Text>
