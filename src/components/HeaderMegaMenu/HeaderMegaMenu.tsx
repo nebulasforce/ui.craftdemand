@@ -113,7 +113,7 @@ export function HeaderMegaMenu({ user, navbarCollapsed = false, onNavbarToggle }
       <header className={classes.header}>
         <Group justify="space-between" h="100%">
           <Group gap="xs" align="center">
-            <Logo text="CraftDemand™" size={30} src="/avatar.png" />
+            <Logo text="CraftDemand" size={30} src="/avatar.png" showTrademark />
             {onNavbarToggle && (
               <ActionIcon
                 variant="transparent"

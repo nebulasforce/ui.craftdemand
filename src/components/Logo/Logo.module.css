@@ -1,3 +1,55 @@
 .logoImage {
     border-radius: 30%;
 }
+
+.trademark {
+    display: inline-flex;
+    font-size: .3em;
+    margin-left: 2px;
+    padding: 2px;
+    border-radius: 2px;
+    line-height: 1;
+    vertical-align: super;
+}
+
+.trademark::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: 2px;
+    padding: 1px;
+    background: linear-gradient(
+        45deg,
+        #ff0080,
+        #ff8c00,
+        #40e0d0,
+        #ff0080,
+        #ff8c00,
+        #40e0d0,
+        #ff0080
+    );
+    background-size: 400% 400%;
+    -webkit-mask: 
+        linear-gradient(#fff 0 0) content-box, 
+        linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask: 
+        linear-gradient(#fff 0 0) content-box, 
+        linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+    animation: moving-border 3s linear infinite;
+    z-index: 0;
+    pointer-events: none;
+}
+
+@keyframes moving-border {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}

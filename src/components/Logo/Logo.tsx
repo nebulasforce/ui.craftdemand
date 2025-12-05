@@ -21,6 +21,7 @@ interface LogoProps {
   isSvg?: boolean; // 允许手动覆盖检测结果
   wrap?: React.CSSProperties['flexWrap'];
   hideText?: boolean; // 新增：是否隐藏文字
+  showTrademark?: boolean; // 新增：是否显示™符号
   textProps?: Omit<TextProps, 'children' | 'size'>& { // 扩展textProps
     gradient?: { from: string; to: string; direction?: number };
     verticalAlign?: 'top' | 'center' | 'bottom';
@@ -39,6 +40,7 @@ export const Logo = ({
                        isSvg: manualIsSvg, // 重命名用于内部逻辑
                        wrap = 'nowrap',
                        hideText = false, // 新增：是否隐藏文字
+                       showTrademark = false, // 新增：是否显示™符号
                        textProps = {}, // 默认空对象
                        imageProps = {}, // 默认空对象
                      }: LogoProps) => {
@@ -108,11 +110,14 @@ export const Logo = ({
             gradient={gradient}
             style={{
               fontWeight: 800, // 通过style属性设置字体粗细
-              overflow:"hidden",
+              overflow:"visible",
               ...textProps.style, // 保留用户可能传入的style
             }}
           >
             {text}
+            {showTrademark && (
+              <sup className={styles.trademark}>TM</sup>
+            )}
           </Text>
         </div>
       )}
