@@ -30,11 +30,30 @@ interface statusItem {
   color: string;
 }
 
+// 定义类型项接口
+interface typeItem {
+  label: string;
+  color: string;
+}
+
 interface openAddEditModalParams {
   action: 'add' | 'edit';
   message?: Message;
 }
 
+// 消息类型常量
+export const MESSAGE_TYPE = {
+  SYSTEM: 0, // 系统消息
+  NORMAL: 1, // 普通消息
+} as const;
+
+// 类型映射
+const typeMap: {[key:number]:typeItem} = {
+  [MESSAGE_TYPE.SYSTEM]: { label: 'System', color: 'blue' },
+  [MESSAGE_TYPE.NORMAL]: { label: 'Normal', color: 'gray' },
+};
+
+// 状态映射
 const statusMap:{[key:number]:statusItem} = {
   0: { label: 'Active', color: 'green' },
   1: { label: 'Disabled', color: 'orange' },
@@ -45,6 +64,18 @@ const statusOptions = Object.entries(statusMap).map(([value, { label }]) => ({
   value,
   label,
 }));
+
+// 获取类型显示文本
+const getTypeLabel = (type: number | string) => {
+  const typeNumber = typeof type === 'string' ? parseInt(type, 10) : type;
+  return typeMap[typeNumber]?.label || 'Unknown';
+};
+
+// 获取类型显示颜色
+const getTypeColor = (type: number | string) => {
+  const typeNumber = typeof type === 'string' ? parseInt(type, 10) : type;
+  return typeMap[typeNumber]?.color || 'gray';
+};
 
 // 获取状态显示文本
 const getStatusLabel = (status: number | string) => {
@@ -206,6 +237,11 @@ const MessagesPageRender =  ({ initialData }:MessagesProps) => {
         <Table.Td>
           <Text size="sm" lineClamp={2}>
             {item.content}
+          </Text>
+        </Table.Td>
+        <Table.Td>
+          <Text c={getTypeColor(item.type)}>
+            {getTypeLabel(item.type)}
           </Text>
         </Table.Td>
         <Table.Td>
@@ -600,6 +636,7 @@ const MessagesPageRender =  ({ initialData }:MessagesProps) => {
                     </Table.Th>
                     <Table.Th miw={150}>Title</Table.Th>
                     <Table.Th>Content</Table.Th>
+                    <Table.Th>Type</Table.Th>
                     <Table.Th>Status</Table.Th>
                     <Table.Th miw={120}>Created By</Table.Th>
                     <Table.Th miw={180}>Created At</Table.Th>
@@ -613,7 +650,7 @@ const MessagesPageRender =  ({ initialData }:MessagesProps) => {
                     rows
                   ) : (
                     <Table.Tr>
-                      <Table.Td colSpan={9} align="center">
+                      <Table.Td colSpan={10} align="center">
                         <Text c="dimmed">No data available</Text>
                       </Table.Td>
                     </Table.Tr>
