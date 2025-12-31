@@ -1,5 +1,6 @@
 import type { listRequest } from '@/api/message/request';
 import { messageList } from '@/api/ssr/message';
+import { listAllAccount } from '@/api/ssr/account';
 import MessagesPageRender from './_render';
 import { convertParams } from '@/api/common/functions';
 
@@ -13,14 +14,26 @@ async function getMessageList(params?: listRequest) {
   }
 }
 
+// getAccountList 从服务端获取账户列表数据
+async function getAccountList() {
+  try {
+    const response = await listAllAccount({});
+    return response.data || [];
+  } catch (error) {
+    return [];
+  }
+}
 
 // 关键：不直接解构 searchParams，而是通过 props 整体获取
 const MessagesPage = async ({ searchParams } :any) => {
   const params = convertParams(await searchParams);
-  const data = await getMessageList(params);
+  const [data, accountList] = await Promise.all([
+    getMessageList(params),
+    getAccountList(),
+  ]);
   return (
     <>
-      <MessagesPageRender initialData={data}  />
+      <MessagesPageRender initialData={data} initialAccountList={accountList} />
     </>
   );
 };

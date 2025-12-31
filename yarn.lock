@@ -2819,7 +2819,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mantine/core@npm:^8.3.6":
+"@mantine/core@npm:^8.3.10":
   version: 8.3.10
   resolution: "@mantine/core@npm:8.3.10"
   dependencies:
@@ -2837,7 +2837,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mantine/dates@npm:^8.3.6":
+"@mantine/dates@npm:^8.3.10":
   version: 8.3.10
   resolution: "@mantine/dates@npm:8.3.10"
   dependencies:
@@ -2852,7 +2852,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mantine/form@npm:^8.3.6":
+"@mantine/form@npm:^8.3.10":
   version: 8.3.10
   resolution: "@mantine/form@npm:8.3.10"
   dependencies:
@@ -2864,7 +2864,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mantine/hooks@npm:^8.3.6":
+"@mantine/hooks@npm:^8.3.10":
   version: 8.3.10
   resolution: "@mantine/hooks@npm:8.3.10"
   peerDependencies:
@@ -2873,7 +2873,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mantine/modals@npm:^8.3.6":
+"@mantine/modals@npm:^8.3.10":
   version: 8.3.10
   resolution: "@mantine/modals@npm:8.3.10"
   peerDependencies:
@@ -2885,7 +2885,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mantine/notifications@npm:^8.3.6":
+"@mantine/notifications@npm:^8.3.10":
   version: 8.3.10
   resolution: "@mantine/notifications@npm:8.3.10"
   dependencies:
@@ -2900,7 +2900,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mantine/nprogress@npm:^8.3.6":
+"@mantine/nprogress@npm:^8.3.10":
   version: 8.3.10
   resolution: "@mantine/nprogress@npm:8.3.10"
   dependencies:
@@ -10625,13 +10625,13 @@ __metadata:
     "@babel/core": "npm:^7.27.4"
     "@eslint/js": "npm:^9.29.0"
     "@ianvs/prettier-plugin-sort-imports": "npm:^4.4.2"
-    "@mantine/core": "npm:^8.3.6"
-    "@mantine/dates": "npm:^8.3.6"
-    "@mantine/form": "npm:^8.3.6"
-    "@mantine/hooks": "npm:^8.3.6"
-    "@mantine/modals": "npm:^8.3.6"
-    "@mantine/notifications": "npm:^8.3.6"
-    "@mantine/nprogress": "npm:^8.3.6"
+    "@mantine/core": "npm:^8.3.10"
+    "@mantine/dates": "npm:^8.3.10"
+    "@mantine/form": "npm:^8.3.10"
+    "@mantine/hooks": "npm:^8.3.10"
+    "@mantine/modals": "npm:^8.3.10"
+    "@mantine/notifications": "npm:^8.3.10"
+    "@mantine/nprogress": "npm:^8.3.10"
     "@mantinex/dev-icons": "npm:^2.0.0"
     "@mantinex/mantine-logo": "npm:^2.0.0"
     "@next/bundle-analyzer": "npm:^15.3.3"

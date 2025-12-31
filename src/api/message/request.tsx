@@ -14,6 +14,8 @@ export interface editMessageRequest {
   title: string;
   content: string;
   status: number;
+  type: number;
+  accountIds?: string[];
 }
 
 export interface getMessageRequest extends Query {
@@ -24,4 +26,6 @@ export interface createMessageRequest {
   title: string;
   content: string;
   status: number;
+  type: number;
+  accountIds?: string[];
 }

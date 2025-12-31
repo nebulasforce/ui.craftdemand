@@ -6,3 +6,7 @@ export interface listData extends Pagination<Account> {
 
 export interface listResponse extends Response<listData> {}
 
+export type listAllAccountData = Account[];
+
+export interface listAllAccountResponse extends Response<listAllAccountData> {}
+

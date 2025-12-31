@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { IconChevronDown, IconChevronUp, IconEdit, IconPlus, IconSearch, IconTrash, IconX } from '@tabler/icons-react';
 import cx from 'clsx';
-import { ActionIcon, Anchor, Box, Breadcrumbs, Button, Checkbox, Collapse, Divider, Flex, FocusTrap, Grid, Group, LoadingOverlay, Modal, Pagination, Paper, ScrollArea, Select, SimpleGrid, Stack, Table, Text, Textarea, TextInput, Title } from '@mantine/core';
+import { ActionIcon, Anchor, Box, Breadcrumbs, Button, Checkbox, Collapse, Divider, Flex, FocusTrap, Grid, Group, LoadingOverlay, Modal, MultiSelect, Pagination, Paper, ScrollArea, Select, SimpleGrid, Stack, Table, Text, Textarea, TextInput, Title } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useDisclosure } from '@mantine/hooks';
 import { createMessage, deleteMessage, editMessage, list as messageList } from '@/api/message/api'; // 导入API
@@ -13,6 +13,7 @@ import { createMessage, deleteMessage, editMessage, list as messageList } from '
 import { createMessageRequest, deleteMessageRequest, editMessageRequest } from '@/api/message/request';
 import { listData } from '@/api/message/response';
 import { Message } from '@/api/message/typings';
+import { Account } from '@/api/account/typings';
 import { DeleteConfirm } from '@/components/DeleteConfirm/DeleteConfirm';
 import { useNavbar } from '@/contexts/NavbarContext/NavbarContext';
 import notify from '@/utils/notify'; // 导入通知工具
@@ -22,6 +23,7 @@ import classes from './style.module.css';
 
 interface MessagesProps {
   initialData: listData | null;
+  initialAccountList?: Account[];
 }
 
 // 定义状态项接口
@@ -53,17 +55,25 @@ const typeMap: {[key:number]:typeItem} = {
   [MESSAGE_TYPE.NORMAL]: { label: 'Normal', color: 'gray' },
 };
 
+// 类型选项数据 - 用于下拉选择器
+const typeOptions = [
+  { value: MESSAGE_TYPE.SYSTEM.toString(), label: 'System' },
+  { value: MESSAGE_TYPE.NORMAL.toString(), label: 'Normal' },
+];
+
 // 状态映射
 const statusMap:{[key:number]:statusItem} = {
-  0: { label: 'Active', color: 'green' },
-  1: { label: 'Disabled', color: 'orange' },
-  2: { label: 'Deleted', color: 'red' },
+  [-1]: { label: 'Deleted', color: 'red' },
+  0: { label: 'Normal', color: 'green' },
+  1: { label: 'Abnormal', color: 'orange' },
+  2: { label: 'Published', color: 'blue' },
 }
 // 状态选项数据 - 用于下拉选择器
-const statusOptions = Object.entries(statusMap).map(([value, { label }]) => ({
-  value,
-  label,
-}));
+const statusOptions = [
+  { value: '-1', label: 'Deleted' },
+  { value: '0', label: 'Normal' },
+  { value: '1', label: 'Abnormal' },
+];
 
 // 获取类型显示文本
 const getTypeLabel = (type: number | string) => {
@@ -96,7 +106,7 @@ interface AdvancedSearchFilters {
 }
 
 
-const MessagesPageRender =  ({ initialData }:MessagesProps) => {
+const MessagesPageRender =  ({ initialData, initialAccountList = [] }:MessagesProps) => {
   const { setActive, setSection } = useNavbar();
   const router = useRouter();
 
@@ -317,10 +327,12 @@ const MessagesPageRender =  ({ initialData }:MessagesProps) => {
   const [addEditAction, setAddEditAction] = useState<'add' | 'edit'>('add');
   const [addEditModalOpened, addEditModalActions] = useDisclosure(false);
   const [editingMessage, setEditingMessage] = useState<Message|null>(null);
+  const [accountList] = useState<Account[]>(initialAccountList || []);
 
   // 打开表单模态窗口
   const openAddEditModal = ({action, message}: openAddEditModalParams) => {
     setAddEditAction(action);
+    
     if (action === 'edit' && message) {
       // 编辑模式：填充现有数据
       setEditingMessage(message);
@@ -330,6 +342,10 @@ const MessagesPageRender =  ({ initialData }:MessagesProps) => {
         title: message.title,
         content: message.content,
         status: message.status,
+        type: message.type,
+        accountIds: message.type === MESSAGE_TYPE.NORMAL 
+          ? (message.accountMessages?.map((am: any) => am.accountId || am.account?.id || am.id) || [])
+          : [],
       });
     } else {
       // 新增模式：重置表单
@@ -339,6 +355,8 @@ const MessagesPageRender =  ({ initialData }:MessagesProps) => {
         title: '',
         content: '',
         status: 0,
+        type: MESSAGE_TYPE.SYSTEM,
+        accountIds: [],
       });
     }
 
@@ -403,6 +421,8 @@ const MessagesPageRender =  ({ initialData }:MessagesProps) => {
       title: editingMessage?.title || '',
       content: editingMessage?.content || '',
       status: editingMessage?.status || 0,
+      type: editingMessage?.type || MESSAGE_TYPE.SYSTEM,
+      accountIds: [] as string[],
     },
     validate: {
       title: (val) => {
@@ -422,6 +442,19 @@ const MessagesPageRender =  ({ initialData }:MessagesProps) => {
           return 'This field is required';
         }
         return null;
+      },
+      type: (val) => {
+        if (val === undefined || val === null) {
+          return 'This field is required';
+        }
+        return null;
+      },
+      accountIds: (val, values) => {
+        // 当类型为普通消息时，accountIds为必填
+        if (values.type === MESSAGE_TYPE.NORMAL && (!val || val.length === 0)) {
+          return 'Please select at least one user';
+        }
+        return null;
       }
     },
   });
@@ -435,6 +468,8 @@ const MessagesPageRender =  ({ initialData }:MessagesProps) => {
           title: values.title,
           content: values.content,
           status: values.status,
+          type: values.type,
+          accountIds: values.type === MESSAGE_TYPE.NORMAL ? values.accountIds : undefined,
         };
         // 调用创建消息API
         const response = await createMessage(formattedData);
@@ -466,6 +501,8 @@ const MessagesPageRender =  ({ initialData }:MessagesProps) => {
           title: values.title,
           content: values.content,
           status: values.status,
+          type: values.type,
+          accountIds: values.type === MESSAGE_TYPE.NORMAL ? values.accountIds : undefined,
         };
         // 调用编辑消息API
         const response = await editMessage(formattedData);
@@ -703,6 +740,76 @@ const MessagesPageRender =  ({ initialData }:MessagesProps) => {
                 radius="md"
                 mb="md"
               />
+              <Select
+                label="Type"
+                required
+                value={addEditForm.values.type.toString()}
+                onChange={(value) => {
+                  const typeValue = parseInt(value||MESSAGE_TYPE.SYSTEM.toString(),10);
+                  addEditForm.setFieldValue('type', typeValue);
+                  // 如果切换到系统消息，清空用户选择并清除验证错误
+                  if (typeValue === MESSAGE_TYPE.SYSTEM) {
+                    addEditForm.setFieldValue('accountIds', []);
+                    addEditForm.clearFieldError('accountIds');
+                  }
+                }}
+                placeholder="Select type"
+                data={typeOptions}
+                disabled={loading}
+                error={addEditForm.errors.type}
+                mb="md"
+              />
+              {addEditForm.values.type === MESSAGE_TYPE.NORMAL && (() => {
+                // 处理账户列表数据
+                // 数据结构可能是 Account[] 或 { account: Account, profile: any }[]
+                const userOptions = accountList
+                  .filter((item: any) => {
+                    // 检查数据结构：可能是直接的 Account 或包含 account 属性的对象
+                    const account = item.account || item;
+                    return account && 
+                           account.id && 
+                           typeof account.id === 'string' && 
+                           account.id.trim() !== '';
+                  })
+                  .reduce((acc, item: any) => {
+                    // 处理不同的数据结构
+                    const account = item.account || item;
+                    const profile = item.profile || null;
+                    const accountId = account.id;
+                    
+                    // 去重：如果该 id 已经存在，跳过
+                    if (!acc.find((opt: any) => opt.value === accountId)) {
+                      // 构建 label: 昵称(用户名)
+                      const nickname = profile?.nickname || '';
+                      const username = account.username || '';
+                      const label = nickname 
+                        ? `${nickname}(${username})` 
+                        : username || account.email || accountId || 'Unknown';
+                      
+                      acc.push({
+                        value: accountId,
+                        label: label,
+                      });
+                    }
+                    return acc;
+                  }, [] as Array<{ value: string; label: string }>);
+
+                return (
+                  <MultiSelect
+                    label="Users"
+                    required
+                    placeholder="Search and select users"
+                    value={addEditForm.values.accountIds}
+                    onChange={(value) => addEditForm.setFieldValue('accountIds', value)}
+                    data={userOptions}
+                    searchable
+                    clearable
+                    disabled={loading}
+                    error={addEditForm.errors.accountIds}
+                    mb="md"
+                  />
+                );
+              })()}
               <Textarea
                 required
                 label="Content"
