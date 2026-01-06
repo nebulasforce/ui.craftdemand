@@ -49,8 +49,10 @@ class Websocket {
     // 接收消息时
     this.socket.onmessage = (event) => {
       try {
-        const data: authenticateResponse= JSON.parse(event.data);
-        // 分发默认时间
+        const data: any = JSON.parse(event.data);
+        console.log('WebSocket: Received message:', data);
+        
+        // 分发默认事件
         this.dispatchEvent('default', data);
         // 在这里处理不同类型的消息
         // 可以根据消息类型分发到不同的事件
@@ -58,18 +60,34 @@ class Websocket {
             switch (data.type) {
               case apiConfig.websocket?.authMessageTypeKey:
                 // 处理认证
-                this.isAuthenticated = data.data.result || false;
-                if (this.isAuthenticated) { // 认证成功
-                  this.accountId = data.data.accountId;
-                  this.expires = data.data.expires;
-                  this.reconnect() // 重连
+                if (data.data && typeof data.data === 'object') {
+                  const authData = data.data as authenticateResponse['data'];
+                  this.isAuthenticated = authData?.result || false;
+                  if (this.isAuthenticated && authData) { // 认证成功
+                    this.accountId = authData.accountId || '';
+                    this.expires = authData.expires || 0;
+                    this.reconnect() // 重连
+                  }
+                } else {
+                  // 只在开发环境或数据确实存在但格式错误时警告
+                  if (data.data !== undefined) {
+                    console.warn('WebSocket: Invalid auth message data format:', data.data);
+                  }
+                  // 如果 data.data 是 undefined，可能是消息格式问题，但不一定是错误
                 }
                 break;
             }
 
-          this.dispatchEvent(data.type, data.data);
+          // 根据消息类型分发事件（所有类型的消息都会分发）
+          // 如果 data.data 不存在，使用 null 或空对象
+          const eventData = data.data !== undefined ? data.data : null;
+          console.log('WebSocket: Dispatching event for type:', data.type, 'with data:', eventData);
+          this.dispatchEvent(data.type, eventData);
+        } else {
+          console.warn('WebSocket: Received message without type field:', data);
         }
       } catch (error) {
+        console.error('WebSocket message parse error:', error, 'Raw data:', event.data);
         this.dispatchEvent('error', error);
       }
     };

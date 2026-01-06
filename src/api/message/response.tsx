@@ -32,3 +32,9 @@ export type getMessageData = Message;
 
 export interface getMessageResponse extends Response<getMessageData> {}
 
+export interface publishMessageData extends Result {
+  id: string;
+}
+
+export interface publishMessageResponse extends Response<publishMessageData> {}
+

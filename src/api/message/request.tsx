@@ -29,3 +29,7 @@ export interface createMessageRequest {
   type: number;
   accountIds?: string[];
 }
+
+export interface publishMessageRequest {
+  id: string;
+}

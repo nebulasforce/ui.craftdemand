@@ -3,14 +3,14 @@
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { IconChevronDown, IconChevronUp, IconEdit, IconPlus, IconSearch, IconTrash, IconX } from '@tabler/icons-react';
+import { IconChevronDown, IconChevronUp, IconEdit, IconEye, IconPlus, IconSearch, IconSend, IconTrash, IconX } from '@tabler/icons-react';
 import cx from 'clsx';
-import { ActionIcon, Anchor, Box, Breadcrumbs, Button, Checkbox, Collapse, Divider, Flex, FocusTrap, Grid, Group, LoadingOverlay, Modal, MultiSelect, Pagination, Paper, ScrollArea, Select, SimpleGrid, Stack, Table, Text, Textarea, TextInput, Title } from '@mantine/core';
+import { ActionIcon, Anchor, Box, Breadcrumbs, Button, Checkbox, Collapse, Divider, Flex, FocusTrap, Grid, Group, LoadingOverlay, Modal, MultiSelect, Pagination, Paper, ScrollArea, Select, SimpleGrid, Space, Stack, Table, Text, Textarea, TextInput, Title } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useDisclosure } from '@mantine/hooks';
-import { createMessage, deleteMessage, editMessage, list as messageList } from '@/api/message/api'; // 导入API
+import { createMessage, deleteMessage, editMessage, getMessage, list as messageList, publishMessage } from '@/api/message/api'; // 导入API
 
-import { createMessageRequest, deleteMessageRequest, editMessageRequest } from '@/api/message/request';
+import { createMessageRequest, deleteMessageRequest, editMessageRequest, publishMessageRequest } from '@/api/message/request';
 import { listData } from '@/api/message/response';
 import { Message } from '@/api/message/typings';
 import { Account } from '@/api/account/typings';
@@ -64,15 +64,14 @@ const typeOptions = [
 // 状态映射
 const statusMap:{[key:number]:statusItem} = {
   [-1]: { label: 'Deleted', color: 'red' },
-  0: { label: 'Normal', color: 'green' },
-  1: { label: 'Abnormal', color: 'orange' },
+  0: { label: 'Unpublished', color: 'gray' },
+  1: { label: 'Published', color: 'green' },
   2: { label: 'Published', color: 'blue' },
 }
 // 状态选项数据 - 用于下拉选择器
 const statusOptions = [
-  { value: '-1', label: 'Deleted' },
-  { value: '0', label: 'Normal' },
-  { value: '1', label: 'Abnormal' },
+  { value: '0', label: 'Unpublished' },
+  { value: '1', label: 'Published' },
 ];
 
 // 获取类型显示文本
@@ -269,14 +268,33 @@ const MessagesPageRender =  ({ initialData, initialAccountList = [] }:MessagesPr
         <Table.Td>{item.updatedAt ? formatTimestamp(item.updatedAt) : '-'}</Table.Td>
         <Table.Td>
           <ActionIcon.Group>
-            <ActionIcon onClick={()=>{openAddEditModal({action:'edit',message:item})}} variant="light" size="md" aria-label="Edit">
-              <IconEdit size={14} stroke={1.5} />
-            </ActionIcon>
-            <DeleteConfirm onConfirm={()=>{handleDeleteOneMessage(item)}} itemName={item.title}>
-              <ActionIcon variant="light" size="md" aria-label="Delete">
-                <IconTrash size={14} stroke={1.5} />
+            {item.status === 0 && (
+              <ActionIcon 
+                onClick={() => handlePublishMessage(item)} 
+                variant="light" 
+                size="md" 
+                aria-label="Publish"
+                color="blue"
+              >
+                <IconSend size={14} stroke={1.5} />
               </ActionIcon>
-            </DeleteConfirm>
+            )}
+            {item.status === 0 ? (
+              <ActionIcon onClick={()=>{openAddEditModal({action:'edit',message:item})}} variant="light" size="md" aria-label="Edit">
+                <IconEdit size={14} stroke={1.5} />
+              </ActionIcon>
+            ) : (
+              <ActionIcon onClick={()=>{openViewDetailModal(item)}} variant="light" size="md" aria-label="View Detail">
+                <IconEye size={14} stroke={1.5} />
+              </ActionIcon>
+            )}
+            {item.status === 0 && (
+              <DeleteConfirm onConfirm={()=>{handleDeleteOneMessage(item)}} itemName={item.title}>
+                <ActionIcon variant="light" size="md" aria-label="Delete">
+                  <IconTrash size={14} stroke={1.5} />
+                </ActionIcon>
+              </DeleteConfirm>
+            )}
           </ActionIcon.Group>
         </Table.Td>
       </Table.Tr>
@@ -328,6 +346,32 @@ const MessagesPageRender =  ({ initialData, initialAccountList = [] }:MessagesPr
   const [addEditModalOpened, addEditModalActions] = useDisclosure(false);
   const [editingMessage, setEditingMessage] = useState<Message|null>(null);
   const [accountList] = useState<Account[]>(initialAccountList || []);
+  
+  // 查看详情相关状态
+  const [viewDetailModalOpened, viewDetailModalActions] = useDisclosure(false);
+  const [viewingMessage, setViewingMessage] = useState<Message|null>(null);
+
+  // 打开查看详情模态窗口
+  const openViewDetailModal = async (message: Message) => {
+    setLoading(true);
+    try {
+      const response = await getMessage({ id: message.id });
+      if (response.code === 0 && response.data) {
+        setViewingMessage(response.data);
+        viewDetailModalActions.open();
+      } else {
+        notify(response.message || 'Failed to load message details', 'error');
+      }
+    } catch (err) {
+      if (err instanceof Error) {
+        notify(err.message, 'error');
+      } else {
+        notify('Internal Error', 'error');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // 打开表单模态窗口
   const openAddEditModal = ({action, message}: openAddEditModalParams) => {
@@ -361,6 +405,30 @@ const MessagesPageRender =  ({ initialData, initialAccountList = [] }:MessagesPr
     }
 
     addEditModalActions.open();
+  };
+
+  const handlePublishMessage = async (message: Message) => {
+    setLoading(true);
+    try {
+      const requestData: publishMessageRequest = {
+        id: message.id,
+      };
+      const response = await publishMessage(requestData);
+      if (response.code === 0) {
+        notify('Message published successfully', 'success');
+        await loadData(page);
+      } else {
+        notify(response.message || 'Failed to publish the message', 'error');
+      }
+    } catch (err) {
+      if (err instanceof Error) {
+        notify(err.message, 'error');
+      } else {
+        notify('Internal Error', 'error');
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleDeleteOneMessage = async (message: Message) => {
@@ -823,21 +891,103 @@ const MessagesPageRender =  ({ initialData, initialAccountList = [] }:MessagesPr
                 minRows={4}
                 mb="md"
               />
-              <Select
-                label="Status"
-                required
-                value={addEditForm.values.status.toString()}
-                onChange={(value) => addEditForm.setFieldValue('status', parseInt(value||'0',10))}
-                placeholder="Select status"
-                data={statusOptions}
-                disabled={loading}
-                mb="md"
-              />
               <Flex justify="flex-end" gap="sm" mt="lg">
                 <Button type="submit" disabled={loading}>Save</Button>
               </Flex>
             </form>
           </FocusTrap>
+        </Box>
+      </Modal>
+
+      {/*查看详情弹窗*/}
+      <Modal
+        opened={viewDetailModalOpened}
+        title="Message Details"
+        onClose={viewDetailModalActions.close}
+        size="md"
+      >
+        <Box pos="relative">
+          <LoadingOverlay visible={loading} />
+          {viewingMessage && (
+            <Stack gap="md">
+              <Box mb="md">
+                <Text size="sm" fw={500} mb={5}>Title</Text>
+                <Text size="sm">
+                  {viewingMessage.title || '-'}
+                </Text>
+              </Box>
+              
+              <Box mb="md">
+                <Text size="sm" fw={500} mb={5}>Type</Text>
+                <Text size="sm">
+                  {getTypeLabel(viewingMessage.type)}
+                </Text>
+              </Box>
+
+              {viewingMessage.type === MESSAGE_TYPE.NORMAL && (() => {
+                // 处理账户列表数据
+                const userOptions = accountList
+                  .filter((item: any) => {
+                    const account = item.account || item;
+                    return account && 
+                           account.id && 
+                           typeof account.id === 'string' && 
+                           account.id.trim() !== '';
+                  })
+                  .reduce((acc, item: any) => {
+                    const account = item.account || item;
+                    const profile = item.profile || null;
+                    const accountId = account.id;
+                    
+                    if (!acc.find((opt: any) => opt.value === accountId)) {
+                      const nickname = profile?.nickname || '';
+                      const username = account.username || '';
+                      const label = nickname 
+                        ? `${nickname}(${username})` 
+                        : username || account.email || accountId || 'Unknown';
+                      
+                      acc.push({
+                        value: accountId,
+                        label: label,
+                      });
+                    }
+                    return acc;
+                  }, [] as Array<{ value: string; label: string }>);
+
+                const selectedUserIds = viewingMessage.accountMessages?.map((am: any) => am.accountId || am.account?.id || am.id) || [];
+                const selectedUsers = userOptions.filter((opt: any) => selectedUserIds.includes(opt.value));
+
+                return (
+                  <Box mb="md">
+                    <Text size="sm" fw={500} mb={5}>Users</Text>
+                    <Text size="sm">
+                      {selectedUsers.length > 0 ? (
+                        selectedUsers.map((u: any, index: number) => (
+                          <span key={u.value}>
+                            {u.label}
+                            {index < selectedUsers.length - 1 && ', '}
+                          </span>
+                        ))
+                      ) : (
+                        '-'
+                      )}
+                    </Text>
+                  </Box>
+                );
+              })()}
+
+              <Box mb="md">
+                <Text size="sm" fw={500} mb={5}>Content</Text>
+                <Text size="sm" style={{ whiteSpace: 'pre-wrap' }}>
+                  {viewingMessage.content || '-'}
+                </Text>
+              </Box>
+
+              <Flex justify="flex-end" gap="sm" mt="lg">
+                <Button onClick={viewDetailModalActions.close}>Close</Button>
+              </Flex>
+            </Stack>
+          )}
         </Box>
       </Modal>
 

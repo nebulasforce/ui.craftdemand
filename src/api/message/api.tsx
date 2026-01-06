@@ -5,7 +5,8 @@ import {
   deleteMessageRequest, 
   editMessageRequest, 
   getMessageRequest, 
-  createMessageRequest 
+  createMessageRequest,
+  publishMessageRequest
 } from '@/api/message/request';
 import { 
   listResponse, 
@@ -13,7 +14,8 @@ import {
   deleteMessageResponse, 
   editMessageResponse, 
   getMessageResponse, 
-  createMessageResponse 
+  createMessageResponse,
+  publishMessageResponse
 } from '@/api/message/response';
 import request from '@/utils/request';
 
@@ -91,6 +93,19 @@ export async function getMessage(req?:getMessageRequest,options?:Options) {
       'Content-Type': 'application/json',
     },
     params: req || {},
+    ...(options || {}),
+  });
+}
+
+// publishMessage 发布消息
+export async function publishMessage(req?:publishMessageRequest,options?:Options) {
+  return request<publishMessageResponse>({
+    url: `/api/v1/message/${req?.id}/publish`,
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: req || {},
     ...(options || {}),
   });
 }
