@@ -91,7 +91,8 @@ export async function proxy(request: NextRequest) {
     }
   }
 
-  // 3. 已认证用户访问登录页 → 重定向到个人中心 - 有可能token已过期
+  // 3. 已认证用户访问登录页 → 重定向到首页
+  // 注意：只有在 token 真正有效时才重定向，避免误判
   if (isAuthenticated && currentPath.startsWith('/auth/login')) {
     return NextResponse.redirect(new URL('/', request.url));
   }

@@ -84,11 +84,13 @@ export function HeaderMegaMenu({ user, navbarCollapsed = false, onNavbarToggle }
   const [linksOpened, { toggle: toggleLinks }] = useDisclosure(false);
   const theme = useMantineTheme();
   const { user: authedUser } = useAuth();
-  const [userDisplay, setUserDisplay] = useState<User | null>(user);
+  // 优先使用 AuthContext 中的用户信息，如果没有则使用 props 中的 user
+  const [userDisplay, setUserDisplay] = useState<User | null>(authedUser || user);
 
   useEffect(() => {
-    setUserDisplay(authedUser);
-  }, [authedUser]);
+    // 优先使用 AuthContext 中的用户信息，如果没有则使用 props 中的 user
+    setUserDisplay(authedUser || user);
+  }, [authedUser, user]);
 
   const links = mockdata.map((item) => (
     <UnstyledButton className={classes.subLink} key={item.title}>

@@ -50,22 +50,70 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const router = useRouter();
 
-  // 从本地存储加载用户信息
+  // 从本地存储加载用户信息，并验证服务端 token
   useEffect(() => {
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
+    const loadUser = async () => {
       try {
-        setUser(JSON.parse(storedUser));
-        setIsAuthenticated(true);
+        // 先尝试从 localStorage 加载用户信息（快速显示）
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+          try {
+            const parsedUser = JSON.parse(storedUser);
+            setUser(parsedUser);
+            setIsAuthenticated(true);
+          } catch (error) {
+            // localStorage 数据损坏，清除它
+            localStorage.removeItem('user');
+          }
+        }
+
+        // 检查 cookie 中是否有 token
+        const token = Cookies.get('token');
+        if (token) {
+          // 如果有 token，从服务端验证并获取最新用户信息
+          try {
+            const resp = await me();
+            if (resp.success && resp.data) {
+              const currentUser = resp.data;
+              setUser(currentUser);
+              localStorage.setItem('user', JSON.stringify(currentUser));
+              setIsAuthenticated(true);
+            } else {
+              // token 无效，清除所有认证信息
+              removeStored();
+              setUser(null);
+              setIsAuthenticated(false);
+            }
+          } catch (error) {
+            // 请求失败，可能是 token 无效或网络问题
+            // 如果 localStorage 中有用户信息，保留它；否则清除
+            if (!storedUser) {
+              removeStored();
+              setUser(null);
+              setIsAuthenticated(false);
+            }
+          }
+        } else {
+          // 没有 token，清除所有认证信息
+          if (!storedUser) {
+            removeStored();
+            setUser(null);
+            setIsAuthenticated(false);
+          }
+        }
       } catch (error) {
         if (error instanceof Error) {
-          notify(error.message, 'error');
-        } else {
-          notify('Login failed', 'error');
+          console.error('Failed to load user:', error.message);
         }
+        removeStored();
+        setUser(null);
+        setIsAuthenticated(false);
+      } finally {
+        setIsLoading(false);
       }
-    }
-    setIsLoading(false);
+    };
+
+    loadUser();
   }, []);
 
   // 登录方法
