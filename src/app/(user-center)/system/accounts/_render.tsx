@@ -8,21 +8,21 @@ import cx from 'clsx';
 import { ActionIcon, Anchor, Avatar, Box, Breadcrumbs, Button, Checkbox, Collapse, Divider, Flex, FocusTrap, Grid, Group, LoadingOverlay, Modal, Pagination, Paper, ScrollArea, Select, SimpleGrid, Stack, Table, Text, TextInput, Title } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useDisclosure } from '@mantine/hooks';
-import { createMySubAccount, deleteMySubAccount, editMySubAccount, mySubAccountList } from '@/api/my/api'; // 导入API
+import { createAccount, deleteAccount, editAccount, list } from '@/api/account/api';
 
-import { createMySubAccountRequest, deleteMySubAccountRequest, editMySubAccountRequest } from '@/api/my/request';
-import { mySubAccountListData } from '@/api/my/response';
+import { createAccountRequest, deleteAccountRequest, editAccountRequest } from '@/api/account/request';
+import { listData } from '@/api/account/response';
 import { User } from '@/api/my/typings';
 import { DeleteConfirm } from '@/components/DeleteConfirm/DeleteConfirm';
 import { useNavbar } from '@/contexts/NavbarContext/NavbarContext';
-import notify from '@/utils/notify'; // 导入通知工具
+import notify from '@/utils/notify';
 import { formatTimestamp } from '@/utils/time';
 import apiConfig from '@/config/api.config';
 import classes from './style.module.css';
 
 
-interface SubAccountsProps {
-  initialData: mySubAccountListData | null;
+interface AccountsProps {
+  initialData: listData | null;
 }
 
 // 定义状态项接口
@@ -68,21 +68,21 @@ interface AdvancedSearchFilters {
 }
 
 
-const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
+const AccountsPageRender =  ({ initialData }:AccountsProps) => {
   const { setActive, setSection } = useNavbar();
   const router = useRouter();
 
   useEffect(() => {
-    setSection('Account');
-    setActive('Sub Accounts');
-  }, []); // 合并依赖项
+    setSection('System');
+    setActive('Accounts');
+  }, []);
 
 
   // 面包屑
   const items = [
     { title: 'Home', href: '/' },
-    { title: 'Account' },
-    { title: 'Sub Accounts' }
+    { title: 'System' },
+    { title: 'Accounts' }
   ];
 
   // 基础搜索状态
@@ -106,7 +106,7 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
   });
 
   // 状态管理
-  const [data, setData] = useState(initialData?.lists || []);
+  const [data, setData] = useState<User[]>(initialData?.lists || []);
   const [page, setPage] = useState(initialData?.page || 1);
   const [pageSize] = useState(initialData?.pageSize || 10);
   const [count, setCount] = useState(initialData?.count || 0);
@@ -173,14 +173,13 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
         });
       }
 
-      const response = await mySubAccountList(searchParams);
+      const response = await list(searchParams);
       if (response.code === 0 && response.data) {
         setPage(currentPage);
         setData(response.data.lists || []);
         setTotalPage(response.data.totalPage || 0);
         setCount(response.data.count || 0);
         setSelection([]);
-        // window.scrollTo({ top: 0, behavior: 'smooth' });
       } else {
         notify(response.message || 'Failed to load data', 'error');
       }
@@ -237,10 +236,10 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
             <ActionIcon onClick={()=>{openAddEditModal({action:'edit',user:item})}} variant="light" size="md" aria-label="Edit">
               <IconEdit size={14} stroke={1.5} />
             </ActionIcon>
-            <ActionIcon onClick={()=>{handleSettingSubAccount(item)}} variant="light" size="md" aria-label="Setting">
+            <ActionIcon onClick={()=>{handleSettingAccount(item)}} variant="light" size="md" aria-label="Setting">
               <IconUserCog size={14} stroke={1.5} />
             </ActionIcon>
-            <DeleteConfirm onConfirm={()=>{handleDeleteOneSubAccount(item)}} itemName={item.account.username}>
+            <DeleteConfirm onConfirm={()=>{handleDeleteOneAccount(item)}} itemName={item.account.username}>
               <ActionIcon variant="light" size="md" aria-label="Delete">
                 <IconTrash size={14} stroke={1.5} />
               </ActionIcon>
@@ -328,18 +327,18 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
     addEditModalActions.open();
   };
 
-  const handleDeleteOneSubAccount = async (user: User) => {
+  const handleDeleteOneAccount = async (user: User) => {
     setLoading(true);
     try {
-      const requestData: deleteMySubAccountRequest = {
+      const requestData: deleteAccountRequest = {
         ids: [user.account.id],
       };
-      const response = await deleteMySubAccount(requestData);
+      const response = await deleteAccount(requestData);
       if (response.code === 0) {
-        notify('Sub account deleted successfully', 'success');
+        notify('Account deleted successfully', 'success');
         await loadData(page);
       } else {
-        notify(response.message || 'Failed to delete the sub account', 'error');
+        notify(response.message || 'Failed to delete the account', 'error');
       }
     } catch (err) {
       if (err instanceof Error) {
@@ -352,22 +351,22 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
     }
   };
 
-  // 批量删除选中的子账号
+  // 批量删除选中的账号
   const handleDeleteSelected = async () => {
     if (selection.length === 0) {
       return;
     }
     setLoading(true);
     try {
-      const requestData: deleteMySubAccountRequest = {
+      const requestData: deleteAccountRequest = {
         ids: selection,
       };
-      const response = await deleteMySubAccount(requestData);
+      const response = await deleteAccount(requestData);
       if (response.code === 0) {
-        notify(`Successfully deleted ${response.data?.count || selection.length} sub account(s)`, 'success');
+        notify(`Successfully deleted ${response.data?.count || selection.length} account(s)`, 'success');
         await loadData(page);
       } else {
-        notify(response.message || 'Failed to delete the sub accounts', 'error');
+        notify(response.message || 'Failed to delete the accounts', 'error');
       }
     } catch (err) {
       if (err instanceof Error) {
@@ -380,23 +379,18 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
     }
   };
 
-  const handleSettingSubAccount = (user: User) => {
+  const handleSettingAccount = (user: User) => {
     console.log('设置账户:', user);
   }
-
-  // const closeAddEditModal = () => {
-  //   setEditingAccount(null);
-  //   addEditModalActions.close();
-  // }
 
   const addEditForm = useForm({
     initialValues: {
       id: editingAccount?.account.id || '',
-      username: editingAccount?.account?.username || '',
+      username: editingAccount?.account.username || '',
       password: '',
-      email: editingAccount?.account?.email || '',
-      mobile: editingAccount?.account?.mobile || '',
-      status: editingAccount?.account?.status || 0,
+      email: editingAccount?.account.email || '',
+      mobile: editingAccount?.account.mobile || '',
+      status: editingAccount?.account.status || 0,
     },
     validate: {
       username: (val) => {
@@ -447,21 +441,29 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
 
   const handleAdEditFormSubmit = async (values: typeof addEditForm.values): Promise<void> => {
     if (addEditAction === 'add'){
+      // 在新增模式下，验证密码是否填写
+      if (!values.password || values.password.trim() === '') {
+        addEditForm.setFieldError('password', 'Password is required');
+        return;
+      }
       setLoading(true);
       try {
         // 处理表单数据，转换为API需要的格式
-        const formattedData: createMySubAccountRequest = {
-          ...values,
+        const formattedData: createAccountRequest = {
+          username: values.username,
+          password: values.password,
+          email: values.email,
+          mobile: values.mobile,
+          status: values.status,
         };
-        // 根据编辑还是新增来确定响应内容
-        // 调用编辑个人资料API
-        const response = await createMySubAccount(formattedData);
+        // 调用创建账号API
+        const response = await createAccount(formattedData);
 
         if (response.code === 0) {
           loadData(page).then()
-          notify('Sub account add successfully', 'success');
+          notify('Account added successfully', 'success');
         } else {
-          notify(response.message || 'Failed to add the sub account', 'error');
+          notify(response.message || 'Failed to add the account', 'error');
         }
       } catch (err){
         if (err instanceof Error) {
@@ -475,22 +477,25 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
       }
 
     }else if(addEditAction === 'edit'){
-      if (!editingAccount) {return;} // 确保用户存在
+      if (!editingAccount) {return;} // 确保账号存在
       setLoading(true);
       try {
         // 处理表单数据，转换为API需要的格式
-        const formattedData: editMySubAccountRequest = {
-          ...values,
+        const formattedData: editAccountRequest = {
+          id: values.id,
+          username: values.username,
+          email: values.email,
+          mobile: values.mobile,
+          status: values.status,
         };
-        // 根据编辑还是新增来确定响应内容
-        // 调用编辑个人资料API
-        const response = await editMySubAccount(formattedData);
+        // 调用编辑账号API
+        const response = await editAccount(formattedData);
 
         if (response.code === 0) {
           loadData(page).then()
-          notify('Sub account updated successfully', 'success');
+          notify('Account updated successfully', 'success');
         } else {
-          notify(response.message || 'Failed to update the sub account', 'error');
+          notify(response.message || 'Failed to update the account', 'error');
         }
       } catch (err) {
         if (err instanceof Error) {
@@ -526,9 +531,9 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
       <Paper pt="xs" pb="xs">
         {/* 页面容器 - 标题 */}
         <Box mb="md">
-          <Title order={3}>Sub Accounts</Title>
+          <Title order={3}>Accounts</Title>
           <Text size="sm" c="dimmed">
-            Manage and control sub-accounts under your main account.
+            Manage and control system accounts.
           </Text>
         </Box>
         <Divider mb="lg" my="xs" variant="dashed" />
@@ -553,7 +558,6 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
                 )
               }
               radius="md"
-              // disabled={loading}
             />
           </Grid.Col>
           <Grid.Col span={{ base: 12, sm: 3 }} mb="xs">
@@ -584,14 +588,12 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
                 value={advancedFilters.username}
                 onChange={(e) => handleAdvancedFilterChange('username', e.target.value)}
                 placeholder="Search by username"
-                // disabled={loading}
               />
               <TextInput
                 label="Mobile"
                 value={advancedFilters.mobile}
                 onChange={(e) => handleAdvancedFilterChange('mobile', e.target.value)}
                 placeholder="Search by mobile number"
-                // disabled={loading}
               />
               <TextInput
                 label="Email"
@@ -606,15 +608,14 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
                 placeholder="Select status"
                 data={statusOptions}
                 clearable
-                // disabled={loading}
               />
             </SimpleGrid>
 
             <Group gap="sm" mt="md" justify="flex-end">
-              <Button variant="ghost" onClick={resetAdvancedFilters} /* disabled={loading}*/>
+              <Button variant="ghost" onClick={resetAdvancedFilters}>
                 Reset
               </Button>
-              <Button onClick={handleAdvancedSearch}/* disabled={loading}*/>
+              <Button onClick={handleAdvancedSearch}>
                 Apply Filters
               </Button>
             </Group>
@@ -627,8 +628,8 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
             <Group>
               <DeleteConfirm
                 onConfirm={handleDeleteSelected}
-                itemName={selection.length === 1 ? data.find(item => selection.includes(item.account.id))?.account.username : `${selection.length} sub accounts`}
-                title="Delete Selected Sub Accounts"
+                itemName={selection.length === 1 ? data.find(item => selection.includes(item.account.id))?.account.username : `${selection.length} accounts`}
+                title="Delete Selected Accounts"
               >
                 <Button
                   variant="danger"
@@ -640,10 +641,9 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
               </DeleteConfirm>
               <Button
                 leftSection={<IconPlus size={16} stroke={1.5} />}
-                // disabled={loading}
                 onClick={() => openAddEditModal({action:'add'})}
               >
-                Add Sub Account
+                Add Account
               </Button>
             </Group>
           </Flex>
@@ -676,7 +676,7 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
                     rows
                   ) : (
                     <Table.Tr>
-                      <Table.Td colSpan={4} align="center">
+                      <Table.Td colSpan={7} align="center">
                         <Text c="dimmed">No data available</Text>
                       </Table.Td>
                     </Table.Tr>
@@ -708,7 +708,7 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
       {/*独立的添加/编辑弹窗*/}
       <Modal
         opened={addEditModalOpened}
-        title={addEditAction === 'add' ? 'Add Sub Account' : 'Edit Sub Account'}
+        title={addEditAction === 'add' ? 'Add Account' : 'Edit Account'}
         onClose={addEditModalActions.close}
         size="md"
       >
@@ -786,4 +786,4 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
   );
 }
 
-export default SubAccountsPageRender;
+export default AccountsPageRender;
