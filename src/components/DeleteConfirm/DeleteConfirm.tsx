@@ -21,14 +21,14 @@ export function DeleteConfirm({
                                 ...props
                               }: DeleteConfirmProps) {
   const description = itemName
-    ? `Are you sure to delete "${itemName}"?`
-    : "Are you sure to delete this？";
+    ? `确定要删除 "${itemName}" 吗？`
+    : "确定要删除此项吗？";
 
   return (
     <PopConfirm
       title={title}
       description={description}
-      confirmText="Delete"
+      confirmText="删除"
       confirmColor="red"
       onConfirm={onConfirm}
       {...props}

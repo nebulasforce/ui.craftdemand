@@ -51,27 +51,27 @@ export const MESSAGE_TYPE = {
 
 // 类型映射
 const typeMap: {[key:number]:typeItem} = {
-  [MESSAGE_TYPE.SYSTEM]: { label: 'System', color: 'blue' },
-  [MESSAGE_TYPE.NORMAL]: { label: 'Normal', color: 'gray' },
+  [MESSAGE_TYPE.SYSTEM]: { label: '系统消息', color: 'blue' },
+  [MESSAGE_TYPE.NORMAL]: { label: '普通消息', color: 'gray' },
 };
 
 // 类型选项数据 - 用于下拉选择器
 const typeOptions = [
-  { value: MESSAGE_TYPE.SYSTEM.toString(), label: 'System' },
-  { value: MESSAGE_TYPE.NORMAL.toString(), label: 'Normal' },
+  { value: MESSAGE_TYPE.SYSTEM.toString(), label: '系统消息' },
+  { value: MESSAGE_TYPE.NORMAL.toString(), label: '普通消息' },
 ];
 
 // 状态映射
 const statusMap:{[key:number]:statusItem} = {
-  [-1]: { label: 'Deleted', color: 'red' },
-  0: { label: 'Unpublished', color: 'gray' },
-  1: { label: 'Published', color: 'green' },
-  2: { label: 'Published', color: 'blue' },
+  [-1]: { label: '已删除', color: 'red' },
+  0: { label: '未发布', color: 'gray' },
+  1: { label: '已发布', color: 'green' },
+  2: { label: '已发布', color: 'blue' },
 }
 // 状态选项数据 - 用于下拉选择器
 const statusOptions = [
-  { value: '0', label: 'Unpublished' },
-  { value: '1', label: 'Published' },
+  { value: '0', label: '未发布' },
+  { value: '1', label: '已发布' },
 ];
 
 // 获取类型显示文本
@@ -117,9 +117,9 @@ const MessagesPageRender =  ({ initialData, initialAccountList = [] }:MessagesPr
 
   // 面包屑
   const items = [
-    { title: 'Home', href: '/' },
-    { title: 'System' },
-    { title: 'Messages' }
+    { title: '首页', href: '/' },
+    { title: '系统' },
+    { title: '消息' }
   ];
 
   // 基础搜索状态
@@ -174,7 +174,7 @@ const MessagesPageRender =  ({ initialData, initialAccountList = [] }:MessagesPr
   const calculateDisplayRange = () => {
     const start = (page - 1) * pageSize + 1;
     const end = Math.min(page * pageSize, count);
-    return `${start}-${end} of ${count}`;
+    return `${start}-${end} 共 ${count}`;
   };
 
   // 数据加载方法，同时支持基础搜索和高级搜索
@@ -495,32 +495,32 @@ const MessagesPageRender =  ({ initialData, initialAccountList = [] }:MessagesPr
     validate: {
       title: (val) => {
         if (!val || val.trim() === '') {
-          return 'This field is required';
+          return '此字段为必填项';
         }
         return null;
       },
       content: (val) => {
         if (!val || val.trim() === '') {
-          return 'This field is required';
+          return '此字段为必填项';
         }
         return null;
       },
       status: (val) => {
         if (val === undefined || val === null) {
-          return 'This field is required';
+          return '此字段为必填项';
         }
         return null;
       },
       type: (val) => {
         if (val === undefined || val === null) {
-          return 'This field is required';
+          return '此字段为必填项';
         }
         return null;
       },
       accountIds: (val, values) => {
         // 当类型为普通消息时，accountIds为必填
         if (values.type === MESSAGE_TYPE.NORMAL && (!val || val.length === 0)) {
-          return 'Please select at least one user';
+          return '请至少选择一个用户';
         }
         return null;
       }
@@ -615,9 +615,9 @@ const MessagesPageRender =  ({ initialData, initialAccountList = [] }:MessagesPr
       <Paper pt="xs" pb="xs">
         {/* 页面容器 - 标题 */}
         <Box mb="md">
-          <Title order={3}>Messages</Title>
+          <Title order={3}>消息管理</Title>
           <Text size="sm" c="dimmed">
-            Manage and control messages efficiently.
+            高效管理和控制消息。
           </Text>
         </Box>
         <Divider mb="lg" my="xs" variant="dashed" />
@@ -625,7 +625,7 @@ const MessagesPageRender =  ({ initialData, initialAccountList = [] }:MessagesPr
           <Grid.Col span={{ base: 12, sm: 9 }} mb="xs">
             {/* 基础搜索组件 */}
             <TextInput
-              placeholder="Search by title, content etc..."
+              placeholder="搜索标题、内容等..."
               value={searchKeyword}
               onChange={(e) => handleSearchChange(e.target.value)}
               leftSection={<IconSearch size={16} stroke={1.5} />}
@@ -656,7 +656,7 @@ const MessagesPageRender =  ({ initialData, initialAccountList = [] }:MessagesPr
               }
               fullWidth
             >
-              {advancedSearchOpen ? 'Hide Advanced Search' : 'Advanced Search'}
+              {advancedSearchOpen ? '隐藏高级搜索' : '高级搜索'}
             </Button>
           </Grid.Col>
         </Grid>
@@ -665,21 +665,21 @@ const MessagesPageRender =  ({ initialData, initialAccountList = [] }:MessagesPr
         <Collapse in={advancedSearchOpen} transitionDuration={200}>
           <Paper p="md" mb="lg" withBorder>
             <Title order={5} mb="md">
-              Advanced Filters
+              高级筛选
             </Title>
             <SimpleGrid cols={{ base: 1, sm: 2, md: 4 }} spacing="md">
               <TextInput
-                label="Title"
+                label="标题"
                 value={advancedFilters.title}
                 onChange={(e) => handleAdvancedFilterChange('title', e.target.value)}
-                placeholder="Search by title"
+                placeholder="搜索标题"
                 // disabled={loading}
               />
               <Select
-                label="Status"
+                label="状态"
                 value={advancedFilters.status || null}
                 onChange={(value) => handleAdvancedFilterChange('status', value || '')}
-                placeholder="Select status"
+                placeholder="选择状态"
                 data={statusOptions}
                 clearable
                 // disabled={loading}
@@ -688,10 +688,10 @@ const MessagesPageRender =  ({ initialData, initialAccountList = [] }:MessagesPr
 
             <Group gap="sm" mt="md" justify="flex-end">
               <Button variant="ghost" onClick={resetAdvancedFilters} /* disabled={loading}*/>
-                Reset
+                重置
               </Button>
               <Button onClick={handleAdvancedSearch}/* disabled={loading}*/>
-                Apply Filters
+                应用
               </Button>
             </Group>
           </Paper>
@@ -703,15 +703,15 @@ const MessagesPageRender =  ({ initialData, initialAccountList = [] }:MessagesPr
             <Group>
               <DeleteConfirm
                 onConfirm={handleDeleteSelected}
-                itemName={selection.length === 1 ? data.find(item => selection.includes(item.id))?.title : `${selection.length} messages`}
-                title="Delete Selected Messages"
+                itemName={selection.length === 1 ? data.find(item => selection.includes(item.id))?.title : `${selection.length} 条消息`}
+                title="删除选中的消息"
               >
                 <Button
                   variant="danger"
                   leftSection={<IconTrash size={16} stroke={1.5} />}
                   disabled={selection.length === 0 || loading}
                 >
-                  Delete Selected
+                  删除选中
                 </Button>
               </DeleteConfirm>
               <Button
@@ -719,7 +719,7 @@ const MessagesPageRender =  ({ initialData, initialAccountList = [] }:MessagesPr
                 // disabled={loading}
                 onClick={() => openAddEditModal({action:'add'})}
               >
-                Add Message
+                添加消息
               </Button>
             </Group>
           </Flex>
@@ -739,15 +739,15 @@ const MessagesPageRender =  ({ initialData, initialAccountList = [] }:MessagesPr
                         indeterminate={selection.length > 0 && selection.length !== data.length}
                       />
                     </Table.Th>
-                    <Table.Th miw={150}>Title</Table.Th>
-                    <Table.Th>Content</Table.Th>
-                    <Table.Th>Type</Table.Th>
-                    <Table.Th>Status</Table.Th>
-                    <Table.Th miw={120}>Created By</Table.Th>
-                    <Table.Th miw={180}>Created At</Table.Th>
-                    <Table.Th miw={120}>Updated By</Table.Th>
-                    <Table.Th miw={180}>Updated At</Table.Th>
-                    <Table.Th>Actions</Table.Th>
+                    <Table.Th miw={150}>标题</Table.Th>
+                    <Table.Th>内容</Table.Th>
+                    <Table.Th>类型</Table.Th>
+                    <Table.Th>状态</Table.Th>
+                    <Table.Th miw={120}>创建人</Table.Th>
+                    <Table.Th miw={180}>创建时间</Table.Th>
+                    <Table.Th miw={120}>更新人</Table.Th>
+                    <Table.Th miw={180}>更新时间</Table.Th>
+                    <Table.Th>操作</Table.Th>
                   </Table.Tr>
                 </Table.Thead>
                 <Table.Tbody>
@@ -756,7 +756,7 @@ const MessagesPageRender =  ({ initialData, initialAccountList = [] }:MessagesPr
                   ) : (
                     <Table.Tr>
                       <Table.Td colSpan={10} align="center">
-                        <Text c="dimmed">No data available</Text>
+                        <Text c="dimmed">暂无数据</Text>
                       </Table.Td>
                     </Table.Tr>
                   )}
@@ -787,7 +787,7 @@ const MessagesPageRender =  ({ initialData, initialAccountList = [] }:MessagesPr
       {/*独立的添加/编辑弹窗*/}
       <Modal
         opened={addEditModalOpened}
-        title={addEditAction === 'add' ? 'Add Message' : 'Edit Message'}
+        title={addEditAction === 'add' ? '添加消息' : '编辑消息'}
         onClose={addEditModalActions.close}
         size="md"
       >
@@ -798,8 +798,8 @@ const MessagesPageRender =  ({ initialData, initialAccountList = [] }:MessagesPr
               <TextInput
                 required
                 data-autofocus
-                label="Title"
-                placeholder="Input message title"
+                label="标题"
+                placeholder="输入消息标题"
                 value={addEditForm.values.title}
                 onChange={(event) =>
                   addEditForm.setFieldValue('title', event.currentTarget.value)
@@ -809,7 +809,7 @@ const MessagesPageRender =  ({ initialData, initialAccountList = [] }:MessagesPr
                 mb="md"
               />
               <Select
-                label="Type"
+                label="类型"
                 required
                 value={addEditForm.values.type.toString()}
                 onChange={(value) => {
@@ -821,7 +821,7 @@ const MessagesPageRender =  ({ initialData, initialAccountList = [] }:MessagesPr
                     addEditForm.clearFieldError('accountIds');
                   }
                 }}
-                placeholder="Select type"
+                placeholder="选择类型"
                 data={typeOptions}
                 disabled={loading}
                 error={addEditForm.errors.type}
@@ -864,9 +864,9 @@ const MessagesPageRender =  ({ initialData, initialAccountList = [] }:MessagesPr
 
                 return (
                   <MultiSelect
-                    label="Users"
+                    label="用户"
                     required
-                    placeholder="Search and select users"
+                    placeholder="搜索并选择用户"
                     value={addEditForm.values.accountIds}
                     onChange={(value) => addEditForm.setFieldValue('accountIds', value)}
                     data={userOptions}
@@ -880,8 +880,8 @@ const MessagesPageRender =  ({ initialData, initialAccountList = [] }:MessagesPr
               })()}
               <Textarea
                 required
-                label="Content"
-                placeholder="Input message content"
+                label="内容"
+                placeholder="输入消息内容"
                 value={addEditForm.values.content}
                 onChange={(event) =>
                   addEditForm.setFieldValue('content', event.currentTarget.value)
@@ -892,7 +892,7 @@ const MessagesPageRender =  ({ initialData, initialAccountList = [] }:MessagesPr
                 mb="md"
               />
               <Flex justify="flex-end" gap="sm" mt="lg">
-                <Button type="submit" disabled={loading}>Save</Button>
+                <Button type="submit" disabled={loading}>保存</Button>
               </Flex>
             </form>
           </FocusTrap>
@@ -902,7 +902,7 @@ const MessagesPageRender =  ({ initialData, initialAccountList = [] }:MessagesPr
       {/*查看详情弹窗*/}
       <Modal
         opened={viewDetailModalOpened}
-        title="Message Details"
+        title="消息详情"
         onClose={viewDetailModalActions.close}
         size="md"
       >
@@ -911,14 +911,14 @@ const MessagesPageRender =  ({ initialData, initialAccountList = [] }:MessagesPr
           {viewingMessage && (
             <Stack gap="md">
               <Box mb="md">
-                <Text size="sm" fw={500} mb={5}>Title</Text>
+                <Text size="sm" fw={500} mb={5}>标题</Text>
                 <Text size="sm">
                   {viewingMessage.title || '-'}
                 </Text>
               </Box>
               
               <Box mb="md">
-                <Text size="sm" fw={500} mb={5}>Type</Text>
+                <Text size="sm" fw={500} mb={5}>类型</Text>
                 <Text size="sm">
                   {getTypeLabel(viewingMessage.type)}
                 </Text>
@@ -959,7 +959,7 @@ const MessagesPageRender =  ({ initialData, initialAccountList = [] }:MessagesPr
 
                 return (
                   <Box mb="md">
-                    <Text size="sm" fw={500} mb={5}>Users</Text>
+                    <Text size="sm" fw={500} mb={5}>用户</Text>
                     <Text size="sm">
                       {selectedUsers.length > 0 ? (
                         selectedUsers.map((u: any, index: number) => (
@@ -977,14 +977,14 @@ const MessagesPageRender =  ({ initialData, initialAccountList = [] }:MessagesPr
               })()}
 
               <Box mb="md">
-                <Text size="sm" fw={500} mb={5}>Content</Text>
+                <Text size="sm" fw={500} mb={5}>内容</Text>
                 <Text size="sm" style={{ whiteSpace: 'pre-wrap' }}>
                   {viewingMessage.content || '-'}
                 </Text>
               </Box>
 
               <Flex justify="flex-end" gap="sm" mt="lg">
-                <Button onClick={viewDetailModalActions.close}>Close</Button>
+                <Button onClick={viewDetailModalActions.close}>关闭</Button>
               </Flex>
             </Stack>
           )}

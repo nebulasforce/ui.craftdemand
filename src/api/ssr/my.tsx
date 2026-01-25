@@ -44,6 +44,19 @@ export async function myCustomMessageList(req?:messageListRequest,options?:Optio
   });
 }
 
+// mySystemMessageList 获取系统消息列表
+export async function mySystemMessageList(req?:messageListRequest,options?:Options) {
+  return sRequest<messageListResponse>({
+    url: '/api/v1/my/system-message',
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    params: req || {},
+    ...(options || {}),
+  });
+}
+
 // getUnreadCount
 export async function myUnreadMessageCount(req?:myUnreadMessageCountRequest,options?:Options) {
   return sRequest<myUnreadMessageCountResponse>({

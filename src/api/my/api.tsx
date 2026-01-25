@@ -19,6 +19,8 @@ import {
   sendEmailVerifiedCodeResponse,
   sendMobileVerifiedCodeResponse,
 } from '@/api/my/response';
+import { listRequest } from '@/api/message/request';
+import { listResponse } from '@/api/message/response';
 import request from '@/utils/request';
 
 // me 获取个人信息
@@ -178,6 +180,31 @@ export async function myUnreadMessageCount(req?: myUnreadMessageCountRequest, op
   });
 }
 
+// myCustomMessageList 获取普通消息列表（客户端）
+export async function myCustomMessageList(req?: listRequest, options?: Options) {
+  return request<listResponse>({
+    url: '/api/v1/my/custom-message',
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    params: req || {},
+    ...(options || {}),
+  });
+}
+
+// mySystemMessageList 获取系统消息列表（客户端）
+export async function mySystemMessageList(req?: listRequest, options?: Options) {
+  return request<listResponse>({
+    url: '/api/v1/my/system-message',
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    params: req || {},
+    ...(options || {}),
+  });
+}
 
 // deleteMySubAccount 删除我的子账号
 export async function deleteMySubAccount(req?:deleteMySubAccountRequest,options?:Options) {

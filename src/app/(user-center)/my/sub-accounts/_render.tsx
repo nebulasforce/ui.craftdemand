@@ -37,9 +37,9 @@ interface openAddEditModalParams {
 }
 
 const statusMap:{[key:number]:statusItem} = {
-  0: { label: '启用', color: 'green' },
+  0: { label: '激活', color: 'green' },
   1: { label: '禁用', color: 'orange' },
-  2: { label: '已注销', color: 'red' },
+  2: { label: '注销', color: 'red' },
 }
 // 状态选项数据 - 用于下拉选择器
 const statusOptions = Object.entries(statusMap).map(([value, { label }]) => ({
