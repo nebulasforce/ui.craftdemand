@@ -194,10 +194,10 @@ export function HeaderMegaMenu({ user, navbarCollapsed = false, onNavbarToggle }
             ) : (
               <>
                 <Link href="/auth/login" passHref>
-                  <Button variant="default">Log in</Button>
+                  <Button variant="default">登录</Button>
                 </Link>
                 <Link href="/auth/register" passHref>
-                  <Button>Sign up</Button>
+                  <Button>注册</Button>
                 </Link>
               </>
             )}
@@ -246,10 +246,10 @@ export function HeaderMegaMenu({ user, navbarCollapsed = false, onNavbarToggle }
             ) : (
               <>
                 <Link  href="/auth/login" passHref>
-                  <Button onClick={closeDrawer}  variant="default">Log in</Button>
+                  <Button onClick={closeDrawer}  variant="default">登录</Button>
                 </Link>
                 <Link href="/auth/register" passHref>
-                  <Button onClick={closeDrawer} >Sign up</Button>
+                  <Button onClick={closeDrawer} >注册</Button>
                 </Link>
               </>
             )}

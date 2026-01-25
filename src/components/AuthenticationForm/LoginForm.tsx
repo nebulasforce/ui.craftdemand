@@ -47,7 +47,7 @@ export function LoginForm(props: PaperProps) {
       if (err instanceof Error) {
         notify(err.message, 'error');
       } else {
-        notify('Internal Error', 'error');
+        notify('内部错误', 'error');
       }
     }
   };
@@ -76,16 +76,16 @@ export function LoginForm(props: PaperProps) {
     validate: {
       loginId: (val) => {
         if (!val || val.trim() === '') {
-          return 'This field is required';
+          return '此字段为必填项';
         }
         return null;
       },
       password: (val) => {
         if (!val) {
-          return 'Password is required';
+          return '密码为必填项';
         }
         if (val.length < 6) {
-          return 'Password should include at least 6 characters';
+          return '密码至少需要6个字符';
         }
         return null;
       },
@@ -93,7 +93,7 @@ export function LoginForm(props: PaperProps) {
       captcha: (val) => {
         if (val) {
           if (val.length !== 6) {
-            return 'Verification code is 6 digits';
+            return '验证码为6位数字';
           }
         }
         return null;
@@ -112,7 +112,7 @@ export function LoginForm(props: PaperProps) {
       };
       const result = await login(params);
       if (result.success) {
-        notify('Login successfully', 'success');
+        notify('登录成功', 'success');
         router.push(redirectPath);
         // // 验证跳转路径的安全性，防止XSS攻击
         // if (redirectPath.startsWith('/') && !redirectPath.startsWith('//')) {
@@ -123,13 +123,13 @@ export function LoginForm(props: PaperProps) {
         // }
       } else {
         // 根据响应结果判断，如果需要显示图形验证码则显示图形验证码
-        notify(result.message || 'Login failed', 'error');
+        notify(result.message || '登录失败', 'error');
       }
     } catch (error) {
       if (error instanceof Error) {
         notify(error.message, 'error');
       } else {
-        notify('Login failed', 'error');
+        notify('登录失败', 'error');
       }
     } finally {
       setLoading(false);
@@ -140,7 +140,7 @@ export function LoginForm(props: PaperProps) {
     <Paper radius="md" p="lg" pos="relative" withBorder {...props}>
       <LoadingOverlay visible={loading} />
       <Text size="lg" component="span" fw={500}>
-        Welcome to Mantine, login with
+        欢迎使用管理系统，使用以下方式登录
       </Text>
 
       <Group grow mb="md" mt="md">
@@ -148,7 +148,7 @@ export function LoginForm(props: PaperProps) {
         <TwitterButton radius="xl">Twitter</TwitterButton>
       </Group>
 
-      <Divider label="Or continue with mobile / email / username" labelPosition="center" my="lg" />
+      <Divider label="或使用手机/邮箱/用户名继续" labelPosition="center" my="lg" />
       {/* 添加 FocusTrap 包装表单内容 */}
       <FocusTrap active>
         <form onSubmit={form.onSubmit(handleSubmit)}>
@@ -156,8 +156,8 @@ export function LoginForm(props: PaperProps) {
             <TextInput
               required
               data-autofocus
-              label="Email/Mobile/Username"
-              placeholder="Enter your email, mobile or username"
+              label="邮箱/手机/用户名"
+              placeholder="请输入您的邮箱、手机或用户名"
               value={form.values.loginId}
               onChange={(event) => form.setFieldValue('loginId', event.currentTarget.value)}
               error={form.errors.loginId} // 显示验证错误
@@ -165,8 +165,8 @@ export function LoginForm(props: PaperProps) {
             />
             <PasswordInput
               required
-              label="Password"
-              placeholder="Your password"
+              label="密码"
+              placeholder="请输入您的密码"
               value={form.values.password}
               onChange={(event) => form.setFieldValue('password', event.currentTarget.value)}
               error={form.errors.password}
@@ -176,10 +176,10 @@ export function LoginForm(props: PaperProps) {
 
           <Group justify="space-between" mt="xl">
             <Anchor component={Link} href="/auth/register" c="dimmed" size="xs">
-              Don't have an account? Register
+              还没有账号？注册
             </Anchor>
             <Button type="submit" radius="xl">
-              Login
+              登录
             </Button>
           </Group>
         </form>

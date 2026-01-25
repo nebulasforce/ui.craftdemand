@@ -33,7 +33,7 @@ const sendVerificationCode = async (mobile: string) => {
   // 模拟发送验证码的逻辑
   return new Promise((resolve) => {
     setTimeout(() => {
-      notify(`Verification code sent to ${mobile} successfully`, 'success');
+      notify(`验证码已成功发送至 ${mobile}`, 'success');
       resolve(true);
     }, 1000);
   });
@@ -66,41 +66,41 @@ export function RegisterForm(props: PaperProps) {
     validate: {
       username: (val) => {
         if (val.trim()?.length < 3) {
-          return 'Username must be at least 3 characters';
+          return '用户名至少需要3个字符';
         }
         return null;
       },
       email: (val) => {
         if (val && !/^\S+@\S+$/.test(val)) {
-          return 'Invalid email address';
+          return '邮箱地址格式不正确';
         }
         return null;
       },
       mobile: (val) => {
         if (val && !/^1[3-9]\d{9}$/.test(val)) {
-          return 'Invalid mobile number';
+          return '手机号格式不正确';
         }
         return null;
       },
       password: (val) => {
         if (!val) {
-          return 'Password is required';
+          return '密码为必填项';
         }
         if (val.length < 6) {
-          return 'Password should include at least 6 characters';
+          return '密码至少需要6个字符';
         }
         return null;
       },
 
       captcha: (val) => {
         if (!val || val.length !== 6) {
-          return 'Verification code is 6 digits';
+          return '验证码为6位数字';
         }
         return null;
       },
       terms: (val) => {
         if (!val) {
-          return 'You must accept the terms and conditions';
+          return '您必须同意条款和条件';
         }
         return null;
       },
@@ -113,7 +113,7 @@ export function RegisterForm(props: PaperProps) {
 
     // 验证手机号
     if (!mobile || !/^1[3-9]\d{9}$/.test(mobile)) {
-      notify('Please enter a valid mobile number', 'error');
+      notify('请输入有效的手机号', 'error');
       return;
     }
 
@@ -167,16 +167,16 @@ export function RegisterForm(props: PaperProps) {
       };
       const result = await register(params);
       if (result.success) {
-        notify('Register successfully', 'success');
+        notify('注册成功', 'success');
         router.push('/auth'); // 注册成功后跳转到登录页
       } else {
-        notify(result.message || 'Register failed', 'error');
+        notify(result.message || '注册失败', 'error');
       }
     } catch (error) {
       if (error instanceof Error) {
         notify(error.message, 'error');
       } else {
-        notify('Authed failed', 'error');
+        notify('认证失败', 'error');
       }
     } finally {
       setLoading(false);
@@ -187,7 +187,7 @@ export function RegisterForm(props: PaperProps) {
     <Paper radius="md" p="lg" withBorder {...props}>
       <LoadingOverlay visible={loading} />
       <Text size="lg" component="span" fw={500}>
-        Welcome to Mantine, Register with
+        欢迎使用管理系统，使用以下方式注册
       </Text>
 
       <Group grow mb="md" mt="md">
@@ -195,14 +195,14 @@ export function RegisterForm(props: PaperProps) {
         <TwitterButton radius="xl">Twitter</TwitterButton>
       </Group>
 
-      <Divider label="Or continue with email" labelPosition="center" my="lg" />
+      <Divider label="或使用邮箱继续" labelPosition="center" my="lg" />
       <FocusTrap active>
         <form onSubmit={form.onSubmit(handleSubmit)}>
           <Stack>
             <TextInput
               required
-              label="Username"
-              placeholder="Your username"
+              label="用户名"
+              placeholder="请输入您的用户名"
               value={form.values.username}
               onChange={(event) => form.setFieldValue('username', event.currentTarget.value)}
               error={form.errors.username}
@@ -212,8 +212,8 @@ export function RegisterForm(props: PaperProps) {
 
             <TextInput
               required
-              label="Email"
-              placeholder="Your email"
+              label="邮箱"
+              placeholder="请输入您的邮箱"
               value={form.values.email}
               onChange={(event) => form.setFieldValue('email', event.currentTarget.value)}
               error={form.errors.email}
@@ -222,8 +222,8 @@ export function RegisterForm(props: PaperProps) {
 
             <TextInput
               required
-              label="Mobile"
-              placeholder="Your mobile number"
+              label="手机号"
+              placeholder="请输入您的手机号"
               value={form.values.mobile}
               onChange={(event) => form.setFieldValue('mobile', event.currentTarget.value)}
               error={form.errors.mobile}
@@ -234,8 +234,8 @@ export function RegisterForm(props: PaperProps) {
             <Flex justify="space-between" gap="xs">
               <TextInput
                 required
-                label="Verification Code"
-                placeholder="Enter verification code"
+                label="验证码"
+                placeholder="请输入验证码"
                 value={form.values.captcha}
                 onChange={(event) => form.setFieldValue('captcha', event.currentTarget.value)}
                 error={form.errors.captcha}
@@ -253,20 +253,20 @@ export function RegisterForm(props: PaperProps) {
                   alignSelf: 'flex-end', // 确保按钮与输入框底部对齐
                 }}
               >
-                {countdown > 0 ? `${countdown} S` : 'Send Code'}
+                {countdown > 0 ? `${countdown} 秒` : '发送验证码'}
               </Button>
             </Flex>
             <PasswordInput
               required
-              label="Password"
-              placeholder="Your password"
+              label="密码"
+              placeholder="请输入您的密码"
               value={form.values.password}
               onChange={(event) => form.setFieldValue('password', event.currentTarget.value)}
               error={form.errors.password}
               radius="md"
             />
             <Checkbox
-              label="I accept terms and conditions"
+              label="我同意条款和条件"
               checked={form.values.terms}
               onChange={(event) => form.setFieldValue('terms', event.currentTarget.checked)}
             />
@@ -274,10 +274,10 @@ export function RegisterForm(props: PaperProps) {
 
           <Group justify="space-between" mt="xl">
             <Anchor component={Link} href="/auth/login" c="dimmed" size="xs">
-              Already have an account? Login
+              已有账号？登录
             </Anchor>
             <Button type="submit" radius="xl">
-              Register
+              注册
             </Button>
           </Group>
         </form>
