@@ -52,11 +52,17 @@ const iconMap = {
   IconUsers,
 };
 
+// 英文 key 到中文显示的映射
+const sectionLabelMap: Record<string, string> = {
+  Account: '账户',
+  System: '系统',
+};
+
 const generateSegments = (data: listGroupData) => {
   const keys = Object.keys(data) as SectionType[];
   return keys.map((key) => ({
-    label: key,
-    value: key,
+    label: sectionLabelMap[key] || key, // 如果有中文映射则使用中文，否则使用原 key
+    value: key, // value 保持英文
   }));
 };
 
@@ -140,10 +146,10 @@ export function NavbarSegmented({ data, collapsed = false }: NavbarSegmentedProp
             className={classes.link}
             onClick={(event) => event.preventDefault()}
             data-collapsed={collapsed || undefined}
-            title={collapsed ? 'Change account' : undefined}
+            title={collapsed ? '切换账号' : undefined}
           >
             <IconSwitchHorizontal className={classes.linkIcon} stroke={1.5} />
-            {!collapsed && <span>Change account</span>}
+            {!collapsed && <span>切换账号</span>}
           </Link>
 
           <Link
@@ -151,10 +157,10 @@ export function NavbarSegmented({ data, collapsed = false }: NavbarSegmentedProp
             className={classes.link}
             onClick={logout}
             data-collapsed={collapsed || undefined}
-            title={collapsed ? 'Logout' : undefined}
+            title={collapsed ? '退出' : undefined}
           >
             <IconLogout className={classes.linkIcon} stroke={1.5} />
-            {!collapsed && <span>Logout</span>}
+            {!collapsed && <span>退出</span>}
           </Link>
         </div>
       </Box>

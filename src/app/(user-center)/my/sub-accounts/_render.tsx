@@ -37,9 +37,9 @@ interface openAddEditModalParams {
 }
 
 const statusMap:{[key:number]:statusItem} = {
-  0: { label: 'Active', color: 'green' },
-  1: { label: 'Disabled', color: 'orange' },
-  2: { label: 'Deleted', color: 'red' },
+  0: { label: '启用', color: 'green' },
+  1: { label: '禁用', color: 'orange' },
+  2: { label: '已注销', color: 'red' },
 }
 // 状态选项数据 - 用于下拉选择器
 const statusOptions = Object.entries(statusMap).map(([value, { label }]) => ({
@@ -50,7 +50,7 @@ const statusOptions = Object.entries(statusMap).map(([value, { label }]) => ({
 // 获取状态显示文本
 const getStatusLabel = (status: number | string) => {
   const statusNumber = typeof status === 'string' ? parseInt(status, 10) : status;
-  return statusMap[statusNumber]?.label || 'Unknown';
+  return statusMap[statusNumber]?.label || '未知';
 };
 
 // 获取状态显示颜色
@@ -80,9 +80,9 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
 
   // 面包屑
   const items = [
-    { title: 'Home', href: '/' },
-    { title: 'Account' },
-    { title: 'Sub Accounts' }
+    { title: '首页', href: '/' },
+    { title: '账户' },
+    { title: '子账号' }
   ];
 
   // 基础搜索状态
@@ -139,7 +139,7 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
   const calculateDisplayRange = () => {
     const start = (page - 1) * pageSize + 1;
     const end = Math.min(page * pageSize, count);
-    return `${start}-${end} of ${count}`;
+    return `显示 ${start}-${end} 条，共 ${count} 条`;
   };
 
   // 数据加载方法，同时支持基础搜索和高级搜索
@@ -182,10 +182,10 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
         setSelection([]);
         // window.scrollTo({ top: 0, behavior: 'smooth' });
       } else {
-        notify(response.message || 'Failed to load data', 'error');
+        notify(response.message || '加载数据失败', 'error');
       }
     } catch (error) {
-      notify('Failed to connect to server', 'error');
+      notify('连接服务器失败', 'error');
     } finally {
       setLoading(false);
     }
@@ -234,17 +234,17 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
         </Table.Td>
         <Table.Td>
           <ActionIcon.Group>
-            <ActionIcon onClick={()=>{openAddEditModal({action:'edit',user:item})}} variant="light" size="md" aria-label="Edit">
+            <ActionIcon onClick={()=>{openAddEditModal({action:'edit',user:item})}} variant="light" size="md" aria-label="编辑">
               <IconEdit size={14} stroke={1.5} />
             </ActionIcon>
-            <ActionIcon onClick={()=>{openResetPasswordModal(item)}} variant="light" size="md" aria-label="Reset Password">
+            <ActionIcon onClick={()=>{openResetPasswordModal(item)}} variant="light" size="md" aria-label="重置密码">
               <IconKey size={14} stroke={1.5} />
             </ActionIcon>
-            <ActionIcon onClick={()=>{handleSettingSubAccount(item)}} variant="light" size="md" aria-label="Setting">
+            <ActionIcon onClick={()=>{handleSettingSubAccount(item)}} variant="light" size="md" aria-label="设置">
               <IconUserCog size={14} stroke={1.5} />
             </ActionIcon>
             <DeleteConfirm onConfirm={()=>{handleDeleteOneSubAccount(item)}} itemName={item.account.username}>
-              <ActionIcon variant="light" size="md" aria-label="Delete">
+              <ActionIcon variant="light" size="md" aria-label="删除">
                 <IconTrash size={14} stroke={1.5} />
               </ActionIcon>
             </DeleteConfirm>
@@ -343,16 +343,16 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
       };
       const response = await deleteMySubAccount(requestData);
       if (response.code === 0) {
-        notify('Sub account deleted successfully', 'success');
+        notify('子账号删除成功', 'success');
         await loadData(page);
       } else {
-        notify(response.message || 'Failed to delete the sub account', 'error');
+        notify(response.message || '删除子账号失败', 'error');
       }
     } catch (err) {
       if (err instanceof Error) {
         notify(err.message, 'error');
       } else {
-        notify('Internal Error', 'error');
+        notify('内部错误', 'error');
       }
     } finally {
       setLoading(false);
@@ -371,16 +371,16 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
       };
       const response = await deleteMySubAccount(requestData);
       if (response.code === 0) {
-        notify(`Successfully deleted ${response.data?.count || selection.length} sub account(s)`, 'success');
+        notify(`成功删除 ${response.data?.count || selection.length} 个子账号`, 'success');
         await loadData(page);
       } else {
-        notify(response.message || 'Failed to delete the sub accounts', 'error');
+        notify(response.message || '删除子账号失败', 'error');
       }
     } catch (err) {
       if (err instanceof Error) {
         notify(err.message, 'error');
       } else {
-        notify('Internal Error', 'error');
+        notify('内部错误', 'error');
       }
     } finally {
       setLoading(false);
@@ -410,16 +410,16 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
       };
       const response = await resetSubAccountPassword(requestData);
       if (response.code === 0) {
-        notify('Password reset successfully', 'success');
+        notify('密码重置成功', 'success');
         resetPasswordModalActions.close();
       } else {
-        notify(response.message || 'Failed to reset password', 'error');
+        notify(response.message || '重置密码失败', 'error');
       }
     } catch (err) {
       if (err instanceof Error) {
         notify(err.message, 'error');
       } else {
-        notify('Internal Error', 'error');
+        notify('内部错误', 'error');
       }
     } finally {
       setLoading(false);
@@ -443,7 +443,7 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
     validate: {
       username: (val) => {
         if (!val || val.trim() === '') {
-          return 'This field is required';
+          return '此字段为必填项';
         }
         return null;
       },
@@ -453,7 +453,7 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
           const password = val.trim();
           // 基础密码验证：至少6位
           if (password.length < 6) {
-            return 'Password must be at least 6 characters long.';
+            return '密码长度至少为6位';
           }
         }
 
@@ -462,11 +462,11 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
       },
       email: (val) => {
         if (!val || val.trim() === '') {
-          return 'This field is required';
+          return '此字段为必填项';
         }
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(val)) {
-          return 'Invalid email format';
+          return '邮箱格式无效';
         }
         return null;
       },
@@ -474,13 +474,13 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
         // 添加手机号格式验证（根据需求调整）
         const cleaned = val.replace(/[^\d+]/g, '');
         if (!/^\+?[\d]+$/.test(cleaned)) {
-          return 'Mobile number should contain only digits';
+          return '手机号只能包含数字';
         }
         return null;
       },
       status: (val) => {
         if (val === undefined || val === null) {
-          return 'This field is required';
+          return '此字段为必填项';
         }
         return null;
       }
@@ -501,15 +501,15 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
 
         if (response.code === 0) {
           loadData(page).then()
-          notify('Sub account add successfully', 'success');
+          notify('子账号添加成功', 'success');
         } else {
-          notify(response.message || 'Failed to add the sub account', 'error');
+          notify(response.message || '添加子账号失败', 'error');
         }
       } catch (err){
         if (err instanceof Error) {
           notify(err.message, 'error');
         } else {
-          notify('Internal Error', 'error');
+          notify('内部错误', 'error');
         }
       } finally {
         setLoading(false);
@@ -530,15 +530,15 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
 
         if (response.code === 0) {
           loadData(page).then()
-          notify('Sub account updated successfully', 'success');
+          notify('子账号更新成功', 'success');
         } else {
-          notify(response.message || 'Failed to update the sub account', 'error');
+          notify(response.message || '更新子账号失败', 'error');
         }
       } catch (err) {
         if (err instanceof Error) {
           notify(err.message, 'error');
         } else {
-          notify('Internal Error', 'error');
+          notify('内部错误', 'error');
         }
       } finally {
         setLoading(false);
@@ -556,10 +556,10 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
     validate: {
       password: (val) => {
         if (!val || val.trim() === '') {
-          return 'Password is required';
+          return '密码为必填项';
         }
         if (val.length < 6) {
-          return 'Password must be at least 6 characters long';
+          return '密码长度至少为6位';
         }
         return null;
       },
@@ -595,9 +595,9 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
       <Paper pt="xs" pb="xs">
         {/* 页面容器 - 标题 */}
         <Box mb="md">
-          <Title order={3}>Sub Accounts</Title>
+          <Title order={3}>子账号</Title>
           <Text size="sm" c="dimmed">
-            Manage and control sub-accounts under your main account.
+            管理和控制您主账号下的子账号。
           </Text>
         </Box>
         <Divider mb="lg" my="xs" variant="dashed" />
@@ -605,7 +605,7 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
           <Grid.Col span={{ base: 12, sm: 9 }} mb="xs">
             {/* 基础搜索组件 */}
             <TextInput
-              placeholder="Search by username, mobile or email..."
+              placeholder="搜索用户名、手机号或邮箱..."
               value={searchKeyword}
               onChange={(e) => handleSearchChange(e.target.value)}
               leftSection={<IconSearch size={16} stroke={1.5} />}
@@ -615,7 +615,7 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
                     variant="default"
                     size="sm"
                     onClick={() => handleSearchChange('')}
-                    aria-label="Clear search"
+                    aria-label="清除搜索"
                   >
                     <IconX size={14} stroke={1.5} />
                   </ActionIcon>
@@ -636,7 +636,7 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
               }
               fullWidth
             >
-              {advancedSearchOpen ? 'Hide Advanced Search' : 'Advanced Search'}
+              {advancedSearchOpen ? '隐藏高级搜索' : '高级搜索'}
             </Button>
           </Grid.Col>
         </Grid>
@@ -645,34 +645,34 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
         <Collapse in={advancedSearchOpen} transitionDuration={200}>
           <Paper p="md" mb="lg" withBorder>
             <Title order={5} mb="md">
-              Advanced Filters
+              高级筛选
             </Title>
             <SimpleGrid cols={{ base: 1, sm: 2, md: 4 }} spacing="md">
               <TextInput
-                label="Username"
+                label="用户名"
                 value={advancedFilters.username}
                 onChange={(e) => handleAdvancedFilterChange('username', e.target.value)}
-                placeholder="Search by username"
+                placeholder="搜索用户名"
                 // disabled={loading}
               />
               <TextInput
-                label="Mobile"
+                label="手机号"
                 value={advancedFilters.mobile}
                 onChange={(e) => handleAdvancedFilterChange('mobile', e.target.value)}
-                placeholder="Search by mobile number"
+                placeholder="搜索手机号"
                 // disabled={loading}
               />
               <TextInput
-                label="Email"
+                label="邮箱"
                 value={advancedFilters.email}
                 onChange={(e) => handleAdvancedFilterChange('email', e.target.value)}
-                placeholder="Search by email"
+                placeholder="搜索邮箱"
               />
               <Select
-                label="Status"
+                label="状态"
                 value={advancedFilters.status || null}
                 onChange={(value) => handleAdvancedFilterChange('status', value || '')}
-                placeholder="Select status"
+                placeholder="选择状态"
                 data={statusOptions}
                 clearable
                 // disabled={loading}
@@ -681,10 +681,10 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
 
             <Group gap="sm" mt="md" justify="flex-end">
               <Button variant="ghost" onClick={resetAdvancedFilters} /* disabled={loading}*/>
-                Reset
+                重置
               </Button>
               <Button onClick={handleAdvancedSearch}/* disabled={loading}*/>
-                Apply Filters
+                应用
               </Button>
             </Group>
           </Paper>
@@ -696,15 +696,15 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
             <Group>
               <DeleteConfirm
                 onConfirm={handleDeleteSelected}
-                itemName={selection.length === 1 ? data.find(item => selection.includes(item.account.id))?.account.username : `${selection.length} sub accounts`}
-                title="Delete Selected Sub Accounts"
+                itemName={selection.length === 1 ? data.find(item => selection.includes(item.account.id))?.account.username : `${selection.length} 个子账号`}
+                title="删除选中的子账号"
               >
                 <Button
                   variant="danger"
                   leftSection={<IconTrash size={16} stroke={1.5} />}
                   disabled={selection.length === 0 || loading}
                 >
-                  Delete Selected
+                  删除选中
                 </Button>
               </DeleteConfirm>
               <Button
@@ -712,7 +712,7 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
                 // disabled={loading}
                 onClick={() => openAddEditModal({action:'add'})}
               >
-                Add Sub Account
+                添加子账号
               </Button>
             </Group>
           </Flex>
@@ -732,12 +732,12 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
                         indeterminate={selection.length > 0 && selection.length !== data.length}
                       />
                     </Table.Th>
-                    <Table.Th miw={150}>Username</Table.Th>
-                    <Table.Th>Mobile</Table.Th>
-                    <Table.Th>Email</Table.Th>
-                    <Table.Th miw={180}>Last Login</Table.Th>
-                    <Table.Th>Status</Table.Th>
-                    <Table.Th>Actions</Table.Th>
+                    <Table.Th miw={150}>用户名</Table.Th>
+                    <Table.Th>手机号</Table.Th>
+                    <Table.Th>邮箱</Table.Th>
+                    <Table.Th miw={180}>最后登录</Table.Th>
+                    <Table.Th>状态</Table.Th>
+                    <Table.Th>操作</Table.Th>
                   </Table.Tr>
                 </Table.Thead>
                 <Table.Tbody>
@@ -745,8 +745,8 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
                     rows
                   ) : (
                     <Table.Tr>
-                      <Table.Td colSpan={4} align="center">
-                        <Text c="dimmed">No data available</Text>
+                      <Table.Td colSpan={7} align="center">
+                        <Text c="dimmed">暂无数据</Text>
                       </Table.Td>
                     </Table.Tr>
                   )}
@@ -777,7 +777,7 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
       {/*独立的添加/编辑弹窗*/}
       <Modal
         opened={addEditModalOpened}
-        title={addEditAction === 'add' ? 'Add Sub Account' : 'Edit Sub Account'}
+        title={addEditAction === 'add' ? '添加子账号' : '编辑子账号'}
         onClose={addEditModalActions.close}
         size="md"
       >
@@ -788,8 +788,8 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
               <TextInput
                 required
                 data-autofocus
-                label="Username"
-                placeholder="Input your username"
+                label="用户名"
+                placeholder="请输入用户名"
                 value={addEditForm.values.username}
                 onChange={(event) =>
                   addEditForm.setFieldValue('username', event.currentTarget.value)
@@ -799,8 +799,8 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
               />
               <TextInput
                 required
-                label="Email"
-                placeholder="Input your email"
+                label="邮箱"
+                placeholder="请输入邮箱"
                 value={addEditForm.values.email}
                 onChange={(event) =>
                   addEditForm.setFieldValue('email', event.currentTarget.value)
@@ -812,8 +812,8 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
                 addEditAction === 'add' &&(
                   <TextInput
                     required
-                    label="Password"
-                    placeholder="Input your password"
+                    label="密码"
+                    placeholder="请输入密码"
                     value={addEditForm.values.password}
                     onChange={(event) =>
                       addEditForm.setFieldValue('password', event.currentTarget.value)
@@ -825,8 +825,8 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
               }
               <TextInput
                 required
-                label="Mobile"
-                placeholder="Input your mobile number"
+                label="手机号"
+                placeholder="请输入手机号"
                 value={addEditForm.values.mobile}
                 onChange={(event) =>
                   addEditForm.setFieldValue('mobile', event.currentTarget.value)
@@ -835,16 +835,16 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
                 radius="md"
               />
               <Select
-                label="Status"
+                label="状态"
                 required
                 value={addEditForm.values.status.toString()}
                 onChange={(value) => addEditForm.setFieldValue('status', parseInt(value||'0',10))}
-                placeholder="Select status"
+                placeholder="选择状态"
                 data={statusOptions}
                 disabled={loading}
               />
               <Flex justify="flex-end" gap="sm" mt="lg">
-                <Button type="submit" disabled={loading}>Save</Button>
+                <Button type="submit" disabled={loading}>保存</Button>
               </Flex>
             </form>
           </FocusTrap>
@@ -854,7 +854,7 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
       {/* 重置密码模态框 */}
       <Modal
         opened={resetPasswordModalOpened}
-        title="Reset Password"
+        title="重置密码"
         onClose={resetPasswordModalActions.close}
         size="md"
       >
@@ -863,13 +863,13 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
           <FocusTrap active>
             <form onSubmit={resetPasswordForm.onSubmit(handleResetPasswordFormSubmit)}>
               <Text size="sm" c="dimmed" mb="md">
-                Reset password for: <Text span fw={500}>{resettingAccount?.account.username}</Text>
+                重置密码用户: <Text span fw={500}>{resettingAccount?.account.username}</Text>
               </Text>
               <TextInput
                 required
                 data-autofocus
-                label="New Password"
-                placeholder="Enter new password"
+                label="新密码"
+                placeholder="请输入新密码"
                 value={resetPasswordForm.values.password}
                 onChange={(event) =>
                   resetPasswordForm.setFieldValue('password', event.currentTarget.value)
@@ -879,10 +879,10 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
               />
               <Flex justify="flex-end" gap="sm" mt="lg">
                 <Button variant="default" onClick={resetPasswordModalActions.close} disabled={loading}>
-                  Cancel
+                  取消
                 </Button>
                 <Button type="submit" disabled={loading}>
-                  Reset Password
+                  重置密码
                 </Button>
               </Flex>
             </form>

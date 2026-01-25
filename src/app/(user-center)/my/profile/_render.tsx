@@ -26,12 +26,14 @@ import {
   Title,
   FileButton,
 } from '@mantine/core';
-import { DatePickerInput } from '@mantine/dates';
+import { DatePickerInput, DatesProvider } from '@mantine/dates';
 import { useForm } from '@mantine/form';
 import { getCitiesData, getProvincesData } from '@/api/data/response';
 import { useNavbar } from '@/contexts/NavbarContext/NavbarContext';
 import { useUser } from '@/contexts/UserContext/UserContext';
 import '@mantine/dates/styles.css';
+import dayjs from 'dayjs';
+import 'dayjs/locale/zh-cn';
 import { uploadRequest } from '@/api/file/request';
 import { IconCalendar, IconUpload } from '@tabler/icons-react';
 import { CityItem } from '@/api/data/typings';
@@ -58,6 +60,9 @@ const createCitiesMap = (cities: Record<string, CityItem[]> | null) => {
     return map;
   }, {} as Record<string, string>);
 }
+
+// 配置 dayjs 使用中文
+dayjs.locale('zh-cn');
 
 const ProfilePageRender = ({ provinces, cities }: ProfilePageProps) => {
   const { setActive, setSection } = useNavbar();
@@ -124,15 +129,15 @@ const ProfilePageRender = ({ provinces, cities }: ProfilePageProps) => {
             }
           })
         }
-        notify('Profile updated successfully', 'success');
+        notify('资料更新成功', 'success');
       } else {
-        notify(response.message || 'Failed to update profile', 'error');
+        notify(response.message || '更新资料失败', 'error');
       }
     } catch (err) {
       if (err instanceof Error) {
         notify(err.message, 'error');
       } else {
-        notify('Internal Error', 'error');
+        notify('内部错误', 'error');
       }
     } finally {
       setLoading(false);
@@ -153,7 +158,7 @@ const ProfilePageRender = ({ provinces, cities }: ProfilePageProps) => {
     // 验证文件大小
     if (file.size > 5 * 1024 * 1024) { // 5MB in bytes
       const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
-      notify(`File size is too large (${fileSizeMB}MB). Maximum allowed size is 5MB.`);
+      notify(`文件大小过大 (${fileSizeMB}MB)。最大允许大小为 5MB。`);
       setFile(null);
       return;
     }
@@ -200,14 +205,14 @@ const ProfilePageRender = ({ provinces, cities }: ProfilePageProps) => {
           // }
         }
       } else {
-        notify(response.message || 'Failed to upload avatar', 'error');
+        notify(response.message || '上传头像失败', 'error');
       }
 
     } catch (err) {
       if (err instanceof Error) {
         notify(err.message, 'error');
       } else {
-        notify('Internal Error', 'error');
+        notify('内部错误', 'error');
       }
     }
   }
@@ -233,9 +238,9 @@ const ProfilePageRender = ({ provinces, cities }: ProfilePageProps) => {
   }, [file]);
 
   const items = [
-    { title: 'Home', href: '/' },
-    { title: 'Account' },
-    { title: 'User Profile' }
+    { title: '首页', href: '/' },
+    { title: '账户' },
+    { title: '个人资料' }
   ];
 
   const form = useForm({
@@ -252,37 +257,37 @@ const ProfilePageRender = ({ provinces, cities }: ProfilePageProps) => {
     validate: {
       nickname: (val) => {
         if (!val || val.trim() === '') {
-          return 'This field is required';
+          return '此字段为必填项';
         }
         return null;
       },
       signature: (val) => {
         if (!val || val.trim() === '') {
-          return 'This field is required';
+          return '此字段为必填项';
         }
         return null;
       },
       birthday: (val) => {
         if (!val || val.trim() === '') {
-          return 'This field is required';
+          return '此字段为必填项';
         }
         return null;
       },
       province: (val) => {
         if (!val || val.trim() === '') {
-          return 'This field is required';
+          return '此字段为必填项';
         }
         return null;
       },
       city: (val) => {
         if (!val || val.trim() === '') {
-          return 'This field is required';
+          return '此字段为必填项';
         }
         return null;
       },
       address: (val) => {
         if (!val || val.trim() === '') {
-          return 'This field is required';
+          return '此字段为必填项';
         }
         return null;
       },
@@ -315,9 +320,9 @@ const ProfilePageRender = ({ provinces, cities }: ProfilePageProps) => {
       <Paper pt="xs" pb="xs">
         {/* 页面容器 - 标题 */}
         <Box mb="md">
-          <Title order={3}>User Profile</Title>
+          <Title order={3}>个人资料</Title>
           <Text size="sm" c="dimmed">
-            Enhance your profile to let us get to know you better.
+            完善您的个人资料，让我们更好地了解您。
           </Text>
         </Box>
         <Divider mb="lg" my="xs" variant="dashed" />
@@ -336,8 +341,8 @@ const ProfilePageRender = ({ provinces, cities }: ProfilePageProps) => {
                         <TextInput
                           required
                           data-autofocus
-                          label="Nickname"
-                          placeholder="Input your nickname"
+                          label="昵称"
+                          placeholder="请输入您的昵称"
                           value={form.values.nickname}
                           onChange={(event) =>
                             form.setFieldValue('nickname', event.currentTarget.value)
@@ -353,8 +358,8 @@ const ProfilePageRender = ({ provinces, cities }: ProfilePageProps) => {
                       <Grid.Col span={12} pr={{ base: 0, sm: 'sm' }}>
                         <Textarea
                           required
-                          label="Signature"
-                          placeholder="Tell us about yourself"
+                          label="个人签名"
+                          placeholder="介绍一下您自己"
                           value={form.values.signature}
                           onChange={(event) =>
                             form.setFieldValue('signature', event.currentTarget.value)
@@ -368,33 +373,35 @@ const ProfilePageRender = ({ provinces, cities }: ProfilePageProps) => {
 
                     {/* 性别 (radio) */}
                     <RadioGroup
-                      label="Gender"
+                      label="性别"
                       required
                       value={form.values.gender.toString()}
                       onChange={(value) => form.setFieldValue('gender', parseInt(value, 10))}
                       mb="md"
                     >
                       <Group>
-                        <Radio value="1" label="Male" />
-                        <Radio value="2" label="Female" />
-                        <Radio value="0" label="Other" />
+                        <Radio value="1" label="男" />
+                        <Radio value="2" label="女" />
+                        <Radio value="0" label="其他" />
                       </Group>
                     </RadioGroup>
 
                     {/* 出生日期 (datepicker) */}
                     <Grid>
                       <Grid.Col span={8} pr={{ base: 0, sm: 'sm' }}>
-                        <DatePickerInput
-                          label="Birthday"
-                          required
-                          placeholder="Select your birthday"
-                          value={form.values.birthday}
-                          rightSection={<IconCalendar size="16" />}
-                          onChange={(date) => form.setFieldValue('birthday', date || '')}
-                          valueFormat="YYYY-MM-DD"
-                          maxDate={new Date()}
-                          error={form.errors.birthday}
-                        />
+                        <DatesProvider settings={{ locale: 'zh-cn', firstDayOfWeek: 0 }}>
+                          <DatePickerInput
+                            label="生日"
+                            required
+                            placeholder="选择您的生日"
+                            value={form.values.birthday}
+                            rightSection={<IconCalendar size="16" />}
+                            onChange={(date) => form.setFieldValue('birthday', date || '')}
+                            valueFormat="YYYY-MM-DD"
+                            maxDate={new Date()}
+                            error={form.errors.birthday}
+                          />
+                        </DatesProvider>
                       </Grid.Col>
                     </Grid>
 
@@ -404,8 +411,8 @@ const ProfilePageRender = ({ provinces, cities }: ProfilePageProps) => {
                       <Grid.Col span={5} pr={{ base: 0, sm: 'sm' }}>
                         <Select
                           required
-                          label="Province"
-                          placeholder="Select province"
+                          label="省份"
+                          placeholder="选择省份"
                           value={form.values.province}
                           onChange={handleProvinceChange}
                           data={
@@ -424,8 +431,8 @@ const ProfilePageRender = ({ provinces, cities }: ProfilePageProps) => {
                       <Grid.Col span={5} pl={{ base: 0, sm: 'sm' }}>
                         <Select
                           required
-                          label="City"
-                          placeholder="Select city"
+                          label="城市"
+                          placeholder="选择城市"
                           value={form.values.city}
                           onChange={(value) => form.setFieldValue('city', value || '')}
                           data={availableCities.map((city) => ({
@@ -444,8 +451,8 @@ const ProfilePageRender = ({ provinces, cities }: ProfilePageProps) => {
                       <Grid.Col span={12} pr={{ base: 0, sm: 'sm' }}>
                         <Textarea
                           required
-                          label="Address"
-                          placeholder="Enter your detailed address"
+                          label="地址"
+                          placeholder="请输入您的详细地址"
                           value={form.values.address}
                           onChange={(event) =>
                             form.setFieldValue('address', event.currentTarget.value)
@@ -488,7 +495,7 @@ const ProfilePageRender = ({ provinces, cities }: ProfilePageProps) => {
                             leftSection={<IconUpload size={14} />}
                             mt="md"
                           >
-                            Upload Avatar
+                            上传头像
                           </Button>
                       }
                     </FileButton>
@@ -507,7 +514,7 @@ const ProfilePageRender = ({ provinces, cities }: ProfilePageProps) => {
                     }
                     {/* 文件大小提示 */}
                     <Text size="xs" c="dimmed" >
-                      Supports JPG, PNG. Max size 5MB
+                      支持 JPG、PNG 格式。最大 5MB
                     </Text>
                   </Stack>
 
@@ -523,13 +530,13 @@ const ProfilePageRender = ({ provinces, cities }: ProfilePageProps) => {
                       onClick={handleReset}
                       disabled={loading}
                     >
-                      Reset
+                      重置
                     </Button>
                     <Button
                       type="submit"
                       disabled={loading}
                     >
-                      Save Changes
+                      保存
                     </Button>
                   </Group>
                 </Grid.Col>

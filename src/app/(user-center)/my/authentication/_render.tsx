@@ -67,7 +67,7 @@ const sendMobileVerificationCode = async (mobile: string) => {
     if (err instanceof Error) {
       notify(err.message, 'error');
     } else {
-      notify('Internal Error', 'error');
+      notify('内部错误', 'error');
     }
     return false;
   }
@@ -90,7 +90,7 @@ const sendEmailVerificationCode = async (email: string) => {
     if (err instanceof Error) {
       notify(err.message, 'error');
     } else {
-      notify('Internal Error', 'error');
+      notify('内部错误', 'error');
     }
     return false
   }
@@ -137,9 +137,9 @@ const AccountPageRender =  ({  }:AccountPageProps) => {
   const [mobileActive,setMobileActive] = useState<boolean>(hasMobileActive());
 
   const items = [
-    { title: 'Home', href: '/' },
-    { title: 'Account' },
-    { title: 'Authentication' }
+    { title: '首页', href: '/' },
+    { title: '账户' },
+    { title: '认证资料' }
   ];
   useEffect(() => {
     setSection('Account');
@@ -179,7 +179,7 @@ const AccountPageRender =  ({  }:AccountPageProps) => {
     validate: {
       username: (val) => {
         if (!val || val.trim() === '') {
-          return 'This field is required';
+          return '此字段为必填项';
         }
         return null;
       },
@@ -207,19 +207,19 @@ const AccountPageRender =  ({  }:AccountPageProps) => {
     validate: {
       confirmPassword: (val) => {
         if (!val || val.trim() === '') {
-          return 'This field is required';
+          return '此字段为必填项';
         }
         return null;
       },
       currentPassword: (val) => {
         if (!val) {
-          return 'This field is required';
+          return '此字段为必填项';
         }
         return null;
       },
       password: (val) => {
         if (!val) {
-          return 'This field is required';
+          return '此字段为必填项';
         }
         return null;
       },
@@ -246,13 +246,13 @@ const AccountPageRender =  ({  }:AccountPageProps) => {
     validate: {
       email: (val) => {
         if (!val || val.trim() === '') {
-          return 'This field is required';
+          return '此字段为必填项';
         }
         return null;
       },
       authCode: (val) => {
         if (!val) {
-          return 'This field is required';
+          return '此字段为必填项';
         }
         return null;
       },
@@ -279,13 +279,13 @@ const AccountPageRender =  ({  }:AccountPageProps) => {
     validate: {
       mobile: (val) => {
         if (!val || val.trim() === '') {
-          return 'This field is required';
+          return '此字段为必填项';
         }
         return null;
       },
       authCode: (val) => {
         if (!val) {
-          return 'This field is required';
+          return '此字段为必填项';
         }
         return null;
       },
@@ -333,15 +333,15 @@ const AccountPageRender =  ({  }:AccountPageProps) => {
           })
           setUsernameEditDisabled(true)
         }
-        notify('The username updated successfully', 'success');
+        notify('用户名更新成功', 'success');
       } else {
-        notify(response.message || 'Failed to update the username', 'error');
+        notify(response.message || '更新用户名失败', 'error');
       }
     } catch (err) {
       if (err instanceof Error) {
         notify(err.message, 'error');
       } else {
-        notify('Internal Error', 'error');
+        notify('内部错误', 'error');
       }
     } finally {
       setLoading(false);
@@ -365,15 +365,15 @@ const AccountPageRender =  ({  }:AccountPageProps) => {
       if (response.code === 0) {
         setPasswordModalActions.close()
         // 更新本地用户上下文
-        notify('The password updated successfully', 'success');
+        notify('密码更新成功', 'success');
       } else {
-        notify(response.message || 'Failed to update the email', 'error');
+        notify(response.message || '更新密码失败', 'error');
       }
     } catch (err) {
       if (err instanceof Error) {
         notify(err.message, 'error');
       } else {
-        notify('Internal Error', 'error');
+        notify('内部错误', 'error');
       }
     } finally {
       setLoading(false);
@@ -407,20 +407,20 @@ const AccountPageRender =  ({  }:AccountPageProps) => {
             }
           })
         }
-        notify('The email updated successfully', 'success');
+        notify('邮箱更新成功', 'success');
         emailForm.setFieldValue('authCode', '');
         setEmailActive(true)
         setTimeout(() => {
           setEmailEditCountdown(-1);
         }, 1000);
       } else {
-        notify(response.message || 'Failed to update the email', 'error');
+        notify(response.message || '更新邮箱失败', 'error');
       }
     } catch (err) {
       if (err instanceof Error) {
         notify(err.message, 'error');
       } else {
-        notify('Internal Error', 'error');
+        notify('内部错误', 'error');
       }
     } finally {
       setLoading(false);
@@ -454,20 +454,20 @@ const AccountPageRender =  ({  }:AccountPageProps) => {
             }
           })
         }
-        notify('The mobile updated successfully', 'success');
+        notify('手机号更新成功', 'success');
         mobileForm.setFieldValue('authCode', '');
         setMobileActive(true)
         setTimeout(() => {
           setMobileEditCountdown(-1);
         }, 1000);
       } else {
-        notify(response.message || 'Failed to update the mobile', 'error');
+        notify(response.message || '更新手机号失败', 'error');
       }
     } catch (err) {
       if (err instanceof Error) {
         notify(err.message, 'error');
       } else {
-        notify('Internal Error', 'error');
+        notify('内部错误', 'error');
       }
     } finally {
       setLoading(false);
@@ -494,7 +494,7 @@ const AccountPageRender =  ({  }:AccountPageProps) => {
         setUsernameAvailable(false);
       }
     } catch (err) {
-      notify('Error checking username availability', 'error');
+      notify('检查用户名可用性时出错', 'error');
       setUsernameAvailable(null);
     } finally {
       setCheckUsernameLoading(false);
@@ -521,7 +521,7 @@ const AccountPageRender =  ({  }:AccountPageProps) => {
         setEmailAvailable(false);
       }
     } catch (err) {
-      notify('Error checking email availability', 'error');
+      notify('检查邮箱可用性时出错', 'error');
       setEmailAvailable(null);
     } finally {
       setCheckEmailLoading(false);
@@ -548,7 +548,7 @@ const AccountPageRender =  ({  }:AccountPageProps) => {
         setMobileAvailable(false);
       }
     } catch (err) {
-      notify('Error checking mobile availability', 'error');
+      notify('检查手机号可用性时出错', 'error');
       setMobileAvailable(null);
     } finally {
       setCheckMobileLoading(false);
@@ -581,7 +581,7 @@ const AccountPageRender =  ({  }:AccountPageProps) => {
     // 验证邮箱格式（调整为邮箱正则表达式）
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!email || !emailRegex.test(email)) {
-      notify('Please enter a valid email address', 'error'); // 提示信息改为邮箱相关
+      notify('请输入有效的邮箱地址', 'error'); // 提示信息改为邮箱相关
       return;
     }
 
@@ -596,9 +596,9 @@ const AccountPageRender =  ({  }:AccountPageProps) => {
       const success = await sendEmailVerificationCode(email);
       if (!success) {
         setEmailEditCountdown(0); // 发送失败则重置倒计时
-        notify(`Verification code sent to ${email} failed`, 'error');
+        notify(`验证码发送到 ${email} 失败`, 'error');
       }else {
-        notify(`Verification code sent to ${email} successfully`, 'success');
+        notify(`验证码已成功发送到 ${email}`, 'success');
       }
     } catch (error) {
       setEmailEditCountdown(0);
@@ -610,7 +610,7 @@ const AccountPageRender =  ({  }:AccountPageProps) => {
     const { mobile } = mobileForm.values;
     // 验证手机号
     if (!mobile || !/^1[3-9]\d{9}$/.test(mobile)) {
-      notify('Please enter a valid mobile number', 'error');
+      notify('请输入有效的手机号码', 'error');
       return;
     }
     // 防止重复发送
@@ -622,9 +622,9 @@ const AccountPageRender =  ({  }:AccountPageProps) => {
       const success = await sendMobileVerificationCode(mobile);
       if (!success) {
         setEmailEditCountdown(0); // 发送失败则重置倒计时
-        notify(`Verification code sent to ${mobile} failed`, 'error');
+        notify(`验证码发送到 ${mobile} 失败`, 'error');
       }else {
-        notify(`Verification code sent to ${mobile} successfully`, 'success');
+        notify(`验证码已成功发送到 ${mobile}`, 'success');
       }
     } catch (error) {
       setMobileEditCountdown(0);
@@ -679,9 +679,9 @@ const AccountPageRender =  ({  }:AccountPageProps) => {
       <Paper pt="xs" pb="xs">
         {/* 页面容器 - 标题 */}
         <Box mb="md">
-          <Title order={3}>Authentication</Title>
+          <Title order={3}>认证资料</Title>
           <Text size="sm" c="dimmed">
-            Verify your identity to enhance account security and access additional features.
+            验证您的认证资料，以增强账户安全性并访问更多功能。
           </Text>
         </Box>
         <Divider mb="lg" my="xs" variant="dashed" />
@@ -691,9 +691,9 @@ const AccountPageRender =  ({  }:AccountPageProps) => {
               {/*username*/}
               <Grid>
                 <Grid.Col  span={{ base: 10, md: 10, lg: 6, xl: 6 }} >
-                  <Text  size="sm">Username</Text>
+                  <Text  size="sm">用户名</Text>
                   <Text size="sm" c="dimmed">
-                    Username can only be set once:  <Space w="md" component="span" />
+                    用户名只能设置一次：  <Space w="md" component="span" />
                     <Text inherit c="blue" fw={700} component="span">
                       {user?.account?.username}
                     </Text>
@@ -702,7 +702,7 @@ const AccountPageRender =  ({  }:AccountPageProps) => {
                 <Grid.Col display="flex"  span={{ base: 2, md: 2, lg: 2, xl: 2 }}>
                     <Flex align="center">
                       <Button leftSection={<IconEdit size={14} />} onClick={usernameModalActions.open} disabled={usernameEditDisabled}  variant="default" size="xs">
-                        Edit
+                        编辑
                       </Button>
                     </Flex>
                 </Grid.Col>
@@ -717,15 +717,15 @@ const AccountPageRender =  ({  }:AccountPageProps) => {
               {/*password*/}
               <Grid>
                 <Grid.Col  span={{ base: 10, md: 10, lg: 6, xl: 6 }} >
-                  <Text  size="sm">Password</Text>
+                  <Text  size="sm">密码</Text>
                   <Text size="sm" c="dimmed">
-                    Your password is {passwordSet? 'set':'not set'}.
+                    您的密码{passwordSet? '已设置':'未设置'}。
                   </Text>
                 </Grid.Col>
                 <Grid.Col display="flex"  span={{ base: 2, md: 2, lg: 2, xl: 2 }}>
                   <Flex align="center">
                     <Button leftSection={<IconEdit size={14} />} onClick={setPasswordModalActions.open} variant="default" size="xs">
-                      Edit
+                      编辑
                     </Button>
                   </Flex>
                 </Grid.Col>
@@ -740,9 +740,9 @@ const AccountPageRender =  ({  }:AccountPageProps) => {
               {/*email*/}
               <Grid>
                 <Grid.Col  span={{ base: 10, md: 10, lg: 6, xl: 6 }} >
-                  <Text  size="sm">Email</Text>
+                  <Text  size="sm">邮箱</Text>
                   <Text size="sm" c="dimmed">
-                    Your email is {emailActive? 'verified':'unverified'}:  <Space w="md" component="span" />
+                    您的邮箱{emailActive? '已验证':'未验证'}：  <Space w="md" component="span" />
                     <Text inherit c="blue" component="span">
                       <b>{user?.account?.email}</b>
                     </Text>
@@ -751,7 +751,7 @@ const AccountPageRender =  ({  }:AccountPageProps) => {
                 <Grid.Col display="flex"  span={{ base: 2, md: 2, lg: 2, xl: 2 }}>
                   <Flex align="center">
                     <Button leftSection={<IconEdit size={14} />} onClick={setEmailModalActions.open} variant="default" size="xs">
-                      Edit
+                      编辑
                     </Button>
                   </Flex>
                 </Grid.Col>
@@ -766,9 +766,9 @@ const AccountPageRender =  ({  }:AccountPageProps) => {
               {/*mobile*/}
               <Grid>
                 <Grid.Col  span={{ base: 10, md: 10, lg: 6, xl: 6 }} >
-                  <Text  size="sm">Mobile Number</Text>
+                  <Text  size="sm">手机号码</Text>
                   <Text size="sm" c="dimmed">
-                    Your mobile number is {mobileActive? 'verified':'unverified'}:  <Space w="md" component="span" />
+                    您的手机号码{mobileActive? '已验证':'未验证'}：  <Space w="md" component="span" />
                     <Text inherit c="blue" component="span">
                       <b>{user?.account?.mobile}</b>
                     </Text>
@@ -776,7 +776,7 @@ const AccountPageRender =  ({  }:AccountPageProps) => {
                 </Grid.Col>
                 <Grid.Col span={{ base: 2, md: 2, lg: 2, xl: 2 }}>
                   <Button leftSection={<IconEdit size={14} />} onClick={setMobileModalActions.open} size="xs" variant="default">
-                    Edit
+                    编辑
                   </Button>
                 </Grid.Col>
               </Grid>
@@ -790,7 +790,7 @@ const AccountPageRender =  ({  }:AccountPageProps) => {
               {/*三方*/}
               <Grid>
                 <Grid.Col  span={{ base: 12, md: 12, lg: 8, xl: 8 }} >
-                  <Text  size="sm">Social Account</Text>
+                  <Text  size="sm">社交账号</Text>
                 </Grid.Col>
               </Grid>
               <Grid >
@@ -823,16 +823,16 @@ const AccountPageRender =  ({  }:AccountPageProps) => {
       {/* 独立的 Username 弹窗 */}
       <Modal
         opened={usernameModalOpened}
-        title="Edit Username"
+        title="编辑用户名"
         onClose={usernameModalActions.close}
         size="md"
       >
         <FocusTrap active>
           <form onSubmit={usernameForm.onSubmit(handleUsernameFormSubmit)}>
           <TextInput
-            label="Username"
+            label="用户名"
             required
-            placeholder="Enter new username"
+            placeholder="请输入新用户名"
             key={usernameForm.key('username')}
             value={usernameForm.values.username}
             {...usernameForm.getInputProps('username')}
@@ -854,7 +854,7 @@ const AccountPageRender =  ({  }:AccountPageProps) => {
             error={usernameForm.errors.username}
           />
           <Flex justify="flex-end" gap="sm" mt="lg">
-            <Button type="submit" disabled={loading}>Save</Button>
+            <Button type="submit" disabled={loading}>保存</Button>
           </Flex>
         </form>
         </FocusTrap>
@@ -863,38 +863,38 @@ const AccountPageRender =  ({  }:AccountPageProps) => {
       {/*独立的password*/}
       <Modal
         opened={passwordModalOpened}
-        title="Edit Password"
+        title="编辑密码"
         onClose={setPasswordModalActions.close}
         size="md"
       >
         <FocusTrap active>
           <form onSubmit={passwordForm.onSubmit(handlePasswordFormSubmit)}>
           <PasswordInput
-            label="Current password"
+            label="当前密码"
             required
-            placeholder="Current Password"
+            placeholder="请输入当前密码"
             key={passwordForm.key('currentPassword')}
             {...passwordForm.getInputProps('currentPassword')}
           />
 
           <PasswordInput
-            label="Password"
+            label="新密码"
             required
-            placeholder="Password"
+            placeholder="请输入新密码"
             key={passwordForm.key('password')}
             {...passwordForm.getInputProps('password')}
           />
           <PasswordInput
             mt="sm"
-            label="Confirm password"
+            label="确认密码"
             required
-            placeholder="Confirm password"
+            placeholder="请确认新密码"
             key={passwordForm.key('confirmPassword')}
             {...passwordForm.getInputProps('confirmPassword')}
           />
 
           <Flex justify="flex-end" gap="sm" mt="lg">
-            <Button type="submit" disabled={loading}>Save</Button>
+            <Button type="submit" disabled={loading}>保存</Button>
           </Flex>
         </form>
         </FocusTrap>
@@ -903,16 +903,16 @@ const AccountPageRender =  ({  }:AccountPageProps) => {
       {/*email修改窗口*/}
       <Modal
         opened={emailModalOpened}
-        title="Edit Email"
+        title="编辑邮箱"
         onClose={setEmailModalActions.close}
         size="md"
       >
         <FocusTrap active>
           <form onSubmit={emailForm.onSubmit(handleEmailFormSubmit)}>
           <TextInput
-            label="Email"
+            label="邮箱"
             required
-            placeholder="Enter new Email"
+            placeholder="请输入新邮箱"
             key={emailForm.key('email')}
             value={emailForm.values.email}
             {...emailForm.getInputProps('email')}
@@ -937,8 +937,8 @@ const AccountPageRender =  ({  }:AccountPageProps) => {
           <Flex justify="space-between" gap="xs">
             <TextInput
               required
-              label="Verification Code"
-              placeholder="Enter verification code"
+              label="验证码"
+              placeholder="请输入验证码"
               value={emailForm.values.authCode}
               onChange={(event) => emailForm.setFieldValue('authCode', event.currentTarget.value)}
               error={emailForm.errors.authCode}
@@ -956,11 +956,11 @@ const AccountPageRender =  ({  }:AccountPageProps) => {
                 alignSelf: 'flex-end', // 确保按钮与输入框底部对齐
               }}
             >
-              {emailEditCountdown > 0 ? `${emailEditCountdown} S` : 'Send Code'}
+              {emailEditCountdown > 0 ? `${emailEditCountdown} 秒` : '发送验证码'}
             </Button>
           </Flex>
           <Flex justify="flex-end" gap="sm" mt="lg">
-            <Button type="submit" disabled={loading}>Save</Button>
+            <Button type="submit" disabled={loading}>保存</Button>
           </Flex>
         </form>
         </FocusTrap>
@@ -969,16 +969,16 @@ const AccountPageRender =  ({  }:AccountPageProps) => {
       {/*mobile修改窗口*/}
       <Modal
         opened={mobileModalOpened}
-        title="Edit Mobile"
+        title="编辑手机号"
         onClose={setMobileModalActions.close}
         size="md"
       >
         <FocusTrap active>
           <form onSubmit={mobileForm.onSubmit(handleMobileFormSubmit)}>
           <TextInput
-            label="Mobile"
+            label="手机号"
             required
-            placeholder="Enter new Mobile"
+            placeholder="请输入新手机号"
             key={mobileForm.key('mobile')}
             value={mobileForm.values.mobile}
             {...mobileForm.getInputProps('mobile')}
@@ -1003,8 +1003,8 @@ const AccountPageRender =  ({  }:AccountPageProps) => {
           <Flex justify="space-between" gap="xs">
             <TextInput
               required
-              label="Verification Code"
-              placeholder="Enter verification code"
+              label="验证码"
+              placeholder="请输入验证码"
               value={mobileForm.values.authCode}
               onChange={(event) => mobileForm.setFieldValue('authCode', event.currentTarget.value)}
               error={mobileForm.errors.authCode}
@@ -1022,11 +1022,11 @@ const AccountPageRender =  ({  }:AccountPageProps) => {
                 alignSelf: 'flex-end', // 确保按钮与输入框底部对齐
               }}
             >
-              {mobileEditCountdown > 0 ? `${mobileEditCountdown} S` : 'Send Code'}
+              {mobileEditCountdown > 0 ? `${mobileEditCountdown} 秒` : '发送验证码'}
             </Button>
           </Flex>
           <Flex justify="flex-end" gap="sm" mt="lg">
-            <Button type="submit" disabled={loading}>Save</Button>
+            <Button type="submit" disabled={loading}>保存</Button>
           </Flex>
         </form>
         </FocusTrap>
