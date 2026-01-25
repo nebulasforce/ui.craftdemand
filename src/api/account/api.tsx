@@ -1,6 +1,6 @@
 import { Options } from '@/api/common/request';
-import { listRequest, listAllAccountRequest, createAccountRequest, deleteAccountRequest, editAccountRequest, getAccountRequest } from '@/api/account/request';
-import { listResponse, listAllAccountResponse, createAccountResponse, deleteAccountResponse, editAccountResponse, getAccountResponse } from '@/api/account/response';
+import { listRequest, listAllAccountRequest, createAccountRequest, deleteAccountRequest, editAccountRequest, getAccountRequest, resetAccountPasswordRequest } from '@/api/account/request';
+import { listResponse, listAllAccountResponse, createAccountResponse, deleteAccountResponse, editAccountResponse, getAccountResponse, resetAccountPasswordResponse } from '@/api/account/response';
 import request from '@/utils/request';
 
 // list 获取账号列表
@@ -77,6 +77,19 @@ export async function getAccount(req?: getAccountRequest, options?: Options) {
       'Content-Type': 'application/json',
     },
     params: req || {},
+    ...(options || {}),
+  });
+}
+
+// resetAccountPassword 重置账号密码
+export async function resetAccountPassword(req?: resetAccountPasswordRequest, options?: Options) {
+  return request<resetAccountPasswordResponse>({
+    url: `/api/v1/account/${req?.id}/password`,
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: req ? { password: req.password } : {},
     ...(options || {}),
   });
 }

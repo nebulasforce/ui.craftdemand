@@ -93,3 +93,9 @@ export interface createMySubAccountResponse extends Response<createMySubAccountD
 export type getMySubAccountData = User;
 
 export interface getMySubAccountResponse extends Response<getMySubAccountData> {}
+
+export interface resetSubAccountPasswordData extends Result {
+  id: string;
+}
+
+export interface resetSubAccountPasswordResponse extends Response<resetSubAccountPasswordData> {}

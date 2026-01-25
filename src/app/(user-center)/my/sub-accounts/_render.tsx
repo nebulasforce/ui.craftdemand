@@ -3,14 +3,14 @@
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { IconChevronDown, IconChevronUp, IconEdit, IconPlus, IconSearch, IconTrash, IconUserCog, IconX } from '@tabler/icons-react';
+import { IconChevronDown, IconChevronUp, IconEdit, IconKey, IconPlus, IconSearch, IconTrash, IconUserCog, IconX } from '@tabler/icons-react';
 import cx from 'clsx';
 import { ActionIcon, Anchor, Avatar, Box, Breadcrumbs, Button, Checkbox, Collapse, Divider, Flex, FocusTrap, Grid, Group, LoadingOverlay, Modal, Pagination, Paper, ScrollArea, Select, SimpleGrid, Stack, Table, Text, TextInput, Title } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useDisclosure } from '@mantine/hooks';
-import { createMySubAccount, deleteMySubAccount, editMySubAccount, mySubAccountList } from '@/api/my/api'; // 导入API
+import { createMySubAccount, deleteMySubAccount, editMySubAccount, mySubAccountList, resetSubAccountPassword } from '@/api/my/api'; // 导入API
 
-import { createMySubAccountRequest, deleteMySubAccountRequest, editMySubAccountRequest } from '@/api/my/request';
+import { createMySubAccountRequest, deleteMySubAccountRequest, editMySubAccountRequest, resetSubAccountPasswordRequest } from '@/api/my/request';
 import { mySubAccountListData } from '@/api/my/response';
 import { User } from '@/api/my/typings';
 import { DeleteConfirm } from '@/components/DeleteConfirm/DeleteConfirm';
@@ -237,6 +237,9 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
             <ActionIcon onClick={()=>{openAddEditModal({action:'edit',user:item})}} variant="light" size="md" aria-label="Edit">
               <IconEdit size={14} stroke={1.5} />
             </ActionIcon>
+            <ActionIcon onClick={()=>{openResetPasswordModal(item)}} variant="light" size="md" aria-label="Reset Password">
+              <IconKey size={14} stroke={1.5} />
+            </ActionIcon>
             <ActionIcon onClick={()=>{handleSettingSubAccount(item)}} variant="light" size="md" aria-label="Setting">
               <IconUserCog size={14} stroke={1.5} />
             </ActionIcon>
@@ -297,6 +300,10 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
   const [addEditAction, setAddEditAction] = useState<'add' | 'edit'>('add');
   const [addEditModalOpened, addEditModalActions] = useDisclosure(false);
   const [editingAccount, setEditingAccount] = useState<User|null>(null);
+
+  // 重置密码模态框状态
+  const [resetPasswordModalOpened, resetPasswordModalActions] = useDisclosure(false);
+  const [resettingAccount, setResettingAccount] = useState<User|null>(null);
 
   // 打开表单模态窗口
   const openAddEditModal = ({action, user}: openAddEditModalParams) => {
@@ -383,6 +390,41 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
   const handleSettingSubAccount = (user: User) => {
     console.log('设置账户:', user);
   }
+
+  // 打开重置密码模态框
+  const openResetPasswordModal = (user: User) => {
+    setResettingAccount(user);
+    resetPasswordForm.setValues({
+      password: '',
+    });
+    resetPasswordModalActions.open();
+  };
+
+  // 处理重置密码
+  const handleResetPassword = async (user: User, password: string) => {
+    setLoading(true);
+    try {
+      const requestData: resetSubAccountPasswordRequest = {
+        id: user.account.id,
+        password: password,
+      };
+      const response = await resetSubAccountPassword(requestData);
+      if (response.code === 0) {
+        notify('Password reset successfully', 'success');
+        resetPasswordModalActions.close();
+      } else {
+        notify(response.message || 'Failed to reset password', 'error');
+      }
+    } catch (err) {
+      if (err instanceof Error) {
+        notify(err.message, 'error');
+      } else {
+        notify('Internal Error', 'error');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // const closeAddEditModal = () => {
   //   setEditingAccount(null);
@@ -504,6 +546,33 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
       }
     }
     addEditForm.reset();
+  };
+
+  // 重置密码表单
+  const resetPasswordForm = useForm({
+    initialValues: {
+      password: '',
+    },
+    validate: {
+      password: (val) => {
+        if (!val || val.trim() === '') {
+          return 'Password is required';
+        }
+        if (val.length < 6) {
+          return 'Password must be at least 6 characters long';
+        }
+        return null;
+      },
+    },
+  });
+
+  // 处理重置密码表单提交
+  const handleResetPasswordFormSubmit = async (values: typeof resetPasswordForm.values): Promise<void> => {
+    if (!resettingAccount) {
+      return;
+    }
+    await handleResetPassword(resettingAccount, values.password);
+    resetPasswordForm.reset();
   };
 
 
@@ -776,6 +845,45 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
               />
               <Flex justify="flex-end" gap="sm" mt="lg">
                 <Button type="submit" disabled={loading}>Save</Button>
+              </Flex>
+            </form>
+          </FocusTrap>
+        </Box>
+      </Modal>
+
+      {/* 重置密码模态框 */}
+      <Modal
+        opened={resetPasswordModalOpened}
+        title="Reset Password"
+        onClose={resetPasswordModalActions.close}
+        size="md"
+      >
+        <Box pos="relative">
+          <LoadingOverlay visible={loading} />
+          <FocusTrap active>
+            <form onSubmit={resetPasswordForm.onSubmit(handleResetPasswordFormSubmit)}>
+              <Text size="sm" c="dimmed" mb="md">
+                Reset password for: <Text span fw={500}>{resettingAccount?.account.username}</Text>
+              </Text>
+              <TextInput
+                required
+                data-autofocus
+                label="New Password"
+                placeholder="Enter new password"
+                value={resetPasswordForm.values.password}
+                onChange={(event) =>
+                  resetPasswordForm.setFieldValue('password', event.currentTarget.value)
+                }
+                error={resetPasswordForm.errors.password}
+                radius="md"
+              />
+              <Flex justify="flex-end" gap="sm" mt="lg">
+                <Button variant="default" onClick={resetPasswordModalActions.close} disabled={loading}>
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={loading}>
+                  Reset Password
+                </Button>
               </Flex>
             </form>
           </FocusTrap>

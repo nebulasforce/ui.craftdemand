@@ -98,3 +98,7 @@ export interface createMySubAccountRequest {
   status: number;
 }
 
+export interface resetSubAccountPasswordRequest {
+  id: string;
+  password: string;
+}

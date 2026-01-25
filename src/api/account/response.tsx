@@ -32,3 +32,9 @@ export interface editAccountResponse extends Response<editAccountData> {}
 export type getAccountData = Account;
 
 export interface getAccountResponse extends Response<getAccountData> {}
+
+export interface resetAccountPasswordData extends Result {
+  id: string;
+}
+
+export interface resetAccountPasswordResponse extends Response<resetAccountPasswordData> {}

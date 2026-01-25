@@ -11,6 +11,7 @@ import {
   IconFileAnalytics,
   IconFingerprint,
   IconKey,
+  IconCategory,
   IconLicense,
   IconLogout,
   IconMessage2,
@@ -32,6 +33,7 @@ import classes from './NavbarSegmented.module.css';
 export type SectionType = Extract<keyof listGroupData, string>;
 
 const iconMap = {
+  IconCategory,
   IconUser,
   Icon2fa,
   IconPasswordUser,

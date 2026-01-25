@@ -28,3 +28,8 @@ export interface editAccountRequest {
 export interface getAccountRequest extends Query {
   id: string;
 }
+
+export interface resetAccountPasswordRequest {
+  id: string;
+  password: string;
+}

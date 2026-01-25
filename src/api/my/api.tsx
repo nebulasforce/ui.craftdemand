@@ -1,5 +1,5 @@
 import { Options } from '@/api/common/request';
-import { createMySubAccountRequest, deleteMySubAccountRequest, editMyAvatarRequest, editMyEmailRequest, editMyMobileRequest, editMyPasswordRequest, editMyProfileRequest, editMySubAccountRequest, editMyUsernameRequest, getMySubAccountRequest, meRequest, myAllSubAccountListRequest, mySubAccountListRequest, myUnreadMessageCountRequest, sendEmailVerifiedCodeRequest, sendMobileVerifiedCodeRequest } from '@/api/my/request';
+import { createMySubAccountRequest, deleteMySubAccountRequest, editMyAvatarRequest, editMyEmailRequest, editMyMobileRequest, editMyPasswordRequest, editMyProfileRequest, editMySubAccountRequest, editMyUsernameRequest, getMySubAccountRequest, meRequest, myAllSubAccountListRequest, mySubAccountListRequest, myUnreadMessageCountRequest, resetSubAccountPasswordRequest, sendEmailVerifiedCodeRequest, sendMobileVerifiedCodeRequest } from '@/api/my/request';
 import {
   createMySubAccountResponse,
   deleteMySubAccountResponse,
@@ -15,6 +15,7 @@ import {
   myAllSubAccountListResponse,
   mySubAccountListResponse,
   myUnreadMessageCountResponse,
+  resetSubAccountPasswordResponse,
   sendEmailVerifiedCodeResponse,
   sendMobileVerifiedCodeResponse,
 } from '@/api/my/response';
@@ -228,6 +229,19 @@ export async function getMySubAccount(req?: getMySubAccountRequest, options?: Op
       'Content-Type': 'application/json',
     },
     params: req || {},
+    ...(options || {}),
+  });
+}
+
+// resetSubAccountPassword 重置子账号密码
+export async function resetSubAccountPassword(req?: resetSubAccountPasswordRequest, options?: Options) {
+  return request<resetSubAccountPasswordResponse>({
+    url: `/api/v1/account/${req?.id}/password`,
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: req ? { password: req.password } : {},
     ...(options || {}),
   });
 }
