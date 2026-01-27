@@ -206,6 +206,19 @@ export async function mySystemMessageList(req?: listRequest, options?: Options) 
   });
 }
 
+// mySentMessageList 获取发送的消息列表（客户端）
+export async function mySentMessageList(req?: listRequest, options?: Options) {
+  return request<listResponse>({
+    url: '/api/v1/my/sent-message',
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    params: req || {},
+    ...(options || {}),
+  });
+}
+
 // deleteMySubAccount 删除我的子账号
 export async function deleteMySubAccount(req?:deleteMySubAccountRequest,options?:Options) {
   return request<deleteMySubAccountResponse>({

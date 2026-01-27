@@ -38,3 +38,9 @@ export interface publishMessageData extends Result {
 
 export interface publishMessageResponse extends Response<publishMessageData> {}
 
+export interface markMessageAsReadData extends Result {
+  id: string;
+}
+
+export interface markMessageAsReadResponse extends Response<markMessageAsReadData> {}
+

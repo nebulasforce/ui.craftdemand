@@ -7,10 +7,12 @@ import { IconChevronDown, IconChevronUp, IconEye, IconSearch, IconX } from '@tab
 import cx from 'clsx';
 import { ActionIcon, Anchor, Box, Breadcrumbs, Button, Checkbox, Collapse, Divider, Flex, Grid, Group, LoadingOverlay, Modal, Pagination, Paper, ScrollArea, Select, SimpleGrid, Stack, Table, Tabs, Text, TextInput, Title } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { myCustomMessageList, mySystemMessageList } from '@/api/my/api';
+import { myCustomMessageList, mySystemMessageList, mySentMessageList } from '@/api/my/api';
 import { listData } from '@/api/message/response';
 import { Message } from '@/api/message/typings';
+import { markMessageAsRead } from '@/api/message/api';
 import { useNavbar } from '@/contexts/NavbarContext/NavbarContext';
+import { useUser } from '@/contexts/UserContext/UserContext';
 import notify from '@/utils/notify';
 import { formatTimestamp } from '@/utils/time';
 import classes from './style.module.css';
@@ -18,7 +20,12 @@ import classes from './style.module.css';
 interface NotificationsProps {
   initialCustomMessageData: listData | null;
   initialSystemMessageData: listData | null;
+  initialSentMessageData: listData | null;
+  initialTab?: string;
 }
+
+// 我的消息阅读状态类型
+type ReadStatus = 0 | 1;
 
 // 定义状态项接口
 interface statusItem {
@@ -26,22 +33,22 @@ interface statusItem {
   color: string;
 }
 
-// 状态映射
-const statusMap: {[key: number]: statusItem} = {
+// 阅读状态映射
+const readStatusMap: Record<ReadStatus, statusItem> = {
   0: { label: '未读', color: 'blue' },
   1: { label: '已读', color: 'green' },
 };
 
-// 获取状态显示文本
-const getStatusLabel = (status: number | string) => {
+// 获取阅读状态显示文本
+const getReadStatusLabel = (status: ReadStatus | number | string) => {
   const statusNumber = typeof status === 'string' ? parseInt(status, 10) : status;
-  return statusMap[statusNumber]?.label || 'Unknown';
+  return readStatusMap[statusNumber as ReadStatus]?.label || '未知';
 };
 
-// 获取状态显示颜色
-const getStatusColor = (status: number | string) => {
+// 获取阅读状态显示颜色
+const getReadStatusColor = (status: ReadStatus | number | string) => {
   const statusNumber = typeof status === 'string' ? parseInt(status, 10) : status;
-  return statusMap[statusNumber]?.color || 'gray';
+  return readStatusMap[statusNumber as ReadStatus]?.color || 'gray';
 };
 
 // 定义高级搜索条件接口
@@ -50,9 +57,10 @@ interface AdvancedSearchFilters {
   status: string;
 }
 
-const NotificationsPageRender = ({ initialCustomMessageData, initialSystemMessageData }: NotificationsProps) => {
+const NotificationsPageRender = ({ initialCustomMessageData, initialSystemMessageData, initialSentMessageData, initialTab = 'system' }: NotificationsProps) => {
   const { setActive, setSection } = useNavbar();
   const router = useRouter();
+  const { user } = useUser();
 
   useEffect(() => {
     setSection('Account');
@@ -62,13 +70,21 @@ const NotificationsPageRender = ({ initialCustomMessageData, initialSystemMessag
   // 面包屑
   const items = [
     { title: '首页', href: '/' },
-    { title: '我的' },
+    { title: '账户' },
     { title: '消息通知' }
   ];
 
-  // Tab 状态
-  const [activeTab, setActiveTab] = useState<string>('custom');
+  // Tab 状态 - 使用从服务端传递的初始值，确保 SSR 一致性
+  const [activeTab, setActiveTab] = useState<string>(() => {
+    // 只允许 'system' 或 'custom'，其他值默认为 'system'
+    return initialTab === 'system' || initialTab === 'custom' ? initialTab : 'system';
+  });
   const isInitialMount = useRef(true);
+  const isClientMounted = useRef(false);
+  
+  // 排序状态
+  const [sortField, setSortField] = useState<string>('');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
   // 基础搜索状态
   const [searchKeyword, setSearchKeyword] = useState('');
@@ -101,33 +117,59 @@ const NotificationsPageRender = ({ initialCustomMessageData, initialSystemMessag
   const [systemMessageCount, setSystemMessageCount] = useState(initialSystemMessageData?.count || 0);
   const [systemMessageTotalPage, setSystemMessageTotalPage] = useState(initialSystemMessageData?.totalPage || 0);
 
+  // 发送消息状态管理
+  const [sentMessageData, setSentMessageData] = useState(initialSentMessageData?.lists || []);
+  const [sentMessagePage, setSentMessagePage] = useState(initialSentMessageData?.page || 1);
+  const [sentMessagePageSize] = useState(initialSentMessageData?.pageSize || 10);
+  const [sentMessageCount, setSentMessageCount] = useState(initialSentMessageData?.count || 0);
+  const [sentMessageTotalPage, setSentMessageTotalPage] = useState(initialSentMessageData?.totalPage || 0);
+
   // 通用状态
   const [loading, setLoading] = useState(false);
   const [selection, setSelection] = useState<string[]>([]);
 
   // 根据当前 tab 获取当前数据
   const getCurrentData = () => {
-    return activeTab === 'custom' ? customMessageData : systemMessageData;
+    if (activeTab === 'system') return systemMessageData;
+    if (activeTab === 'custom') return customMessageData;
+    return sentMessageData;
   };
 
   const getCurrentPage = () => {
-    return activeTab === 'custom' ? customMessagePage : systemMessagePage;
+    if (activeTab === 'system') return systemMessagePage;
+    if (activeTab === 'custom') return customMessagePage;
+    return sentMessagePage;
   };
 
   const getCurrentPageSize = () => {
-    return activeTab === 'custom' ? customMessagePageSize : systemMessagePageSize;
+    if (activeTab === 'system') return systemMessagePageSize;
+    if (activeTab === 'custom') return customMessagePageSize;
+    return sentMessagePageSize;
   };
 
   const getCurrentCount = () => {
-    return activeTab === 'custom' ? customMessageCount : systemMessageCount;
+    if (activeTab === 'system') return systemMessageCount;
+    if (activeTab === 'custom') return customMessageCount;
+    return sentMessageCount;
   };
 
   const getCurrentTotalPage = () => {
-    return activeTab === 'custom' ? customMessageTotalPage : systemMessageTotalPage;
+    if (activeTab === 'system') return systemMessageTotalPage;
+    if (activeTab === 'custom') return customMessageTotalPage;
+    return sentMessageTotalPage;
   };
 
-  // 当page变化时更新URL
+  // 标记客户端已挂载
   useEffect(() => {
+    isClientMounted.current = true;
+  }, []);
+
+  // 当page变化时更新URL（只在客户端挂载后执行，避免初始渲染时的闪烁）
+  useEffect(() => {
+    // 跳过初始渲染，避免闪烁
+    if (!isClientMounted.current) {
+      return;
+    }
     const currentPage = getCurrentPage();
     const searchParams = new URLSearchParams(window.location.search);
     if (currentPage === 1) {
@@ -135,8 +177,14 @@ const NotificationsPageRender = ({ initialCustomMessageData, initialSystemMessag
     } else {
       searchParams.set('page', currentPage.toString());
     }
+    // 保持tab参数
+    if (activeTab !== 'system') {
+      searchParams.set('tab', activeTab);
+    } else {
+      searchParams.delete('tab');
+    }
     router.push(`?${searchParams.toString()}`, { scroll: false });
-  }, [customMessagePage, systemMessagePage, router]);
+  }, [customMessagePage, systemMessagePage, sentMessagePage, activeTab, router]);
 
   // 监听 activeTab 变化，自动加载对应 tab 的数据
   useEffect(() => {
@@ -148,6 +196,18 @@ const NotificationsPageRender = ({ initialCustomMessageData, initialSystemMessag
     // tab 切换时重置到第一页并加载数据
     loadData(1).then();
   }, [activeTab]);
+
+  // 监听排序变化，自动重新加载数据
+  useEffect(() => {
+    // 跳过初始渲染
+    if (isInitialMount.current) {
+      return;
+    }
+    // 排序变化时重置到第一页并加载数据
+    if (sortField) {
+      loadData(1).then();
+    }
+  }, [sortField, sortOrder]);
 
   const toggleRow = (id: string) =>
     setSelection((current) =>
@@ -195,8 +255,22 @@ const NotificationsPageRender = ({ initialCustomMessageData, initialSystemMessag
         });
       }
 
+      // 添加排序参数
+      if (sortField) {
+        searchParams.sortField = sortField;
+        searchParams.sortOrder = sortOrder;
+      }
+
       let response;
-      if (activeTab === 'custom') {
+      if (activeTab === 'system') {
+        response = await mySystemMessageList(searchParams);
+        if (response.code === 0 && response.data) {
+          setSystemMessagePage(currentPage);
+          setSystemMessageData(response.data.lists || []);
+          setSystemMessageTotalPage(response.data.totalPage || 0);
+          setSystemMessageCount(response.data.count || 0);
+        }
+      } else if (activeTab === 'custom') {
         response = await myCustomMessageList(searchParams);
         if (response.code === 0 && response.data) {
           setCustomMessagePage(currentPage);
@@ -205,12 +279,12 @@ const NotificationsPageRender = ({ initialCustomMessageData, initialSystemMessag
           setCustomMessageCount(response.data.count || 0);
         }
       } else {
-        response = await mySystemMessageList(searchParams);
+        response = await mySentMessageList(searchParams);
         if (response.code === 0 && response.data) {
-          setSystemMessagePage(currentPage);
-          setSystemMessageData(response.data.lists || []);
-          setSystemMessageTotalPage(response.data.totalPage || 0);
-          setSystemMessageCount(response.data.count || 0);
+          setSentMessagePage(currentPage);
+          setSentMessageData(response.data.lists || []);
+          setSentMessageTotalPage(response.data.totalPage || 0);
+          setSentMessageCount(response.data.count || 0);
         }
       }
 
@@ -236,12 +310,42 @@ const NotificationsPageRender = ({ initialCustomMessageData, initialSystemMessag
     if (value) {
       setActiveTab(value);
       setSelection([]);
+      // 更新URL参数（只在客户端执行）
+      if (typeof window !== 'undefined') {
+        const searchParams = new URLSearchParams(window.location.search);
+        if (value === 'system') {
+          searchParams.delete('tab');
+        } else {
+          searchParams.set('tab', value);
+        }
+        // 切换tab时重置到第一页
+        searchParams.delete('page');
+        router.push(`?${searchParams.toString()}`, { scroll: false });
+      }
       // 数据加载由 useEffect 监听 activeTab 变化自动触发
     }
   };
 
+  // 处理排序
+  const handleSort = (field: string) => {
+    const newSortField = field;
+    const newSortOrder = sortField === field 
+      ? (sortOrder === 'asc' ? 'desc' : 'asc')
+      : 'desc';
+    
+    setSortField(newSortField);
+    setSortOrder(newSortOrder);
+    // 数据加载由 useEffect 监听 sortField 和 sortOrder 变化自动触发
+  };
+
   const rows = getCurrentData().map((item) => {
     const selected = selection.includes(item.id);
+    const isMyMessage = activeTab === 'system' || activeTab === 'custom';
+    // 系统消息 / 收到的消息优先使用 readStatus 与 publishTime 字段
+    const readStatusValue = (item as any).readStatus ?? item.status;
+    const timeValue = (item as any).publishTime ?? item.createdAt;
+    const creatorName = item.creator?.nickname || item.creator?.username || '-';
+
     return (
       <Table.Tr key={item.id} className={cx({ [classes.rowSelected]: selected })}>
         <Table.Td>
@@ -258,11 +362,16 @@ const NotificationsPageRender = ({ initialCustomMessageData, initialSystemMessag
           </Text>
         </Table.Td>
         <Table.Td>
-          <Text c={getStatusColor(item.status)}>
-            {getStatusLabel(item.status)}
+          <Text c={getReadStatusColor(readStatusValue)}>
+            {getReadStatusLabel(readStatusValue)}
           </Text>
         </Table.Td>
-        <Table.Td>{item.createdAt ? formatTimestamp(item.createdAt) : '-'}</Table.Td>
+        <Table.Td>{timeValue ? formatTimestamp(timeValue) : '-'}</Table.Td>
+        <Table.Td>
+          <Text size="sm">
+            {creatorName}
+          </Text>
+        </Table.Td>
         <Table.Td>
           <ActionIcon.Group>
             <ActionIcon onClick={() => openViewDetailModal(item)} variant="light" size="md" aria-label="View Detail">
@@ -316,6 +425,52 @@ const NotificationsPageRender = ({ initialCustomMessageData, initialSystemMessag
   const openViewDetailModal = (message: Message) => {
     setViewingMessage(message);
     viewDetailModalActions.open();
+  };
+
+  // 关闭查看详情模态窗口并标记为已读
+  const handleCloseViewDetailModal = async () => {
+    if (viewingMessage) {
+      // 如果消息未读，则标记为已读
+      const readStatusValue = (viewingMessage as any).readStatus ?? viewingMessage.status;
+      if (readStatusValue === 0 && user?.account?.id) {
+        try {
+          const response = await markMessageAsRead({ 
+            id: viewingMessage.id,
+            accountId: user.account.id
+          });
+          if (response.code === 0) {
+            // 更新本地消息列表中的状态
+            const updateMessageStatus = (messages: Message[]) => {
+              return messages.map((msg) => {
+                if (msg.id === viewingMessage.id) {
+                  return {
+                    ...msg,
+                    readStatus: 1,
+                    status: 1,
+                  };
+                }
+                return msg;
+              });
+            };
+
+            // 根据当前 tab 更新对应的消息列表
+            if (activeTab === 'system') {
+              setSystemMessageData((prev) => updateMessageStatus(prev));
+            } else if (activeTab === 'custom') {
+              setCustomMessageData((prev) => updateMessageStatus(prev));
+            } else {
+              setSentMessageData((prev) => updateMessageStatus(prev));
+            }
+          } else {
+            notify(response?.message || '标记已读失败', 'error');
+          }
+        } catch (error) {
+          notify('标记已读失败，请稍后重试', 'error');
+        }
+      }
+    }
+    // 关闭模态窗口
+    viewDetailModalActions.close();
   };
 
   // 状态选项数据 - 用于下拉选择器
@@ -392,8 +547,8 @@ const NotificationsPageRender = ({ initialCustomMessageData, initialSystemMessag
         {/* Tab 切换 */}
         <Tabs value={activeTab} onChange={handleTabChange} mb="md">
           <Tabs.List>
+            <Tabs.Tab value="system">系统通知</Tabs.Tab>
             <Tabs.Tab value="custom">普通消息</Tabs.Tab>
-            <Tabs.Tab value="system">系统消息</Tabs.Tab>
           </Tabs.List>
         </Tabs>
 
@@ -448,8 +603,30 @@ const NotificationsPageRender = ({ initialCustomMessageData, initialSystemMessag
                     </Table.Th>
                     <Table.Th miw={150}>标题</Table.Th>
                     <Table.Th>内容</Table.Th>
-                    <Table.Th>状态</Table.Th>
-                    <Table.Th miw={180}>创建时间</Table.Th>
+                    <Table.Th 
+                      style={{ cursor: 'pointer', userSelect: 'none' }}
+                      onClick={() => handleSort('status')}
+                    >
+                      状态
+                      {sortField === 'status' && (
+                        <span style={{ marginLeft: 4 }}>
+                          {sortOrder === 'asc' ? '↑' : '↓'}
+                        </span>
+                      )}
+                    </Table.Th>
+                    <Table.Th 
+                      miw={180}
+                      style={{ cursor: 'pointer', userSelect: 'none' }}
+                      onClick={() => handleSort('createdAt')}
+                    >
+                      发布时间
+                      {sortField === 'createdAt' && (
+                        <span style={{ marginLeft: 4 }}>
+                          {sortOrder === 'asc' ? '↑' : '↓'}
+                        </span>
+                      )}
+                    </Table.Th>
+                    <Table.Th>发送人</Table.Th>
                     <Table.Th>操作</Table.Th>
                   </Table.Tr>
                 </Table.Thead>
@@ -458,7 +635,7 @@ const NotificationsPageRender = ({ initialCustomMessageData, initialSystemMessag
                     rows
                   ) : (
                     <Table.Tr>
-                      <Table.Td colSpan={6} align="center">
+                      <Table.Td colSpan={7} align="center">
                         <Text c="dimmed">暂无数据</Text>
                       </Table.Td>
                     </Table.Tr>
@@ -491,7 +668,7 @@ const NotificationsPageRender = ({ initialCustomMessageData, initialSystemMessag
       <Modal
         opened={viewDetailModalOpened}
         title="消息详情"
-        onClose={viewDetailModalActions.close}
+        onClose={handleCloseViewDetailModal}
         size="md"
       >
         <Box pos="relative">
@@ -507,8 +684,8 @@ const NotificationsPageRender = ({ initialCustomMessageData, initialSystemMessag
               
               <Box mb="md">
                 <Text size="sm" fw={500} mb={5}>状态</Text>
-                <Text size="sm" c={getStatusColor(viewingMessage.status)}>
-                  {getStatusLabel(viewingMessage.status)}
+                <Text size="sm" c={getReadStatusColor((viewingMessage as any).readStatus ?? viewingMessage.status)}>
+                  {getReadStatusLabel((viewingMessage as any).readStatus ?? viewingMessage.status)}
                 </Text>
               </Box>
 
@@ -519,17 +696,24 @@ const NotificationsPageRender = ({ initialCustomMessageData, initialSystemMessag
                 </Text>
               </Box>
 
-              {viewingMessage.createdAt && (
+              <Box mb="md">
+                <Text size="sm" fw={500} mb={5}>发送人</Text>
+                <Text size="sm">
+                  {viewingMessage.creator?.nickname || viewingMessage.creator?.username || '-'}
+                </Text>
+              </Box>
+
+              {((viewingMessage as any).publishTime || viewingMessage.createdAt) && (
                 <Box mb="md">
-                  <Text size="sm" fw={500} mb={5}>创建时间</Text>
+                  <Text size="sm" fw={500} mb={5}>发布时间</Text>
                   <Text size="sm">
-                    {formatTimestamp(viewingMessage.createdAt)}
+                    {formatTimestamp((viewingMessage as any).publishTime || viewingMessage.createdAt!)}
                   </Text>
                 </Box>
               )}
 
               <Flex justify="flex-end" gap="sm" mt="lg">
-                <Button onClick={viewDetailModalActions.close}>关闭</Button>
+                <Button onClick={handleCloseViewDetailModal}>关闭</Button>
               </Flex>
             </Stack>
           )}

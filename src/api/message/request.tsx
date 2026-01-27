@@ -33,3 +33,8 @@ export interface createMessageRequest {
 export interface publishMessageRequest {
   id: string;
 }
+
+export interface markMessageAsReadRequest {
+  id: string;
+  accountId: string;
+}

@@ -6,7 +6,8 @@ import {
   editMessageRequest, 
   getMessageRequest, 
   createMessageRequest,
-  publishMessageRequest
+  publishMessageRequest,
+  markMessageAsReadRequest
 } from '@/api/message/request';
 import { 
   listResponse, 
@@ -15,7 +16,8 @@ import {
   editMessageResponse, 
   getMessageResponse, 
   createMessageResponse,
-  publishMessageResponse
+  publishMessageResponse,
+  markMessageAsReadResponse
 } from '@/api/message/response';
 import request from '@/utils/request';
 
@@ -101,6 +103,19 @@ export async function getMessage(req?:getMessageRequest,options?:Options) {
 export async function publishMessage(req?:publishMessageRequest,options?:Options) {
   return request<publishMessageResponse>({
     url: `/api/v1/message/${req?.id}/publish`,
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: req || {},
+    ...(options || {}),
+  });
+}
+
+// markMessageAsRead 标记消息为已读
+export async function markMessageAsRead(req?:markMessageAsReadRequest,options?:Options) {
+  return request<markMessageAsReadResponse>({
+    url: `/api/v1/message/${req?.id}/read`,
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
