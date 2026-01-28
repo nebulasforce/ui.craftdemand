@@ -415,7 +415,7 @@ const MessagesPageRender =  ({ initialData, initialAccountList = [] }:MessagesPr
       };
       const response = await publishMessage(requestData);
       if (response.code === 0) {
-        notify('Message published successfully', 'success');
+        notify('消息发布成功', 'success');
         await loadData(page);
       } else {
         notify(response.message || 'Failed to publish the message', 'error');
@@ -439,7 +439,7 @@ const MessagesPageRender =  ({ initialData, initialAccountList = [] }:MessagesPr
       };
       const response = await deleteMessage(requestData);
       if (response.code === 0) {
-        notify('Message deleted successfully', 'success');
+        notify('消息删除成功', 'success');
         await loadData(page);
       } else {
         notify(response.message || 'Failed to delete the message', 'error');
@@ -467,7 +467,7 @@ const MessagesPageRender =  ({ initialData, initialAccountList = [] }:MessagesPr
       };
       const response = await deleteMessage(requestData);
       if (response.code === 0) {
-        notify(`Successfully deleted ${response.data?.count || selection.length} message(s)`, 'success');
+        notify(`成功删除 ${response.data?.count || selection.length} 条消息`, 'success');
         await loadData(page);
       } else {
         notify(response.message || 'Failed to delete the messages', 'error');
@@ -544,7 +544,7 @@ const MessagesPageRender =  ({ initialData, initialAccountList = [] }:MessagesPr
 
         if (response.code === 0) {
           loadData(page).then()
-          notify('Message added successfully', 'success');
+          notify('消息添加成功', 'success');
         } else {
           notify(response.message || 'Failed to add the message', 'error');
         }
@@ -577,7 +577,7 @@ const MessagesPageRender =  ({ initialData, initialAccountList = [] }:MessagesPr
 
         if (response.code === 0) {
           loadData(page).then()
-          notify('Message updated successfully', 'success');
+          notify('消息更新成功', 'success');
         } else {
           notify(response.message || 'Failed to update the message', 'error');
         }
