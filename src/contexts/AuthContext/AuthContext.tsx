@@ -172,7 +172,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setIsAuthenticated(false);
       removeStored()
       wsService.reconnect();
-      notify('Logged out Successfully', 'success');
+      notify('退出登录成功', 'success');
       router.push('/');
     } catch (error) {
       if (error instanceof Error) {

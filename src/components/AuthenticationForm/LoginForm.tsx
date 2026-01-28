@@ -112,7 +112,7 @@ export function LoginForm(props: PaperProps) {
       };
       const result = await login(params);
       if (result.success) {
-        notify('登录成功', 'success');
+        notify('欢迎回来！登录成功', 'success');
         router.push(redirectPath);
         // // 验证跳转路径的安全性，防止XSS攻击
         // if (redirectPath.startsWith('/') && !redirectPath.startsWith('//')) {

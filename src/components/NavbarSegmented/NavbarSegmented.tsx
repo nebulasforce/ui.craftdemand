@@ -144,17 +144,6 @@ export function NavbarSegmented({ data, collapsed = false }: NavbarSegmentedProp
           <Link
             href="#"
             className={classes.link}
-            onClick={(event) => event.preventDefault()}
-            data-collapsed={collapsed || undefined}
-            title={collapsed ? '切换账号' : undefined}
-          >
-            <IconSwitchHorizontal className={classes.linkIcon} stroke={1.5} />
-            {!collapsed && <span>切换账号</span>}
-          </Link>
-
-          <Link
-            href="#"
-            className={classes.link}
             onClick={logout}
             data-collapsed={collapsed || undefined}
             title={collapsed ? '退出' : undefined}
