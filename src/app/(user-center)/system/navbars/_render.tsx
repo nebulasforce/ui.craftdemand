@@ -623,8 +623,11 @@ const NavbarsPageRender = ({ initialData, labelOptions }: NavbarsProps) => {
               />
               <Select
                 label="状态"
-                value={advancedFilters.status || null}
-                onChange={(value) => handleAdvancedFilterChange('status', value || '')}
+                value={statusOptions.find(opt => opt.label === advancedFilters.status)?.value || null}
+                onChange={(value) => {
+                  const selectedOption = statusOptions.find(opt => opt.value === value);
+                  handleAdvancedFilterChange('status', selectedOption?.label || '');
+                }}
                 placeholder="选择状态"
                 data={statusOptions}
                 clearable

@@ -85,7 +85,6 @@ export function NavbarSegmented({ data, collapsed = false }: NavbarSegmentedProp
             </Text>
 
             <SegmentedControl
-              id="navbar-section-control"
               value={section}
               onChange={(value: any) => setSection(value)}
               transitionTimingFunction="ease"
