@@ -336,7 +336,7 @@ const NavbarsPageRender = ({ initialData, labelOptions }: NavbarsProps) => {
         code: navbar.code,
         icon: navbar.icon,
         url: navbar.url,
-        section: navbar.section,
+        label: navbar.label || '',
         color: navbar.color || '',
         sort: navbar.sort || 0,
         status: navbar.status,
@@ -349,7 +349,7 @@ const NavbarsPageRender = ({ initialData, labelOptions }: NavbarsProps) => {
         code: '',
         icon: '',
         url: '',
-        section: '',
+        label: '',
         color: '',
         sort: 0,
         status: 0,
@@ -418,7 +418,7 @@ const NavbarsPageRender = ({ initialData, labelOptions }: NavbarsProps) => {
       code: editingNavbar?.code || '',
       icon: editingNavbar?.icon || '',
       url: editingNavbar?.url || '',
-      section: editingNavbar?.section || '',
+      label: editingNavbar?.label || '',
       color: editingNavbar?.color || '',
       sort: editingNavbar?.sort || 0,
       status: editingNavbar?.status ?? 0,
@@ -448,7 +448,7 @@ const NavbarsPageRender = ({ initialData, labelOptions }: NavbarsProps) => {
         }
         return null;
       },
-      section: (val) => {
+      label: (val) => {
         if (!val || val.trim() === '') {
           return '此字段为必填项';
         }
@@ -472,7 +472,8 @@ const NavbarsPageRender = ({ initialData, labelOptions }: NavbarsProps) => {
           code: values.code,
           icon: values.icon,
           url: values.url,
-          section: values.section,
+          section: values.label,
+          label: values.label,
           color: values.color || undefined,
           sort: values.sort,
           status: values.status,
@@ -506,7 +507,8 @@ const NavbarsPageRender = ({ initialData, labelOptions }: NavbarsProps) => {
           code: values.code,
           icon: values.icon,
           url: values.url,
-          section: values.section,
+          section: values.label,
+          label: values.label,
           color: values.color || undefined,
           sort: values.sort,
           status: values.status,
@@ -789,11 +791,11 @@ const NavbarsPageRender = ({ initialData, labelOptions }: NavbarsProps) => {
                 <Select
                   label="分组"
                   required
-                  value={addEditForm.values.section}
-                  onChange={(value) => addEditForm.setFieldValue('section', value || '')}
+                  value={addEditForm.values.label}
+                  onChange={(value) => addEditForm.setFieldValue('label', value || '')}
                   placeholder="选择分组"
                   data={sectionOptions}
-                  error={addEditForm.errors.section}
+                  error={addEditForm.errors.label}
                 />
                 <Select
                   label="状态"

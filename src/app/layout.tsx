@@ -17,12 +17,12 @@ export const metadata = appConfig.metadata;
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
 
   return (
-    <html lang="en" {...mantineHtmlProps}>
+    <html lang="en" {...mantineHtmlProps} suppressHydrationWarning>
     <head>
       <title />
       <ColorSchemeScript />
     </head>
-    <body className="antialiased">
+    <body className="antialiased" suppressHydrationWarning>
     <MantineProvider theme={theme}>
         {/*<NavigationProgress />*/}
         <Notifications position="top-center" />

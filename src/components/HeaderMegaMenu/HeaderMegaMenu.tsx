@@ -140,7 +140,7 @@ export function HeaderMegaMenu({ user, navbarCollapsed = false, onNavbarToggle }
             <Link href="/" passHref className={classes.link}>
               Home
             </Link>
-            <HoverCard width={600} position="bottom" radius="md" shadow="md" withinPortal>
+            <HoverCard id="header-features-card" width={600} position="bottom" radius="md" shadow="md" withinPortal>
               <HoverCard.Target>
                 <Link href="#" className={classes.link}>
                   <Center inline>
