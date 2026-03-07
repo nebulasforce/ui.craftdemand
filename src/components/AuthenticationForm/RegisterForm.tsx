@@ -41,17 +41,20 @@ const sendVerificationCode = async (mobile: string) => {
 
 export function RegisterForm(props: PaperProps) {
   const [loading, setLoading] = useState(false);
-  const [countdown, setCountdown] = useState(() => {
-    if (typeof window !== 'undefined') {
-      const cd = localStorage.getItem('countdown');
-      return cd ? Math.max(0, Number(cd)) : 0;
-    }
-    return 0;
-  });
+  // 初始状态设为 0，确保服务端和客户端一致
+  const [countdown, setCountdown] = useState(0);
   const { register } = useAuth();
   const router = useRouter();
 
   const usernameRef = useRef<HTMLInputElement>(null);
+  
+  // 客户端挂载后从 localStorage 加载倒计时
+  useEffect(() => {
+    const cd = localStorage.getItem('countdown');
+    if (cd) {
+      setCountdown(Math.max(0, Number(cd)));
+    }
+  }, []);
 
   const form = useForm({
     initialValues: {

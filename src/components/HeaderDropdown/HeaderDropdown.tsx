@@ -79,9 +79,19 @@ export function HeaderDropdown({ user }: HeaderDropdownProps) {
   const [loading, setLoading] = useState(true);
   const [drawerOpened, setDrawerOpened] = useState(false);
   const theme = useMantineTheme();
+  
+  // 客户端挂载状态，用于避免 hydration mismatch
+  const [mounted, setMounted] = useState(false);
 
   // 媒体查询 - 检测屏幕尺寸
-  const isMobile = useMediaQuery(`(max-width: ${em(theme.breakpoints.sm)})`);
+  // 设置 initialValue 为 false，确保服务端和客户端初始状态一致
+  const isMobile = useMediaQuery(`(max-width: ${em(theme.breakpoints.sm)})`, false, {
+    getInitialValueInEffect: true,
+  });
+  
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const fetchData = async (): Promise<void> => {
     try {
@@ -275,10 +285,13 @@ export function HeaderDropdown({ user }: HeaderDropdownProps) {
     </UnstyledButton>
   );
 
+  // 在客户端挂载前，使用与服务端一致的默认渲染（桌面端）
+  const showMobile = mounted && isMobile;
+
   return (
     <Box pos="relative">
       {/* 桌面端使用下拉菜单 */}
-      {!isMobile && (
+      {!showMobile && (
         <Menu width={200} withinPortal trigger="click-hover" >
           <Menu.Target>
             {userInfoSection}
@@ -312,7 +325,7 @@ export function HeaderDropdown({ user }: HeaderDropdownProps) {
       )}
 
       {/* 移动端使用抽屉 */}
-      {isMobile && (
+      {showMobile && (
         <>
           {userInfoSection}
           <Drawer

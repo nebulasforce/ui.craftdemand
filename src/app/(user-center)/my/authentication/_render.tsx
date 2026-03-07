@@ -147,21 +147,21 @@ const AccountPageRender =  ({  }:AccountPageProps) => {
   }, [setActive, setSection]); // 合并依赖项
 
 
-  const [emailEditCountdown, setEmailEditCountdown] = useState(() => {
-    if (typeof window !== 'undefined') {
-      const cd = localStorage.getItem('emailEditCountdown');
-      return cd ? Math.max(0, Number(cd)) : 0;
+  // 初始状态设为 0，确保服务端和客户端一致
+  const [emailEditCountdown, setEmailEditCountdown] = useState(0);
+  const [mobileEditCountdown, setMobileEditCountdown] = useState(0);
+  
+  // 客户端挂载后从 localStorage 加载倒计时
+  useEffect(() => {
+    const emailCd = localStorage.getItem('emailEditCountdown');
+    if (emailCd) {
+      setEmailEditCountdown(Math.max(0, Number(emailCd)));
     }
-    return 0;
-  });
-
-  const [mobileEditCountdown, setMobileEditCountdown] = useState(() => {
-    if (typeof window !== 'undefined') {
-      const cd = localStorage.getItem('mobileEditCountdown');
-      return cd ? Math.max(0, Number(cd)) : 0;
+    const mobileCd = localStorage.getItem('mobileEditCountdown');
+    if (mobileCd) {
+      setMobileEditCountdown(Math.max(0, Number(mobileCd)));
     }
-    return 0;
-  });
+  }, []);
 
 
   const [checkUsernameLoading, setCheckUsernameLoading] = useState(false);
