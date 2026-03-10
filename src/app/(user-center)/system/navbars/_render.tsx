@@ -565,7 +565,7 @@ const NavbarsPageRender = ({ initialData, labelOptions }: NavbarsProps) => {
           <Grid.Col span={{ base: 12, sm: 9 }} mb="xs">
             {/* 基础搜索组件 */}
             <TextInput
-              placeholder="搜索名称、编码等..."
+              placeholder="搜索名称等..."
               value={searchKeyword}
               onChange={(e) => handleSearchChange(e.target.value)}
               leftSection={<IconSearch size={16} stroke={1.5} />}
