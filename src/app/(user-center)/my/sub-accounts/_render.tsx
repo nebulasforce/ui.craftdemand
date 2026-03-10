@@ -158,9 +158,8 @@ const SubAccountsPageRender =  ({ initialData }:SubAccountsProps) => {
       // 动态构建搜索参数
       const searchParams: Record<string, any> = { ...baseParams };
 
-      // 只有在非高级搜索或高级搜索无有效字段时，才添加keyword（且keyword有值）
-      const useKeyword = !(advancedSearchOpen && Object.values(advancedFilters).some(v => v));
-      if (useKeyword && searchKeyword) {
+      // 关键字搜索始终生效（只要有值），不再被高级搜索覆盖
+      if (currentKeyword && currentKeyword.trim() !== '') {
         searchParams.keyword = currentKeyword.toLowerCase();
       }
 

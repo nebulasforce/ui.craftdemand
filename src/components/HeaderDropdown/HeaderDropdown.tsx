@@ -53,6 +53,7 @@ interface DropdownGroup {
 export interface HeaderDropdownProps {
   user: User;
   dropdowns?: DropdownGroup[];
+  initialData?: listGroupData;
 }
 
 
@@ -74,8 +75,8 @@ const convertKeysToKbd = (keysString?: string): ReactNode => {
   ));
 };
 
-export function HeaderDropdown({ user }: HeaderDropdownProps) {
-  const [data, setData] = useState<listGroupData>();
+export function HeaderDropdown({ user, initialData }: HeaderDropdownProps) {
+  const [data, setData] = useState<listGroupData | undefined>(initialData);
   const [loading, setLoading] = useState(true);
   const [drawerOpened, setDrawerOpened] = useState(false);
   const theme = useMantineTheme();
@@ -110,12 +111,20 @@ export function HeaderDropdown({ user }: HeaderDropdownProps) {
   const { logout, isAuthenticated } = useAuth();
 
   useEffect(() => {
-    if (isAuthenticated) {
-      fetchData().then(() => {
-        setLoading(false);
-      });
+    if (!isAuthenticated) {
+      return;
     }
-  }, [isAuthenticated]);
+
+    // 若已经通过 SSR 提供了数据，则跳过首轮请求
+    if (data) {
+      setLoading(false);
+      return;
+    }
+
+    fetchData().then(() => {
+      setLoading(false);
+    });
+  }, [isAuthenticated, data]);
 
   // 图标映射表
   const iconMap = {

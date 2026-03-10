@@ -5,25 +5,25 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { IconChevronDown, IconChevronUp, IconEdit, IconEye, IconPlus, IconSearch, IconTrash, IconX } from '@tabler/icons-react';
 import cx from 'clsx';
-import { ActionIcon, Anchor, Box, Breadcrumbs, Button, Checkbox, Collapse, ColorInput, Divider, Flex, FocusTrap, Grid, Group, LoadingOverlay, Modal, NumberInput, Pagination, Paper, ScrollArea, Select, SimpleGrid, Stack, Table, Text, TextInput, Title, Tooltip } from '@mantine/core';
+import { ActionIcon, Anchor, Badge, Box, Breadcrumbs, Button, Checkbox, Collapse, Divider, Flex, FocusTrap, Grid, Group, LoadingOverlay, Modal, NumberInput, Pagination, Paper, ScrollArea, Select, SimpleGrid, Stack, Table, Text, Textarea, TextInput, Title } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useDisclosure } from '@mantine/hooks';
-import { createNavbar, deleteNavbar, editNavbar, getNavbar, list as navbarList } from '@/api/navbar/api';
+import { createApi, deleteApi, editApi, getApi, list as apiList } from '@/api/api/api';
 
-import { createNavbarRequest, deleteNavbarRequest, editNavbarRequest } from '@/api/navbar/request';
-import { listData } from '@/api/navbar/response';
-import { Navbar } from '@/api/navbar/typings';
+import { createApiRequest, deleteApiRequest, editApiRequest } from '@/api/api/request';
+import { listData } from '@/api/api/response';
+import { Api } from '@/api/api/typings';
 import { DeleteConfirm } from '@/components/DeleteConfirm/DeleteConfirm';
-import { DynamicIcon } from '@/components/DynamicIcon';
 import { useNavbar } from '@/contexts/NavbarContext/NavbarContext';
 import notify from '@/utils/notify';
 import { formatTimestamp } from '@/utils/time';
 import classes from './style.module.css';
+import request from '@/utils/request';
 
 
-interface NavbarsProps {
+interface ApiProps {
   initialData: listData | null;
-  labelOptions: string[];
+  initialModules?: { name: string }[] | null;
 }
 
 interface statusItem {
@@ -33,7 +33,7 @@ interface statusItem {
 
 interface openAddEditModalParams {
   action: 'add' | 'edit';
-  navbar?: Navbar;
+  api?: Api;
 }
 
 // 状态映射
@@ -51,6 +51,50 @@ const statusOptions = Object.entries(statusMap)
     label,
   }));
 
+// HTTP 方法选项
+const methodOptions = [
+  { value: 'GET', label: 'GET' },
+  { value: 'POST', label: 'POST' },
+  { value: 'PUT', label: 'PUT' },
+  { value: 'DELETE', label: 'DELETE' },
+  { value: 'PATCH', label: 'PATCH' },
+];
+
+// 类型映射 (type字段: 0=系统, 1=业务)
+const typeMap: { [key: number]: { label: string; color: string } } = {
+  0: { label: '系统', color: 'blue' },
+  1: { label: '业务', color: 'teal' },
+};
+
+// 类型选项数据 - 用于下拉选择器
+const typeOptions = Object.entries(typeMap).map(([value, { label }]) => ({
+  value,
+  label,
+}));
+
+// 获取类型显示文本
+const getTypeLabel = (type: number | string) => {
+  const typeNumber = typeof type === 'string' ? parseInt(type, 10) : type;
+  return typeMap[typeNumber]?.label || '未知';
+};
+
+// 获取类型显示颜色
+const getTypeColor = (type: number | string) => {
+  const typeNumber = typeof type === 'string' ? parseInt(type, 10) : type;
+  return typeMap[typeNumber]?.color || 'gray';
+};
+
+// 获取HTTP方法对应的颜色
+const getMethodColor = (method: string) => {
+  const colorMap: { [key: string]: string } = {
+    GET: 'blue',
+    POST: 'green',
+    PUT: 'orange',
+    DELETE: 'red',
+    PATCH: 'violet',
+  };
+  return colorMap[method?.toUpperCase()] || 'gray';
+};
 
 // 获取状态显示文本
 const getStatusLabel = (status: number | string) => {
@@ -67,23 +111,21 @@ const getStatusColor = (status: number | string) => {
 // 定义高级搜索条件接口
 interface AdvancedSearchFilters {
   name: string;
-  section: string;
+  path: string;
+  method: string;
+  module: string;
+  type: string;
   status: string;
 }
 
 
-const NavbarsPageRender = ({ initialData, labelOptions }: NavbarsProps) => {
-  // 将 labelOptions 字符串数组转换为 Select 组件需要的格式
-  const sectionOptions = labelOptions.map(item => ({
-    value: item,
-    label: item,
-  }));
+const ApiPageRender = ({ initialData, initialModules }: ApiProps) => {
   const { setActive, setSection } = useNavbar();
   const router = useRouter();
 
   useEffect(() => {
     setSection('System');
-    setActive('Navbars');
+    setActive('Api');
   }, []);
 
 
@@ -91,7 +133,7 @@ const NavbarsPageRender = ({ initialData, labelOptions }: NavbarsProps) => {
   const items = [
     { title: '首页', href: '/' },
     { title: '系统' },
-    { title: '导航栏' }
+    { title: 'API管理' }
   ];
 
   // 基础搜索状态
@@ -109,9 +151,59 @@ const NavbarsPageRender = ({ initialData, labelOptions }: NavbarsProps) => {
   const [advancedSearchOpen, setAdvancedSearchOpen] = useState(false);
   const [advancedFilters, setAdvancedFilters] = useState<AdvancedSearchFilters>({
     name: '',
-    section: '',
+    path: '',
+    module: '',
+    method: '',
+    type: '',
     status: '',
   });
+
+  // 模块下拉选项
+  const [moduleOptions, setModuleOptions] = useState<{ value: string; label: string }[]>(
+    () =>
+      (initialModules || []).map((item) => ({
+        value: item.name,
+        label: item.name,
+      }))
+  );
+
+  // 加载模块列表
+  useEffect(() => {
+    // 若服务端已提供模块数据，则不再在客户端重复请求
+    if (moduleOptions.length > 0) {
+      return;
+    }
+    const fetchModules = async () => {
+      try {
+        const res = await request<{
+          code: number;
+          data?: { name: string }[];
+          message?: string;
+        }>({
+          url: '/api/v1/api/modules',
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (res.code === 0 && Array.isArray(res.data)) {
+          setModuleOptions(
+            res.data.map((item) => ({
+              value: item.name,
+              label: item.name,
+            }))
+          );
+        } else {
+          notify(res.message || '获取模块列表失败', 'error');
+        }
+      } catch (error) {
+        notify('获取模块列表失败', 'error');
+      }
+    };
+
+    fetchModules().then();
+  }, []);
 
   // 状态管理
   const [data, setData] = useState(initialData?.lists || []);
@@ -174,7 +266,7 @@ const NavbarsPageRender = ({ initialData, labelOptions }: NavbarsProps) => {
         });
       }
 
-      const response = await navbarList(searchParams);
+      const response = await apiList(searchParams);
       if (response.code === 0 && response.data) {
         setPage(currentPage);
         setData(response.data.lists || []);
@@ -209,29 +301,29 @@ const NavbarsPageRender = ({ initialData, labelOptions }: NavbarsProps) => {
           </Text>
         </Table.Td>
         <Table.Td>
-          <Text size="sm">
-            {item.label || '-'}
+          <Text size="sm" lineClamp={1}>
+            {item.module || '-'}
           </Text>
         </Table.Td>
         <Table.Td>
-          <Tooltip label={item.icon} withArrow>
-            <Group gap="xs">
-              <DynamicIcon name={item.icon} size={18} stroke={1.5} />
-              <Text size="sm" c="dimmed">
-                {item.icon}
-              </Text>
-            </Group>
-          </Tooltip>
+          <Badge color={getMethodColor(item.method)} variant="light" size="sm">
+            {item.method}
+          </Badge>
         </Table.Td>
         <Table.Td>
           <Text size="sm" lineClamp={1}>
-            {item.url}
+            {item.path}
           </Text>
         </Table.Td>
         <Table.Td>
-          <Text size="sm">
-            {item.sort}
+          <Text size="sm" lineClamp={1}>
+            {item.description || '-'}
           </Text>
+        </Table.Td>
+        <Table.Td>
+          <Badge color={getTypeColor(item.type)} variant="light" size="sm">
+            {getTypeLabel(item.type)}
+          </Badge>
         </Table.Td>
         <Table.Td>
           <Text c={getStatusColor(item.status)}>
@@ -243,10 +335,10 @@ const NavbarsPageRender = ({ initialData, labelOptions }: NavbarsProps) => {
             <ActionIcon onClick={() => { openViewDetailModal(item) }} variant="light" size="md" aria-label="查看详情">
               <IconEye size={14} stroke={1.5} />
             </ActionIcon>
-            <ActionIcon onClick={() => { openAddEditModal({ action: 'edit', navbar: item }) }} variant="light" size="md" aria-label="编辑">
+            <ActionIcon onClick={() => { openAddEditModal({ action: 'edit', api: item }) }} variant="light" size="md" aria-label="编辑">
               <IconEdit size={14} stroke={1.5} />
             </ActionIcon>
-            <DeleteConfirm onConfirm={() => { handleDeleteOneNavbar(item) }} itemName={item.name}>
+            <DeleteConfirm onConfirm={() => { handleDeleteOneApi(item) }} itemName={item.name}>
               <ActionIcon variant="light" size="md" aria-label="删除">
                 <IconTrash size={14} stroke={1.5} />
               </ActionIcon>
@@ -269,7 +361,10 @@ const NavbarsPageRender = ({ initialData, labelOptions }: NavbarsProps) => {
   const resetAdvancedFilters = () => {
     setAdvancedFilters({
       name: '',
-      section: '',
+      path: '',
+      module: '',
+      method: '',
+      type: '',
       status: '',
     });
   };
@@ -296,22 +391,22 @@ const NavbarsPageRender = ({ initialData, labelOptions }: NavbarsProps) => {
 
   const [addEditAction, setAddEditAction] = useState<'add' | 'edit'>('add');
   const [addEditModalOpened, addEditModalActions] = useDisclosure(false);
-  const [editingNavbar, setEditingNavbar] = useState<Navbar | null>(null);
+  const [editingApi, setEditingApi] = useState<Api | null>(null);
 
   // 查看详情相关状态
   const [viewDetailModalOpened, viewDetailModalActions] = useDisclosure(false);
-  const [viewingNavbar, setViewingNavbar] = useState<Navbar | null>(null);
+  const [viewingApi, setViewingApi] = useState<Api | null>(null);
 
   // 打开查看详情模态窗口
-  const openViewDetailModal = async (navbar: Navbar) => {
+  const openViewDetailModal = async (api: Api) => {
     setLoading(true);
     try {
-      const response = await getNavbar({ id: navbar.id });
+      const response = await getApi({ id: api.id });
       if (response.code === 0 && response.data) {
-        setViewingNavbar(response.data);
+        setViewingApi(response.data);
         viewDetailModalActions.open();
       } else {
-        notify(response.message || 'Failed to load navbar details', 'error');
+        notify(response.message || 'Failed to load API details', 'error');
       }
     } catch (err) {
       if (err instanceof Error) {
@@ -325,33 +420,31 @@ const NavbarsPageRender = ({ initialData, labelOptions }: NavbarsProps) => {
   };
 
   // 打开表单模态窗口
-  const openAddEditModal = ({ action, navbar }: openAddEditModalParams) => {
+  const openAddEditModal = ({ action, api }: openAddEditModalParams) => {
     setAddEditAction(action);
 
-    if (action === 'edit' && navbar) {
-      setEditingNavbar(navbar);
+    if (action === 'edit' && api) {
+      setEditingApi(api);
       addEditForm.setValues({
-        id: navbar.id,
-        name: navbar.name,
-        code: navbar.code,
-        icon: navbar.icon,
-        url: navbar.url,
-        label: navbar.label || '',
-        color: navbar.color || '',
-        sort: navbar.sort || 0,
-        status: navbar.status,
+        id: api.id,
+        name: api.name,
+        module: api.module || '',
+        path: api.path,
+        method: api.method,
+        description: api.description || '',
+        type: api.type || 0,
+        status: api.status,
       });
     } else {
-      setEditingNavbar(null);
+      setEditingApi(null);
       addEditForm.setValues({
         id: '',
         name: '',
-        code: '',
-        icon: '',
-        url: '',
-        label: '',
-        color: '',
-        sort: 0,
+        module: '',
+        path: '',
+        method: 'GET',
+        description: '',
+        type: 0,
         status: 0,
       });
     }
@@ -359,18 +452,18 @@ const NavbarsPageRender = ({ initialData, labelOptions }: NavbarsProps) => {
     addEditModalActions.open();
   };
 
-  const handleDeleteOneNavbar = async (navbar: Navbar) => {
+  const handleDeleteOneApi = async (api: Api) => {
     setLoading(true);
     try {
-      const requestData: deleteNavbarRequest = {
-        ids: [navbar.id],
+      const requestData: deleteApiRequest = {
+        ids: [api.id],
       };
-      const response = await deleteNavbar(requestData);
+      const response = await deleteApi(requestData);
       if (response.code === 0) {
-        notify('导航栏删除成功', 'success');
+        notify('API删除成功', 'success');
         await loadData(page);
       } else {
-        notify(response.message || 'Failed to delete the navbar', 'error');
+        notify(response.message || 'Failed to delete the API', 'error');
       }
     } catch (err) {
       if (err instanceof Error) {
@@ -383,22 +476,22 @@ const NavbarsPageRender = ({ initialData, labelOptions }: NavbarsProps) => {
     }
   };
 
-  // 批量删除选中的导航栏
+  // 批量删除选中的API
   const handleDeleteSelected = async () => {
     if (selection.length === 0) {
       return;
     }
     setLoading(true);
     try {
-      const requestData: deleteNavbarRequest = {
+      const requestData: deleteApiRequest = {
         ids: selection,
       };
-      const response = await deleteNavbar(requestData);
+      const response = await deleteApi(requestData);
       if (response.code === 0) {
-        notify(`成功删除 ${response.data?.count || selection.length} 条导航栏`, 'success');
+        notify(`成功删除 ${response.data?.count || selection.length} 条API`, 'success');
         await loadData(page);
       } else {
-        notify(response.message || 'Failed to delete the navbars', 'error');
+        notify(response.message || 'Failed to delete the APIs', 'error');
       }
     } catch (err) {
       if (err instanceof Error) {
@@ -413,15 +506,14 @@ const NavbarsPageRender = ({ initialData, labelOptions }: NavbarsProps) => {
 
   const addEditForm = useForm({
     initialValues: {
-      id: editingNavbar?.id || '',
-      name: editingNavbar?.name || '',
-      code: editingNavbar?.code || '',
-      icon: editingNavbar?.icon || '',
-      url: editingNavbar?.url || '',
-      label: editingNavbar?.label || '',
-      color: editingNavbar?.color || '',
-      sort: editingNavbar?.sort || 0,
-      status: editingNavbar?.status ?? 0,
+      id: editingApi?.id || '',
+      name: editingApi?.name || '',
+      module: editingApi?.module || '',
+      path: editingApi?.path || '',
+      method: editingApi?.method || 'GET',
+      description: editingApi?.description || '',
+      type: editingApi?.type || 0,
+      status: editingApi?.status ?? 0,
     },
     validate: {
       name: (val) => {
@@ -430,25 +522,13 @@ const NavbarsPageRender = ({ initialData, labelOptions }: NavbarsProps) => {
         }
         return null;
       },
-      code: (val) => {
+      path: (val) => {
         if (!val || val.trim() === '') {
           return '此字段为必填项';
         }
         return null;
       },
-      icon: (val) => {
-        if (!val || val.trim() === '') {
-          return '此字段为必填项';
-        }
-        return null;
-      },
-      url: (val) => {
-        if (!val || val.trim() === '') {
-          return '此字段为必填项';
-        }
-        return null;
-      },
-      label: (val) => {
+      method: (val) => {
         if (!val || val.trim() === '') {
           return '此字段为必填项';
         }
@@ -467,24 +547,22 @@ const NavbarsPageRender = ({ initialData, labelOptions }: NavbarsProps) => {
     if (addEditAction === 'add') {
       setLoading(true);
       try {
-        const formattedData: createNavbarRequest = {
+        const formattedData: createApiRequest = {
           name: values.name,
-          code: values.code,
-          icon: values.icon,
-          url: values.url,
-          section: values.label,
-          label: values.label,
-          color: values.color || undefined,
-          sort: values.sort,
+          module: values.module || undefined,
+          path: values.path,
+          method: values.method,
+          description: values.description || undefined,
+          type: values.type,
           status: values.status,
         };
-        const response = await createNavbar(formattedData);
+        const response = await createApi(formattedData);
 
         if (response.code === 0) {
           loadData(page).then()
-          notify('导航栏添加成功', 'success');
+          notify('API添加成功', 'success');
         } else {
-          notify(response.message || 'Failed to add the navbar', 'error');
+          notify(response.message || 'Failed to add the API', 'error');
         }
       } catch (err) {
         if (err instanceof Error) {
@@ -498,28 +576,26 @@ const NavbarsPageRender = ({ initialData, labelOptions }: NavbarsProps) => {
       }
 
     } else if (addEditAction === 'edit') {
-      if (!editingNavbar) { return; }
+      if (!editingApi) { return; }
       setLoading(true);
       try {
-        const formattedData: editNavbarRequest = {
+        const formattedData: editApiRequest = {
           id: values.id,
           name: values.name,
-          code: values.code,
-          icon: values.icon,
-          url: values.url,
-          section: values.label,
-          label: values.label,
-          color: values.color || undefined,
-          sort: values.sort,
+          module: values.module || undefined,
+          path: values.path,
+          method: values.method,
+          description: values.description || undefined,
+          type: values.type,
           status: values.status,
         };
-        const response = await editNavbar(formattedData);
+        const response = await editApi(formattedData);
 
         if (response.code === 0) {
           loadData(page).then()
-          notify('导航栏更新成功', 'success');
+          notify('API更新成功', 'success');
         } else {
-          notify(response.message || 'Failed to update the navbar', 'error');
+          notify(response.message || 'Failed to update the API', 'error');
         }
       } catch (err) {
         if (err instanceof Error) {
@@ -555,9 +631,9 @@ const NavbarsPageRender = ({ initialData, labelOptions }: NavbarsProps) => {
       <Paper pt="xs" pb="xs">
         {/* 页面容器 - 标题 */}
         <Box mb="md">
-          <Title order={3}>导航栏管理</Title>
+          <Title order={3}>API管理</Title>
           <Text size="sm" c="dimmed">
-            高效管理和控制导航栏菜单项。
+            高效管理和控制系统API接口。
           </Text>
         </Box>
         <Divider mb="lg" my="xs" variant="dashed" />
@@ -565,7 +641,7 @@ const NavbarsPageRender = ({ initialData, labelOptions }: NavbarsProps) => {
           <Grid.Col span={{ base: 12, sm: 9 }} mb="xs">
             {/* 基础搜索组件 */}
             <TextInput
-              placeholder="搜索名称、编码等..."
+              placeholder="搜索名称、路径等..."
               value={searchKeyword}
               onChange={(e) => handleSearchChange(e.target.value)}
               leftSection={<IconSearch size={16} stroke={1.5} />}
@@ -606,7 +682,7 @@ const NavbarsPageRender = ({ initialData, labelOptions }: NavbarsProps) => {
             <Title order={5} mb="md">
               高级筛选
             </Title>
-            <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="md">
+            <SimpleGrid cols={{ base: 1, sm: 2, md: 6 }} spacing="md">
               <TextInput
                 label="名称"
                 value={advancedFilters.name}
@@ -614,20 +690,40 @@ const NavbarsPageRender = ({ initialData, labelOptions }: NavbarsProps) => {
                 placeholder="搜索名称"
               />
               <Select
-                label="分组"
-                value={advancedFilters.section || null}
-                onChange={(value) => handleAdvancedFilterChange('section', value || '')}
-                placeholder="选择分组"
-                data={sectionOptions}
+                label="模块"
+                value={advancedFilters.module || null}
+                onChange={(value) => handleAdvancedFilterChange('module', value || '')}
+                placeholder="选择模块"
+                data={moduleOptions}
+                clearable
+                searchable
+              />
+              <TextInput
+                label="路径"
+                value={advancedFilters.path}
+                onChange={(e) => handleAdvancedFilterChange('path', e.target.value)}
+                placeholder="搜索路径"
+              />
+              <Select
+                label="请求方法"
+                value={advancedFilters.method || null}
+                onChange={(value) => handleAdvancedFilterChange('method', value || '')}
+                placeholder="选择方法"
+                data={methodOptions}
+                clearable
+              />
+              <Select
+                label="类型"
+                value={advancedFilters.type || null}
+                onChange={(value) => handleAdvancedFilterChange('type', value || '')}
+                placeholder="选择类型"
+                data={typeOptions}
                 clearable
               />
               <Select
                 label="状态"
-                value={statusOptions.find(opt => opt.label === advancedFilters.status)?.value || null}
-                onChange={(value) => {
-                  const selectedOption = statusOptions.find(opt => opt.value === value);
-                  handleAdvancedFilterChange('status', selectedOption?.label || '');
-                }}
+                value={advancedFilters.status || null}
+                onChange={(value) => handleAdvancedFilterChange('status', value || '')}
                 placeholder="选择状态"
                 data={statusOptions}
                 clearable
@@ -651,8 +747,8 @@ const NavbarsPageRender = ({ initialData, labelOptions }: NavbarsProps) => {
             <Group>
               <DeleteConfirm
                 onConfirm={handleDeleteSelected}
-                itemName={selection.length === 1 ? data.find(item => selection.includes(item.id))?.name : `${selection.length} 条导航栏`}
-                title="删除选中的导航栏"
+                itemName={selection.length === 1 ? data.find(item => selection.includes(item.id))?.name : `${selection.length} 条API`}
+                title="删除选中的API"
               >
                 <Button
                   variant="danger"
@@ -666,7 +762,7 @@ const NavbarsPageRender = ({ initialData, labelOptions }: NavbarsProps) => {
                 leftSection={<IconPlus size={16} stroke={1.5} />}
                 onClick={() => openAddEditModal({ action: 'add' })}
               >
-                添加导航栏
+                添加API
               </Button>
             </Group>
           </Flex>
@@ -687,10 +783,11 @@ const NavbarsPageRender = ({ initialData, labelOptions }: NavbarsProps) => {
                       />
                     </Table.Th>
                     <Table.Th miw={100}>名称</Table.Th>
-                    <Table.Th miw={80}>分组</Table.Th>
-                    <Table.Th miw={120}>图标</Table.Th>
-                    <Table.Th miw={150}>URL</Table.Th>
-                    <Table.Th miw={60}>排序</Table.Th>
+                    <Table.Th miw={120}>模块</Table.Th>
+                    <Table.Th miw={80}>方法</Table.Th>
+                    <Table.Th miw={200}>路径</Table.Th>
+                    <Table.Th miw={150}>描述</Table.Th>
+                    <Table.Th miw={80}>类型</Table.Th>
                     <Table.Th miw={80}>状态</Table.Th>
                     <Table.Th>操作</Table.Th>
                   </Table.Tr>
@@ -700,7 +797,7 @@ const NavbarsPageRender = ({ initialData, labelOptions }: NavbarsProps) => {
                     rows
                   ) : (
                     <Table.Tr>
-                      <Table.Td colSpan={8} align="center">
+                    <Table.Td colSpan={9} align="center">
                         <Text c="dimmed">暂无数据</Text>
                       </Table.Td>
                     </Table.Tr>
@@ -732,7 +829,7 @@ const NavbarsPageRender = ({ initialData, labelOptions }: NavbarsProps) => {
       {/*独立的添加/编辑弹窗*/}
       <Modal
         opened={addEditModalOpened}
-        title={addEditAction === 'add' ? '添加导航栏' : '编辑导航栏'}
+        title={addEditAction === 'add' ? '添加API' : '编辑API'}
         onClose={addEditModalActions.close}
         size="lg"
       >
@@ -745,7 +842,7 @@ const NavbarsPageRender = ({ initialData, labelOptions }: NavbarsProps) => {
                   required
                   data-autofocus
                   label="名称"
-                  placeholder="输入导航栏名称"
+                  placeholder="输入 API 名称"
                   value={addEditForm.values.name}
                   onChange={(event) =>
                     addEditForm.setFieldValue('name', event.currentTarget.value)
@@ -753,52 +850,49 @@ const NavbarsPageRender = ({ initialData, labelOptions }: NavbarsProps) => {
                   error={addEditForm.errors.name}
                   radius="md"
                 />
-                <TextInput
-                  required
-                  label="编码"
-                  placeholder="输入导航栏编码"
-                  value={addEditForm.values.code}
-                  onChange={(event) =>
-                    addEditForm.setFieldValue('code', event.currentTarget.value)
-                  }
-                  error={addEditForm.errors.code}
-                  radius="md"
-                />
-                <TextInput
-                  required
-                  label="图标"
-                  placeholder="输入图标名称，如 IconHome"
-                  value={addEditForm.values.icon}
-                  onChange={(event) =>
-                    addEditForm.setFieldValue('icon', event.currentTarget.value)
-                  }
-                  error={addEditForm.errors.icon}
-                  radius="md"
-                  rightSection={
-                    addEditForm.values.icon && (
-                      <DynamicIcon name={addEditForm.values.icon} size={18} stroke={1.5} />
-                    )
-                  }
-                />
-                <TextInput
-                  required
-                  label="URL"
-                  placeholder="输入导航栏URL"
-                  value={addEditForm.values.url}
-                  onChange={(event) =>
-                    addEditForm.setFieldValue('url', event.currentTarget.value)
-                  }
-                  error={addEditForm.errors.url}
-                  radius="md"
-                />
                 <Select
-                  label="分组"
+                  label="模块"
+                  placeholder="选择模块"
+                  value={addEditForm.values.module || null}
+                  onChange={(value) => addEditForm.setFieldValue('module', value || '')}
+                  data={moduleOptions}
+                  clearable
+                  searchable
+                />
+                <Box style={{ gridColumn: 'span 2' }}>
+                  <Group align="flex-end" gap="sm" wrap="nowrap">
+                    <Select
+                      required
+                      label="路径"
+                      value={addEditForm.values.method}
+                      onChange={(value) => addEditForm.setFieldValue('method', value || 'GET')}
+                      placeholder="方法"
+                      data={methodOptions}
+                      error={addEditForm.errors.method}
+                      style={{ maxWidth: 120 }}
+                    />
+                    <TextInput
+                      required
+                      placeholder="输入API路径，如 /api/v1/users"
+                      value={addEditForm.values.path}
+                      onChange={(event) =>
+                        addEditForm.setFieldValue('path', event.currentTarget.value)
+                      }
+                      error={addEditForm.errors.path}
+                      radius="md"
+                      style={{ flex: 1 }}
+                    />
+                  </Group>
+                </Box>
+                <Select
+                  label="类型"
                   required
-                  value={addEditForm.values.label}
-                  onChange={(value) => addEditForm.setFieldValue('label', value || '')}
-                  placeholder="选择分组"
-                  data={sectionOptions}
-                  error={addEditForm.errors.label}
+                  value={addEditForm.values.type.toString()}
+                  onChange={(value) => addEditForm.setFieldValue('type', parseInt(value || '0', 10))}
+                  placeholder="选择类型"
+                  data={typeOptions}
+                  disabled={loading}
+                  error={addEditForm.errors.type}
                 />
                 <Select
                   label="状态"
@@ -810,23 +904,16 @@ const NavbarsPageRender = ({ initialData, labelOptions }: NavbarsProps) => {
                   disabled={loading}
                   error={addEditForm.errors.status}
                 />
-                <NumberInput
-                  label="排序"
-                  placeholder="输入排序值"
-                  value={addEditForm.values.sort}
-                  onChange={(value) =>
-                    addEditForm.setFieldValue('sort', typeof value === 'number' ? value : 0)
+                <Textarea
+                  label="描述"
+                  placeholder="输入API描述"
+                  value={addEditForm.values.description}
+                  onChange={(event) =>
+                    addEditForm.setFieldValue('description', event.currentTarget.value)
                   }
                   radius="md"
-                  min={0}
-                />
-                <ColorInput
-                  label="颜色"
-                  placeholder="选择颜色"
-                  value={addEditForm.values.color}
-                  onChange={(value) => addEditForm.setFieldValue('color', value)}
-                  format="hex"
-                  swatches={['#2e2e2e', '#868e96', '#fa5252', '#e64980', '#be4bdb', '#7950f2', '#4c6ef5', '#228be6', '#15aabf', '#12b886', '#40c057', '#82c91e', '#fab005', '#fd7e14']}
+                  style={{ gridColumn: 'span 2' }}
+                  rows={3}
                 />
               </SimpleGrid>
               <Flex justify="flex-end" gap="sm" mt="lg">
@@ -840,66 +927,48 @@ const NavbarsPageRender = ({ initialData, labelOptions }: NavbarsProps) => {
       {/*查看详情弹窗*/}
       <Modal
         opened={viewDetailModalOpened}
-        title="导航栏详情"
+        title="API详情"
         onClose={viewDetailModalActions.close}
         size="lg"
       >
         <Box pos="relative">
           <LoadingOverlay visible={loading} />
-          {viewingNavbar && (
+          {viewingApi && (
             <Stack gap="md">
               <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                 <Box>
                   <Text size="sm" fw={500} mb={5}>名称</Text>
-                  <Text size="sm">{viewingNavbar.name || '-'}</Text>
+                  <Text size="sm">{viewingApi.name || '-'}</Text>
                 </Box>
                 <Box>
-                  <Text size="sm" fw={500} mb={5}>编码</Text>
-                  <Text size="sm">{viewingNavbar.code || '-'}</Text>
+                  <Text size="sm" fw={500} mb={5}>模块</Text>
+                  <Text size="sm">{viewingApi.module || '-'}</Text>
                 </Box>
                 <Box>
-                  <Text size="sm" fw={500} mb={5}>图标</Text>
-                  <Group gap="xs">
-                    {viewingNavbar.icon && (
-                      <DynamicIcon name={viewingNavbar.icon} size={18} stroke={1.5} />
-                    )}
-                    <Text size="sm">{viewingNavbar.icon || '-'}</Text>
-                  </Group>
+                  <Text size="sm" fw={500} mb={5}>请求方法</Text>
+                  <Badge color={getMethodColor(viewingApi.method)} variant="light" size="sm">
+                    {viewingApi.method || '-'}
+                  </Badge>
+                </Box>
+                <Box style={{ gridColumn: 'span 2' }}>
+                  <Text size="sm" fw={500} mb={5}>路径</Text>
+                  <Text size="sm">{viewingApi.path || '-'}</Text>
                 </Box>
                 <Box>
-                  <Text size="sm" fw={500} mb={5}>URL</Text>
-                  <Text size="sm">{viewingNavbar.url || '-'}</Text>
-                </Box>
-                <Box>
-                  <Text size="sm" fw={500} mb={5}>分组</Text>
-                  <Text size="sm">{viewingNavbar.section || '-'}</Text>
+                  <Text size="sm" fw={500} mb={5}>类型</Text>
+                  <Badge color={getTypeColor(viewingApi.type)} variant="light" size="sm">
+                    {getTypeLabel(viewingApi.type)}
+                  </Badge>
                 </Box>
                 <Box>
                   <Text size="sm" fw={500} mb={5}>状态</Text>
-                  <Text size="sm" c={getStatusColor(viewingNavbar.status)}>
-                    {getStatusLabel(viewingNavbar.status)}
+                  <Text size="sm" c={getStatusColor(viewingApi.status)}>
+                    {getStatusLabel(viewingApi.status)}
                   </Text>
                 </Box>
-                <Box>
-                  <Text size="sm" fw={500} mb={5}>排序</Text>
-                  <Text size="sm">{viewingNavbar.sort ?? '-'}</Text>
-                </Box>
-                <Box>
-                  <Text size="sm" fw={500} mb={5}>颜色</Text>
-                  <Group gap="xs">
-                    {viewingNavbar.color && (
-                      <Box
-                        style={{
-                          width: 16,
-                          height: 16,
-                          borderRadius: 4,
-                          backgroundColor: viewingNavbar.color,
-                          border: '1px solid var(--mantine-color-default-border)',
-                        }}
-                      />
-                    )}
-                    <Text size="sm">{viewingNavbar.color || '-'}</Text>
-                  </Group>
+                <Box style={{ gridColumn: 'span 2' }}>
+                  <Text size="sm" fw={500} mb={5}>描述</Text>
+                  <Text size="sm">{viewingApi.description || '-'}</Text>
                 </Box>
               </SimpleGrid>
 
@@ -909,25 +978,25 @@ const NavbarsPageRender = ({ initialData, labelOptions }: NavbarsProps) => {
                 <Box>
                   <Text size="sm" fw={500} mb={5}>创建人</Text>
                   <Text size="sm">
-                    {viewingNavbar.creator ? (viewingNavbar.creator.nickname || viewingNavbar.creator.username || '-') : '-'}
+                    {viewingApi.creator ? (viewingApi.creator.nickname || viewingApi.creator.username || '-') : '-'}
                   </Text>
                 </Box>
                 <Box>
                   <Text size="sm" fw={500} mb={5}>创建时间</Text>
                   <Text size="sm">
-                    {viewingNavbar.createdAt ? formatTimestamp(viewingNavbar.createdAt) : '-'}
+                    {viewingApi.createdAt ? formatTimestamp(viewingApi.createdAt) : '-'}
                   </Text>
                 </Box>
                 <Box>
                   <Text size="sm" fw={500} mb={5}>更新人</Text>
                   <Text size="sm">
-                    {viewingNavbar.updater ? (viewingNavbar.updater.nickname || viewingNavbar.updater.username || '-') : '-'}
+                    {viewingApi.updater ? (viewingApi.updater.nickname || viewingApi.updater.username || '-') : '-'}
                   </Text>
                 </Box>
                 <Box>
                   <Text size="sm" fw={500} mb={5}>更新时间</Text>
                   <Text size="sm">
-                    {viewingNavbar.updatedAt ? formatTimestamp(viewingNavbar.updatedAt) : '-'}
+                    {viewingApi.updatedAt ? formatTimestamp(viewingApi.updatedAt) : '-'}
                   </Text>
                 </Box>
               </SimpleGrid>
@@ -944,4 +1013,4 @@ const NavbarsPageRender = ({ initialData, labelOptions }: NavbarsProps) => {
   );
 }
 
-export default NavbarsPageRender;
+export default ApiPageRender;

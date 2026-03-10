@@ -35,6 +35,7 @@ import {
 import { IconLayoutSidebarLeftCollapse, IconLayoutSidebarLeftExpand } from '@tabler/icons-react';
 import { useDisclosure } from '@mantine/hooks';
 import { User } from '@/api/my/typings';
+import { listGroupData as HeadDropdownListGroupData } from '@/api/headDropdown/response';
 import { HeaderDropdown } from '@/components/HeaderDropdown/HeaderDropdown';
 import { Logo } from '@/components/Logo/Logo';
 import { useAuth } from '@/contexts/AuthContext/AuthContext';
@@ -77,9 +78,10 @@ interface HeaderMegaMenuProps {
   user: User | null;
   navbarCollapsed?: boolean;
   onNavbarToggle?: () => void;
+  headerDropdownData: HeadDropdownListGroupData;
 }
 
-export function HeaderMegaMenu({ user, navbarCollapsed = false, onNavbarToggle }: HeaderMegaMenuProps) {
+export function HeaderMegaMenu({ user, navbarCollapsed = false, onNavbarToggle, headerDropdownData }: HeaderMegaMenuProps) {
   const [drawerOpened, { toggle: toggleDrawer, close: closeDrawer }] = useDisclosure(false);
   const [linksOpened, { toggle: toggleLinks }] = useDisclosure(false);
   const theme = useMantineTheme();
@@ -193,7 +195,7 @@ export function HeaderMegaMenu({ user, navbarCollapsed = false, onNavbarToggle }
 
           <Group visibleFrom="md" ml="auto">
             {userDisplay ? (
-              <HeaderDropdown user={userDisplay} />
+              <HeaderDropdown user={userDisplay} initialData={headerDropdownData} />
             ) : (
               <>
                 <Link href="/auth/login" passHref>
@@ -245,7 +247,7 @@ export function HeaderMegaMenu({ user, navbarCollapsed = false, onNavbarToggle }
 
           <Group justify="center" grow pb="xl" px="md">
             {userDisplay ? (
-              <HeaderDropdown user={userDisplay} />
+              <HeaderDropdown user={userDisplay} initialData={headerDropdownData} />
             ) : (
               <>
                 <Link  href="/auth/login" passHref>
