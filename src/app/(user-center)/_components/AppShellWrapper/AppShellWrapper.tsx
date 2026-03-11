@@ -1,14 +1,16 @@
 'use client';
 
-import React from 'react';
-import { AppShell, AppShellHeader, AppShellMain, AppShellNavbar } from '@mantine/core';
+import React, { useEffect } from 'react';
+import { AppShell, AppShellHeader, AppShellMain, AppShellNavbar, Center, Loader } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
+import { useRouter } from 'next/navigation';
 import { User } from '@/api/my/typings';
 import { listGroupData as NavbarListGroupData } from '@/api/navbar/response';
 import { listGroupData as HeadDropdownListGroupData } from '@/api/headDropdown/response';
 import { HeaderMegaMenu } from '@/components/HeaderMegaMenu/HeaderMegaMenu';
 import { NavbarSegmented } from '@/components/NavbarSegmented/NavbarSegmented';
 import { NavbarProvider } from '@/contexts/NavbarContext/NavbarContext';
+import { useAuth } from '@/contexts/AuthContext/AuthContext';
 
 interface AppShellWrapperProps {
   navbarData: NavbarListGroupData;
@@ -20,6 +22,22 @@ interface AppShellWrapperProps {
 export function AppShellWrapper({ navbarData, headerDropdownData, children, user }: AppShellWrapperProps) {
   const [mobileOpened, { toggle: toggleMobile }] = useDisclosure();
   const [desktopOpened, { toggle: toggleDesktop }] = useDisclosure(true);
+  const { isAuthenticated, isLoading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      router.replace('/auth/login');
+    }
+  }, [isLoading, isAuthenticated, router]);
+
+  if (isLoading || !isAuthenticated) {
+    return (
+      <Center h="100vh">
+        <Loader />
+      </Center>
+    );
+  }
 
   return (
     <NavbarProvider navbarData={navbarData}>

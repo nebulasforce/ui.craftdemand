@@ -19,6 +19,11 @@ export const DynamicIcon = ({ name, size = 24, ...props }: DynamicIconProps) => 
     setMounted(true);
   }, []);
 
+  // 当 name 为空或未提供时，不渲染任何内容，也不发出警告
+  if (!name) {
+    return null;
+  }
+
   const Icon = TablerIcons[name as keyof typeof TablerIcons] as IconComponent | undefined;
 
   if (!Icon) {

@@ -3,16 +3,62 @@
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { IconChevronDown, IconChevronUp, IconEdit, IconEye, IconPlus, IconSearch, IconTrash, IconX } from '@tabler/icons-react';
+import {
+  IconChevronDown,
+  IconChevronUp,
+  IconEdit,
+  IconEye,
+  IconPlus,
+  IconSearch,
+  IconTrash,
+  IconX,
+} from '@tabler/icons-react';
 import cx from 'clsx';
-import { ActionIcon, Anchor, Box, Breadcrumbs, Button, Checkbox, Collapse, ColorInput, Divider, Flex, FocusTrap, Grid, Group, LoadingOverlay, Modal, NumberInput, Pagination, Paper, ScrollArea, Select, SimpleGrid, Stack, Table, Text, TextInput, Title, Tooltip } from '@mantine/core';
+import {
+  ActionIcon,
+  Anchor,
+  Box,
+  Breadcrumbs,
+  Button,
+  Checkbox,
+  Collapse,
+  ColorInput,
+  Divider,
+  Flex,
+  FocusTrap,
+  Grid,
+  Group,
+  LoadingOverlay,
+  Modal,
+  NumberInput,
+  Pagination,
+  Paper,
+  ScrollArea,
+  Select,
+  SimpleGrid,
+  Stack,
+  Table,
+  Text,
+  TextInput,
+  Title,
+  Tooltip,
+} from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useDisclosure } from '@mantine/hooks';
-import { createNavbar, deleteNavbar, editNavbar, getNavbar, list as navbarList } from '@/api/navbar/api';
-
-import { createNavbarRequest, deleteNavbarRequest, editNavbarRequest } from '@/api/navbar/request';
-import { listData } from '@/api/navbar/response';
-import { Navbar } from '@/api/navbar/typings';
+import {
+  createHeadDropdown,
+  deleteHeadDropdown,
+  editHeadDropdown,
+  getHeadDropdown,
+  list as headDropdownList,
+} from '@/api/headDropdown/api';
+import {
+  createHeadDropdownRequest,
+  deleteHeadDropdownRequest,
+  editHeadDropdownRequest,
+} from '@/api/headDropdown/request';
+import { listData } from '@/api/headDropdown/response';
+import { HeadDropdown } from '@/api/headDropdown/typings';
 import { DeleteConfirm } from '@/components/DeleteConfirm/DeleteConfirm';
 import { DynamicIcon } from '@/components/DynamicIcon';
 import { useNavbar } from '@/contexts/NavbarContext/NavbarContext';
@@ -20,61 +66,26 @@ import notify from '@/utils/notify';
 import { formatTimestamp } from '@/utils/time';
 import classes from './style.module.css';
 
-
-interface NavbarsProps {
+interface HeaderDropdownsProps {
   initialData: listData | null;
-  labelOptions: string[];
-}
-
-interface statusItem {
-  label: string;
-  color: string;
+  /** 分组选项，来自服务端 headDropdown ListGroup 接口 */
+  groupOptions: string[];
 }
 
 interface openAddEditModalParams {
   action: 'add' | 'edit';
-  navbar?: Navbar;
+  item?: HeadDropdown;
 }
-
-// 状态映射
-const statusMap: { [key: number]: statusItem } = {
-  0: { label: '启用', color: 'green' },
-  1: { label: '禁用', color: 'orange' },
-  [-1]: { label: '已删除', color: 'red' },
-};
-
-// 状态选项数据 - 用于下拉选择器
-const statusOptions = Object.entries(statusMap)
-  .filter(([key]) => parseInt(key, 10) >= 0)
-  .map(([value, { label }]) => ({
-    value,
-    label,
-  }));
-
-
-// 获取状态显示文本
-const getStatusLabel = (status: number | string) => {
-  const statusNumber = typeof status === 'string' ? parseInt(status, 10) : status;
-  return statusMap[statusNumber]?.label || '未知';
-};
-
-// 获取状态显示颜色
-const getStatusColor = (status: number | string) => {
-  const statusNumber = typeof status === 'string' ? parseInt(status, 10) : status;
-  return statusMap[statusNumber]?.color || 'gray';
-};
 
 // 定义高级搜索条件接口
 interface AdvancedSearchFilters {
   name: string;
   section: string;
-  status: string;
 }
 
-
-const NavbarsPageRender = ({ initialData, labelOptions }: NavbarsProps) => {
-  // 将 labelOptions 字符串数组转换为 Select 组件需要的格式
-  const sectionOptions = labelOptions.map(item => ({
+const HeaderDropdownsPageRender = ({ initialData, groupOptions }: HeaderDropdownsProps) => {
+  // 将分组选项转换为 Select 组件需要的格式（分组来自服务端 ListGroup 接口）
+  const sectionOptions = groupOptions.map((item) => ({
     value: item,
     label: item,
   }));
@@ -83,15 +94,14 @@ const NavbarsPageRender = ({ initialData, labelOptions }: NavbarsProps) => {
 
   useEffect(() => {
     setSection('System');
-    setActive('Navbars');
+    setActive('HeaderDropdowns');
   }, []);
-
 
   // 面包屑
   const items = [
     { title: '首页', href: '/' },
     { title: '系统' },
-    { title: '导航栏' }
+    { title: '下拉管理' },
   ];
 
   // 基础搜索状态
@@ -104,13 +114,11 @@ const NavbarsPageRender = ({ initialData, labelOptions }: NavbarsProps) => {
     searchKeywordRef.current = searchKeyword;
   }, [searchKeyword]);
 
-
   // 高级搜索状态
   const [advancedSearchOpen, setAdvancedSearchOpen] = useState(false);
   const [advancedFilters, setAdvancedFilters] = useState<AdvancedSearchFilters>({
     name: '',
     section: '',
-    status: '',
   });
 
   // 状态管理
@@ -135,7 +143,7 @@ const NavbarsPageRender = ({ initialData, labelOptions }: NavbarsProps) => {
 
   const toggleRow = (id: string) =>
     setSelection((current) =>
-      current.includes(id) ? current.filter((item) => item !== id) : [...current, id]
+      current.includes(id) ? current.filter((item) => item !== id) : [...current, id],
     );
   const toggleAll = () =>
     setSelection((current) => (current.length === data.length ? [] : data.map((item) => item.id)));
@@ -176,17 +184,11 @@ const NavbarsPageRender = ({ initialData, labelOptions }: NavbarsProps) => {
             return;
           }
 
-          // 状态条件传输值（status code），不传输 label 文本
-          if (key === 'status') {
-            searchParams.status = parseInt(value, 10);
-            return;
-          }
-
           searchParams[key] = value;
         });
       }
 
-      const response = await navbarList(searchParams);
+      const response = await headDropdownList(searchParams);
       if (response.code === 0 && response.data) {
         setPage(currentPage);
         setData(response.data.lists || []);
@@ -221,9 +223,7 @@ const NavbarsPageRender = ({ initialData, labelOptions }: NavbarsProps) => {
           </Text>
         </Table.Td>
         <Table.Td>
-          <Text size="sm">
-            {item.label || '-'}
-          </Text>
+          <Text size="sm">{item.label || '-'}</Text>
         </Table.Td>
         <Table.Td>
           <Tooltip label={item.icon} withArrow>
@@ -241,19 +241,38 @@ const NavbarsPageRender = ({ initialData, labelOptions }: NavbarsProps) => {
           </Text>
         </Table.Td>
         <Table.Td>
-          <Text c={getStatusColor(item.status)}>
-            {getStatusLabel(item.status)}
+          <Text size="sm" lineClamp={1}>
+            {item.rightSection || '-'}
           </Text>
         </Table.Td>
         <Table.Td>
           <ActionIcon.Group>
-            <ActionIcon onClick={() => { openViewDetailModal(item) }} variant="light" size="md" aria-label="查看详情">
+            <ActionIcon
+              onClick={() => {
+                openViewDetailModal(item);
+              }}
+              variant="light"
+              size="md"
+              aria-label="查看详情"
+            >
               <IconEye size={14} stroke={1.5} />
             </ActionIcon>
-            <ActionIcon onClick={() => { openAddEditModal({ action: 'edit', navbar: item }) }} variant="light" size="md" aria-label="编辑">
+            <ActionIcon
+              onClick={() => {
+                openAddEditModal({ action: 'edit', item });
+              }}
+              variant="light"
+              size="md"
+              aria-label="编辑"
+            >
               <IconEdit size={14} stroke={1.5} />
             </ActionIcon>
-            <DeleteConfirm onConfirm={() => { handleDeleteOneNavbar(item) }} itemName={item.name}>
+            <DeleteConfirm
+              onConfirm={() => {
+                handleDeleteOne(item);
+              }}
+              itemName={item.name}
+            >
               <ActionIcon variant="light" size="md" aria-label="删除">
                 <IconTrash size={14} stroke={1.5} />
               </ActionIcon>
@@ -266,9 +285,9 @@ const NavbarsPageRender = ({ initialData, labelOptions }: NavbarsProps) => {
 
   // 处理高级搜索字段变化
   const handleAdvancedFilterChange = (field: keyof AdvancedSearchFilters, value: string) => {
-    setAdvancedFilters(prev => ({
+    setAdvancedFilters((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
   };
 
@@ -277,10 +296,8 @@ const NavbarsPageRender = ({ initialData, labelOptions }: NavbarsProps) => {
     setAdvancedFilters({
       name: '',
       section: '',
-      status: '',
     });
   };
-
 
   // 处理基础搜索输入
   const handleSearchChange = (value: string) => {
@@ -300,25 +317,24 @@ const NavbarsPageRender = ({ initialData, labelOptions }: NavbarsProps) => {
     loadData(1).then();
   };
 
-
   const [addEditAction, setAddEditAction] = useState<'add' | 'edit'>('add');
   const [addEditModalOpened, addEditModalActions] = useDisclosure(false);
-  const [editingNavbar, setEditingNavbar] = useState<Navbar | null>(null);
+  const [editingItem, setEditingItem] = useState<HeadDropdown | null>(null);
 
   // 查看详情相关状态
   const [viewDetailModalOpened, viewDetailModalActions] = useDisclosure(false);
-  const [viewingNavbar, setViewingNavbar] = useState<Navbar | null>(null);
+  const [viewingItem, setViewingItem] = useState<HeadDropdown | null>(null);
 
   // 打开查看详情模态窗口
-  const openViewDetailModal = async (navbar: Navbar) => {
+  const openViewDetailModal = async (item: HeadDropdown) => {
     setLoading(true);
     try {
-      const response = await getNavbar({ id: navbar.id });
+      const response = await getHeadDropdown({ id: item.id });
       if (response.code === 0 && response.data) {
-        setViewingNavbar(response.data);
+        setViewingItem(response.data);
         viewDetailModalActions.open();
       } else {
-        notify(response.message || 'Failed to load navbar details', 'error');
+        notify(response.message || 'Failed to load header dropdown details', 'error');
       }
     } catch (err) {
       if (err instanceof Error) {
@@ -332,24 +348,25 @@ const NavbarsPageRender = ({ initialData, labelOptions }: NavbarsProps) => {
   };
 
   // 打开表单模态窗口
-  const openAddEditModal = ({ action, navbar }: openAddEditModalParams) => {
+  const openAddEditModal = ({ action, item }: openAddEditModalParams) => {
     setAddEditAction(action);
 
-    if (action === 'edit' && navbar) {
-      setEditingNavbar(navbar);
+    if (action === 'edit' && item) {
+      setEditingItem(item);
       addEditForm.setValues({
-        id: navbar.id,
-        name: navbar.name,
-        code: navbar.code,
-        icon: navbar.icon,
-        url: navbar.url,
-        label: navbar.label || '',
-        color: navbar.color || '',
-        sort: navbar.sort || 0,
-        status: navbar.status,
+        id: item.id,
+        name: item.name,
+        code: item.code,
+        icon: item.icon,
+        url: item.url,
+        label: item.label || '',
+        color: item.color || '',
+        sort: item.sort || 0,
+        event: item.event || '',
+        rightSection: item.rightSection || '',
       });
     } else {
-      setEditingNavbar(null);
+      setEditingItem(null);
       addEditForm.setValues({
         id: '',
         name: '',
@@ -359,25 +376,26 @@ const NavbarsPageRender = ({ initialData, labelOptions }: NavbarsProps) => {
         label: '',
         color: '',
         sort: 0,
-        status: 0,
+        event: '',
+        rightSection: '',
       });
     }
 
     addEditModalActions.open();
   };
 
-  const handleDeleteOneNavbar = async (navbar: Navbar) => {
+  const handleDeleteOne = async (item: HeadDropdown) => {
     setLoading(true);
     try {
-      const requestData: deleteNavbarRequest = {
-        ids: [navbar.id],
+      const requestData: deleteHeadDropdownRequest = {
+        ids: [item.id],
       };
-      const response = await deleteNavbar(requestData);
+      const response = await deleteHeadDropdown(requestData);
       if (response.code === 0) {
-        notify('导航栏删除成功', 'success');
+        notify('头部下拉删除成功', 'success');
         await loadData(page);
       } else {
-        notify(response.message || 'Failed to delete the navbar', 'error');
+        notify(response.message || 'Failed to delete the header dropdown', 'error');
       }
     } catch (err) {
       if (err instanceof Error) {
@@ -390,22 +408,22 @@ const NavbarsPageRender = ({ initialData, labelOptions }: NavbarsProps) => {
     }
   };
 
-  // 批量删除选中的导航栏
+  // 批量删除选中项
   const handleDeleteSelected = async () => {
     if (selection.length === 0) {
       return;
     }
     setLoading(true);
     try {
-      const requestData: deleteNavbarRequest = {
+      const requestData: deleteHeadDropdownRequest = {
         ids: selection,
       };
-      const response = await deleteNavbar(requestData);
+      const response = await deleteHeadDropdown(requestData);
       if (response.code === 0) {
-        notify(`成功删除 ${response.data?.count || selection.length} 条导航栏`, 'success');
+        notify(`成功删除 ${response.data?.count || selection.length} 条头部下拉`, 'success');
         await loadData(page);
       } else {
-        notify(response.message || 'Failed to delete the navbars', 'error');
+        notify(response.message || 'Failed to delete the header dropdowns', 'error');
       }
     } catch (err) {
       if (err instanceof Error) {
@@ -420,15 +438,16 @@ const NavbarsPageRender = ({ initialData, labelOptions }: NavbarsProps) => {
 
   const addEditForm = useForm({
     initialValues: {
-      id: editingNavbar?.id || '',
-      name: editingNavbar?.name || '',
-      code: editingNavbar?.code || '',
-      icon: editingNavbar?.icon || '',
-      url: editingNavbar?.url || '',
-      label: editingNavbar?.label || '',
-      color: editingNavbar?.color || '',
-      sort: editingNavbar?.sort || 0,
-      status: editingNavbar?.status ?? 0,
+      id: editingItem?.id || '',
+      name: editingItem?.name || '',
+      code: editingItem?.code || '',
+      icon: editingItem?.icon || '',
+      url: editingItem?.url || '',
+      label: editingItem?.label || '',
+      color: editingItem?.color || '',
+      sort: editingItem?.sort || 0,
+      event: editingItem?.event || '',
+      rightSection: editingItem?.rightSection || '',
     },
     validate: {
       name: (val) => {
@@ -461,12 +480,6 @@ const NavbarsPageRender = ({ initialData, labelOptions }: NavbarsProps) => {
         }
         return null;
       },
-      status: (val) => {
-        if (val === undefined || val === null) {
-          return '此字段为必填项';
-        }
-        return null;
-      },
     },
   });
 
@@ -474,7 +487,7 @@ const NavbarsPageRender = ({ initialData, labelOptions }: NavbarsProps) => {
     if (addEditAction === 'add') {
       setLoading(true);
       try {
-        const formattedData: createNavbarRequest = {
+        const formattedData: createHeadDropdownRequest = {
           name: values.name,
           code: values.code,
           icon: values.icon,
@@ -483,15 +496,16 @@ const NavbarsPageRender = ({ initialData, labelOptions }: NavbarsProps) => {
           label: values.label,
           color: values.color || undefined,
           sort: values.sort,
-          status: values.status,
+          event: values.event || undefined,
+          rightSection: values.rightSection || undefined,
         };
-        const response = await createNavbar(formattedData);
+        const response = await createHeadDropdown(formattedData);
 
         if (response.code === 0) {
-          loadData(page).then()
-          notify('导航栏添加成功', 'success');
+          loadData(page).then();
+          notify('头部下拉添加成功', 'success');
         } else {
-          notify(response.message || 'Failed to add the navbar', 'error');
+          notify(response.message || 'Failed to add the header dropdown', 'error');
         }
       } catch (err) {
         if (err instanceof Error) {
@@ -503,12 +517,13 @@ const NavbarsPageRender = ({ initialData, labelOptions }: NavbarsProps) => {
         setLoading(false);
         addEditModalActions.close();
       }
-
     } else if (addEditAction === 'edit') {
-      if (!editingNavbar) { return; }
+      if (!editingItem) {
+        return;
+      }
       setLoading(true);
       try {
-        const formattedData: editNavbarRequest = {
+        const formattedData: editHeadDropdownRequest = {
           id: values.id,
           name: values.name,
           code: values.code,
@@ -518,15 +533,16 @@ const NavbarsPageRender = ({ initialData, labelOptions }: NavbarsProps) => {
           label: values.label,
           color: values.color || undefined,
           sort: values.sort,
-          status: values.status,
+          event: values.event || undefined,
+          rightSection: values.rightSection || undefined,
         };
-        const response = await editNavbar(formattedData);
+        const response = await editHeadDropdown(formattedData);
 
         if (response.code === 0) {
-          loadData(page).then()
-          notify('导航栏更新成功', 'success');
+          loadData(page).then();
+          notify('头部下拉更新成功', 'success');
         } else {
-          notify(response.message || 'Failed to update the navbar', 'error');
+          notify(response.message || 'Failed to update the header dropdown', 'error');
         }
       } catch (err) {
         if (err instanceof Error) {
@@ -542,7 +558,6 @@ const NavbarsPageRender = ({ initialData, labelOptions }: NavbarsProps) => {
     addEditForm.reset();
   };
 
-
   return (
     <Box>
       {/* 面包屑 */}
@@ -553,18 +568,24 @@ const NavbarsPageRender = ({ initialData, labelOptions }: NavbarsProps) => {
               {item.title}
             </Anchor>
           ) : (
-            <Anchor key={index} role="button" component="span" onClick={() => { }}>
+            <Anchor
+              key={index}
+              role="button"
+              component="span"
+              onClick={() => {
+                }}
+            >
               {item.title}
             </Anchor>
-          )
+          ),
         )}
       </Breadcrumbs>
       <Paper pt="xs" pb="xs">
         {/* 页面容器 - 标题 */}
         <Box mb="md">
-          <Title order={3}>导航栏管理</Title>
+          <Title order={3}>下拉管理</Title>
           <Text size="sm" c="dimmed">
-            高效管理和控制导航栏菜单项。
+            管理头部下拉菜单项及其分组。
           </Text>
         </Box>
         <Divider mb="lg" my="xs" variant="dashed" />
@@ -597,9 +618,7 @@ const NavbarsPageRender = ({ initialData, labelOptions }: NavbarsProps) => {
               variant="ghost"
               size="sm"
               onClick={() => setAdvancedSearchOpen(!advancedSearchOpen)}
-              leftSection={
-                advancedSearchOpen ? <IconChevronUp size={16} /> : <IconChevronDown size={16} />
-              }
+              leftSection={advancedSearchOpen ? <IconChevronUp size={16} /> : <IconChevronDown size={16} />}
               fullWidth
             >
               {advancedSearchOpen ? '隐藏高级搜索' : '高级搜索'}
@@ -628,23 +647,13 @@ const NavbarsPageRender = ({ initialData, labelOptions }: NavbarsProps) => {
                 data={sectionOptions}
                 clearable
               />
-              <Select
-                label="状态"
-                value={advancedFilters.status || null}
-                onChange={(value) => handleAdvancedFilterChange('status', value || '')}
-                placeholder="选择状态"
-                data={statusOptions}
-                clearable
-              />
             </SimpleGrid>
 
             <Group gap="sm" mt="md" justify="flex-end">
               <Button variant="ghost" onClick={resetAdvancedFilters}>
                 重置
               </Button>
-              <Button onClick={handleAdvancedSearch}>
-                应用
-              </Button>
+              <Button onClick={handleAdvancedSearch}>应用</Button>
             </Group>
           </Paper>
         </Collapse>
@@ -655,8 +664,12 @@ const NavbarsPageRender = ({ initialData, labelOptions }: NavbarsProps) => {
             <Group>
               <DeleteConfirm
                 onConfirm={handleDeleteSelected}
-                itemName={selection.length === 1 ? data.find(item => selection.includes(item.id))?.name : `${selection.length} 条导航栏`}
-                title="删除选中的导航栏"
+                itemName={
+                  selection.length === 1
+                    ? data.find((item) => selection.includes(item.id))?.name
+                    : `${selection.length} 条头部下拉`
+                }
+                title="删除选中的头部下拉"
               >
                 <Button
                   variant="danger"
@@ -670,7 +683,7 @@ const NavbarsPageRender = ({ initialData, labelOptions }: NavbarsProps) => {
                 leftSection={<IconPlus size={16} stroke={1.5} />}
                 onClick={() => openAddEditModal({ action: 'add' })}
               >
-                添加导航栏
+                添加头部下拉
               </Button>
             </Group>
           </Flex>
@@ -694,7 +707,7 @@ const NavbarsPageRender = ({ initialData, labelOptions }: NavbarsProps) => {
                     <Table.Th miw={80}>分组</Table.Th>
                     <Table.Th miw={120}>图标</Table.Th>
                     <Table.Th miw={150}>URL</Table.Th>
-                    <Table.Th miw={80}>状态</Table.Th>
+                    <Table.Th miw={120}>快捷键</Table.Th>
                     <Table.Th>操作</Table.Th>
                   </Table.Tr>
                 </Table.Thead>
@@ -735,7 +748,7 @@ const NavbarsPageRender = ({ initialData, labelOptions }: NavbarsProps) => {
       {/*独立的添加/编辑弹窗*/}
       <Modal
         opened={addEditModalOpened}
-        title={addEditAction === 'add' ? '添加导航栏' : '编辑导航栏'}
+        title={addEditAction === 'add' ? '添加头部下拉' : '编辑头部下拉'}
         onClose={addEditModalActions.close}
         size="lg"
       >
@@ -748,33 +761,27 @@ const NavbarsPageRender = ({ initialData, labelOptions }: NavbarsProps) => {
                   required
                   data-autofocus
                   label="名称"
-                  placeholder="输入导航栏名称"
+                  placeholder="输入名称"
                   value={addEditForm.values.name}
-                  onChange={(event) =>
-                    addEditForm.setFieldValue('name', event.currentTarget.value)
-                  }
+                  onChange={(event) => addEditForm.setFieldValue('name', event.currentTarget.value)}
                   error={addEditForm.errors.name}
                   radius="md"
                 />
                 <TextInput
                   required
                   label="编码"
-                  placeholder="输入导航栏编码"
+                  placeholder="输入编码"
                   value={addEditForm.values.code}
-                  onChange={(event) =>
-                    addEditForm.setFieldValue('code', event.currentTarget.value)
-                  }
+                  onChange={(event) => addEditForm.setFieldValue('code', event.currentTarget.value)}
                   error={addEditForm.errors.code}
                   radius="md"
                 />
                 <TextInput
                   required
                   label="图标"
-                  placeholder="输入图标名称，如 IconHome"
+                  placeholder="输入图标名称，如 IconUser"
                   value={addEditForm.values.icon}
-                  onChange={(event) =>
-                    addEditForm.setFieldValue('icon', event.currentTarget.value)
-                  }
+                  onChange={(event) => addEditForm.setFieldValue('icon', event.currentTarget.value)}
                   error={addEditForm.errors.icon}
                   radius="md"
                   rightSection={
@@ -786,11 +793,9 @@ const NavbarsPageRender = ({ initialData, labelOptions }: NavbarsProps) => {
                 <TextInput
                   required
                   label="URL"
-                  placeholder="输入导航栏URL"
+                  placeholder="输入 URL"
                   value={addEditForm.values.url}
-                  onChange={(event) =>
-                    addEditForm.setFieldValue('url', event.currentTarget.value)
-                  }
+                  onChange={(event) => addEditForm.setFieldValue('url', event.currentTarget.value)}
                   error={addEditForm.errors.url}
                   radius="md"
                 />
@@ -802,16 +807,6 @@ const NavbarsPageRender = ({ initialData, labelOptions }: NavbarsProps) => {
                   placeholder="选择分组"
                   data={sectionOptions}
                   error={addEditForm.errors.label}
-                />
-                <Select
-                  label="状态"
-                  required
-                  value={addEditForm.values.status.toString()}
-                  onChange={(value) => addEditForm.setFieldValue('status', parseInt(value || '0', 10))}
-                  placeholder="选择状态"
-                  data={statusOptions}
-                  disabled={loading}
-                  error={addEditForm.errors.status}
                 />
                 <NumberInput
                   label="排序"
@@ -829,11 +824,44 @@ const NavbarsPageRender = ({ initialData, labelOptions }: NavbarsProps) => {
                   value={addEditForm.values.color}
                   onChange={(value) => addEditForm.setFieldValue('color', value)}
                   format="hex"
-                  swatches={['#2e2e2e', '#868e96', '#fa5252', '#e64980', '#be4bdb', '#7950f2', '#4c6ef5', '#228be6', '#15aabf', '#12b886', '#40c057', '#82c91e', '#fab005', '#fd7e14']}
+                  swatches={[
+                    '#2e2e2e',
+                    '#868e96',
+                    '#fa5252',
+                    '#e64980',
+                    '#be4bdb',
+                    '#7950f2',
+                    '#4c6ef5',
+                    '#228be6',
+                    '#15aabf',
+                    '#12b886',
+                    '#40c057',
+                    '#82c91e',
+                    '#fab005',
+                    '#fd7e14',
+                  ]}
+                />
+                <TextInput
+                  label="事件标识"
+                  placeholder="如 logout"
+                  value={addEditForm.values.event}
+                  onChange={(event) => addEditForm.setFieldValue('event', event.currentTarget.value)}
+                  radius="md"
+                />
+                <TextInput
+                  label="快捷键（逗号分隔）"
+                  placeholder="例如 Ctrl,K 或 Cmd,K"
+                  value={addEditForm.values.rightSection}
+                  onChange={(event) =>
+                    addEditForm.setFieldValue('rightSection', event.currentTarget.value)
+                  }
+                  radius="md"
                 />
               </SimpleGrid>
               <Flex justify="flex-end" gap="sm" mt="lg">
-                <Button type="submit" disabled={loading}>保存</Button>
+                <Button type="submit" disabled={loading}>
+                  保存
+                </Button>
               </Flex>
             </form>
           </FocusTrap>
@@ -843,66 +871,86 @@ const NavbarsPageRender = ({ initialData, labelOptions }: NavbarsProps) => {
       {/*查看详情弹窗*/}
       <Modal
         opened={viewDetailModalOpened}
-        title="导航栏详情"
+        title="头部下拉详情"
         onClose={viewDetailModalActions.close}
         size="lg"
       >
         <Box pos="relative">
           <LoadingOverlay visible={loading} />
-          {viewingNavbar && (
+          {viewingItem && (
             <Stack gap="md">
               <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                 <Box>
-                  <Text size="sm" fw={500} mb={5}>名称</Text>
-                  <Text size="sm">{viewingNavbar.name || '-'}</Text>
+                  <Text size="sm" fw={500} mb={5}>
+                    名称
+                  </Text>
+                  <Text size="sm">{viewingItem.name || '-'}</Text>
                 </Box>
                 <Box>
-                  <Text size="sm" fw={500} mb={5}>编码</Text>
-                  <Text size="sm">{viewingNavbar.code || '-'}</Text>
+                  <Text size="sm" fw={500} mb={5}>
+                    编码
+                  </Text>
+                  <Text size="sm">{viewingItem.code || '-'}</Text>
                 </Box>
                 <Box>
-                  <Text size="sm" fw={500} mb={5}>图标</Text>
+                  <Text size="sm" fw={500} mb={5}>
+                    图标
+                  </Text>
                   <Group gap="xs">
-                    {viewingNavbar.icon && (
-                      <DynamicIcon name={viewingNavbar.icon} size={18} stroke={1.5} />
+                    {viewingItem.icon && (
+                      <DynamicIcon name={viewingItem.icon} size={18} stroke={1.5} />
                     )}
-                    <Text size="sm">{viewingNavbar.icon || '-'}</Text>
+                    <Text size="sm">{viewingItem.icon || '-'}</Text>
                   </Group>
                 </Box>
                 <Box>
-                  <Text size="sm" fw={500} mb={5}>URL</Text>
-                  <Text size="sm">{viewingNavbar.url || '-'}</Text>
-                </Box>
-                <Box>
-                  <Text size="sm" fw={500} mb={5}>分组</Text>
-                  <Text size="sm">{viewingNavbar.section || '-'}</Text>
-                </Box>
-                <Box>
-                  <Text size="sm" fw={500} mb={5}>状态</Text>
-                  <Text size="sm" c={getStatusColor(viewingNavbar.status)}>
-                    {getStatusLabel(viewingNavbar.status)}
+                  <Text size="sm" fw={500} mb={5}>
+                    URL
                   </Text>
+                  <Text size="sm">{viewingItem.url || '-'}</Text>
                 </Box>
                 <Box>
-                  <Text size="sm" fw={500} mb={5}>排序</Text>
-                  <Text size="sm">{viewingNavbar.sort ?? '-'}</Text>
+                  <Text size="sm" fw={500} mb={5}>
+                    分组
+                  </Text>
+                  <Text size="sm">{viewingItem.section || '-'}</Text>
                 </Box>
                 <Box>
-                  <Text size="sm" fw={500} mb={5}>颜色</Text>
+                  <Text size="sm" fw={500} mb={5}>
+                    排序
+                  </Text>
+                  <Text size="sm">{viewingItem.sort ?? '-'}</Text>
+                </Box>
+                <Box>
+                  <Text size="sm" fw={500} mb={5}>
+                    颜色
+                  </Text>
                   <Group gap="xs">
-                    {viewingNavbar.color && (
+                    {viewingItem.color && (
                       <Box
                         style={{
                           width: 16,
                           height: 16,
                           borderRadius: 4,
-                          backgroundColor: viewingNavbar.color,
+                          backgroundColor: viewingItem.color,
                           border: '1px solid var(--mantine-color-default-border)',
                         }}
                       />
                     )}
-                    <Text size="sm">{viewingNavbar.color || '-'}</Text>
+                    <Text size="sm">{viewingItem.color || '-'}</Text>
                   </Group>
+                </Box>
+                <Box>
+                  <Text size="sm" fw={500} mb={5}>
+                    事件标识
+                  </Text>
+                  <Text size="sm">{viewingItem.event || '-'}</Text>
+                </Box>
+                <Box>
+                  <Text size="sm" fw={500} mb={5}>
+                    快捷键
+                  </Text>
+                  <Text size="sm">{viewingItem.rightSection || '-'}</Text>
                 </Box>
               </SimpleGrid>
 
@@ -910,27 +958,43 @@ const NavbarsPageRender = ({ initialData, labelOptions }: NavbarsProps) => {
 
               <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                 <Box>
-                  <Text size="sm" fw={500} mb={5}>创建人</Text>
+                  <Text size="sm" fw={500} mb={5}>
+                    创建人
+                  </Text>
                   <Text size="sm">
-                    {viewingNavbar.creator ? (viewingNavbar.creator.nickname || viewingNavbar.creator.username || '-') : '-'}
+                    {viewingItem.creator
+                      ? viewingItem.creator.nickname ||
+                        viewingItem.creator.username ||
+                        '-'
+                      : '-'}
                   </Text>
                 </Box>
                 <Box>
-                  <Text size="sm" fw={500} mb={5}>创建时间</Text>
+                  <Text size="sm" fw={500} mb={5}>
+                    创建时间
+                  </Text>
                   <Text size="sm">
-                    {viewingNavbar.createdAt ? formatTimestamp(viewingNavbar.createdAt) : '-'}
+                    {viewingItem.createdAt ? formatTimestamp(viewingItem.createdAt) : '-'}
                   </Text>
                 </Box>
                 <Box>
-                  <Text size="sm" fw={500} mb={5}>更新人</Text>
+                  <Text size="sm" fw={500} mb={5}>
+                    更新人
+                  </Text>
                   <Text size="sm">
-                    {viewingNavbar.updater ? (viewingNavbar.updater.nickname || viewingNavbar.updater.username || '-') : '-'}
+                    {viewingItem.updater
+                      ? viewingItem.updater.nickname ||
+                        viewingItem.updater.username ||
+                        '-'
+                      : '-'}
                   </Text>
                 </Box>
                 <Box>
-                  <Text size="sm" fw={500} mb={5}>更新时间</Text>
+                  <Text size="sm" fw={500} mb={5}>
+                    更新时间
+                  </Text>
                   <Text size="sm">
-                    {viewingNavbar.updatedAt ? formatTimestamp(viewingNavbar.updatedAt) : '-'}
+                    {viewingItem.updatedAt ? formatTimestamp(viewingItem.updatedAt) : '-'}
                   </Text>
                 </Box>
               </SimpleGrid>
@@ -942,9 +1006,9 @@ const NavbarsPageRender = ({ initialData, labelOptions }: NavbarsProps) => {
           )}
         </Box>
       </Modal>
-
     </Box>
   );
-}
+};
 
-export default NavbarsPageRender;
+export default HeaderDropdownsPageRender;
+

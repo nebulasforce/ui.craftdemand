@@ -15,11 +15,43 @@
 
 .top {
   height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .navbarMain {
   flex: 1;
   margin-top: var(--mantine-spacing-xl);
+  overflow-y: auto;
+  padding-right: calc(var(--mantine-spacing-xs) / 2);
+}
+
+/* 默认隐藏滚动条，仅在悬停时显示 */
+.navbarMain {
+  scrollbar-width: none; /* Firefox */
+}
+
+.navbarMain::-webkit-scrollbar {
+  width: 0; /* Chrome, Safari */
+  height: 0;
+}
+
+.navbarMain:hover {
+  scrollbar-width: thin; /* Firefox */
+}
+
+.navbarMain:hover::-webkit-scrollbar {
+  width: 6px;
+}
+
+.navbarMain:hover::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.navbarMain:hover::-webkit-scrollbar-thumb {
+  background-color: rgba(148, 163, 184, 0.7); /* 类似 gray-400 */
+  border-radius: 999px;
 }
 
 .title {

@@ -1,3 +1,13 @@
+export interface Creator {
+  username: string;
+  nickname: string;
+}
+
+export interface Updater {
+  username: string;
+  nickname: string;
+}
+
 export interface HeadDropdownWithOutId {
   name: string;
   code: string;
@@ -8,4 +18,13 @@ export interface HeadDropdownWithOutId {
   rightSection: string;
   label: string;
   sort: number;
+}
+
+export interface HeadDropdown extends HeadDropdownWithOutId {
+  id: string;
+  section: string;
+  creator?: Creator;
+  createdAt?: number;
+  updater?: Updater;
+  updatedAt?: number;
 }
