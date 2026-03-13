@@ -679,28 +679,28 @@ const NotificationsPageRender = ({ initialCustomMessageData, initialSystemMessag
           {viewingMessage && (
             <Stack gap="md">
               <Box mb="md">
-                <Text size="sm" fw={500} mb={5}>标题</Text>
+                <Text size="sm" fw={600} mb={5}>标题</Text>
                 <Text size="sm">
                   {viewingMessage.title || '-'}
                 </Text>
               </Box>
               
               <Box mb="md">
-                <Text size="sm" fw={500} mb={5}>状态</Text>
+                <Text size="sm" fw={600} mb={5}>状态</Text>
                 <Text size="sm" c={getReadStatusColor((viewingMessage as any).readStatus ?? viewingMessage.status)}>
                   {getReadStatusLabel((viewingMessage as any).readStatus ?? viewingMessage.status)}
                 </Text>
               </Box>
 
               <Box mb="md">
-                <Text size="sm" fw={500} mb={5}>内容</Text>
+                <Text size="sm" fw={600} mb={5}>内容</Text>
                 <Text size="sm" style={{ whiteSpace: 'pre-wrap' }}>
                   {viewingMessage.content || '-'}
                 </Text>
               </Box>
 
               <Box mb="md">
-                <Text size="sm" fw={500} mb={5}>发送人</Text>
+                <Text size="sm" fw={600} mb={5}>发送人</Text>
                 <Text size="sm">
                   {viewingMessage.creator?.nickname || viewingMessage.creator?.username || '-'}
                 </Text>
@@ -708,7 +708,7 @@ const NotificationsPageRender = ({ initialCustomMessageData, initialSystemMessag
 
               {((viewingMessage as any).publishTime || viewingMessage.createdAt) && (
                 <Box mb="md">
-                  <Text size="sm" fw={500} mb={5}>发布时间</Text>
+                  <Text size="sm" fw={600} mb={5}>发布时间</Text>
                   <Text size="sm">
                     {formatTimestamp((viewingMessage as any).publishTime || viewingMessage.createdAt!)}
                   </Text>

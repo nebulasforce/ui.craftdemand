@@ -914,14 +914,14 @@ const MessagesPageRender =  ({ initialData, initialAccountList = [] }:MessagesPr
           {viewingMessage && (
             <Stack gap="md">
               <Box mb="md">
-                <Text size="sm" fw={500} mb={5}>标题</Text>
+                <Text size="sm" fw={600} mb={5}>标题</Text>
                 <Text size="sm">
                   {viewingMessage.title || '-'}
                 </Text>
               </Box>
               
               <Box mb="md">
-                <Text size="sm" fw={500} mb={5}>类型</Text>
+                <Text size="sm" fw={600} mb={5}>类型</Text>
                 <Text size="sm">
                   {getTypeLabel(viewingMessage.type)}
                 </Text>
@@ -962,7 +962,7 @@ const MessagesPageRender =  ({ initialData, initialAccountList = [] }:MessagesPr
 
                 return (
                   <Box mb="md">
-                    <Text size="sm" fw={500} mb={5}>用户</Text>
+                    <Text size="sm" fw={600} mb={5}>用户</Text>
                     <Text size="sm">
                       {selectedUsers.length > 0 ? (
                         selectedUsers.map((u: any, index: number) => (
@@ -980,7 +980,7 @@ const MessagesPageRender =  ({ initialData, initialAccountList = [] }:MessagesPr
               })()}
 
               <Box mb="md">
-                <Text size="sm" fw={500} mb={5}>内容</Text>
+                <Text size="sm" fw={600} mb={5}>内容</Text>
                 <Text size="sm" style={{ whiteSpace: 'pre-wrap' }}>
                   {viewingMessage.content || '-'}
                 </Text>

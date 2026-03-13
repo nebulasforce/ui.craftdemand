@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
@@ -8,6 +8,7 @@ import {
   IconChevronUp,
   IconEdit,
   IconEye,
+  IconMinus,
   IconPlus,
   IconSearch,
   IconTrash,
@@ -22,7 +23,6 @@ import {
   Button,
   Checkbox,
   Collapse,
-  Grid,
   Divider,
   Flex,
   FocusTrap,
@@ -40,38 +40,35 @@ import {
   Text,
   TextInput,
   Title,
-  Tooltip,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useDisclosure } from '@mantine/hooks';
 import {
-  createMenu,
-  deleteMenu,
-  editMenu,
-  getMenu,
-  list as menuListApi,
-} from '@/api/menu/api';
+  createRole,
+  deleteRole,
+  editRole,
+  getRole,
+  list as roleListApi,
+  listAll as roleListAllApi,
+} from '@/api/role/api';
 import {
-  createMenuRequest,
-  deleteMenuRequest,
-  editMenuRequest,
-} from '@/api/menu/request';
-import { listData } from '@/api/menu/response';
-import { Menu } from '@/api/menu/typings';
+  createRoleRequest,
+  deleteRoleRequest,
+  editRoleRequest,
+} from '@/api/role/request';
+import { listAllData, listData } from '@/api/role/response';
+import { Role } from '@/api/role/typings';
 import { DeleteConfirm } from '@/components/DeleteConfirm/DeleteConfirm';
-import { DynamicIcon } from '@/components/DynamicIcon';
 import { useNavbar } from '@/contexts/NavbarContext/NavbarContext';
-import { TreeTable } from '@/components/TreeTable/TreeTable';
 import notify from '@/utils/notify';
-import { formatTimestamp } from '@/utils/time';
 import classes from './style.module.css';
 
-interface MenuPageRenderProps {
+interface RolesPageRenderProps {
   initialData: listData | null;
 }
 
-type MenuNode = Menu & {
-  children?: MenuNode[];
+type RoleNode = Role & {
+  children?: RoleNode[];
 };
 
 interface StatusItem {
@@ -81,7 +78,7 @@ interface StatusItem {
 
 interface OpenAddEditModalParams {
   action: 'add' | 'edit';
-  menu?: Menu;
+  role?: Role;
 }
 
 interface AdvancedSearchFilters {
@@ -109,19 +106,19 @@ const getStatusColor = (status: number | string) => {
   return statusMap[n]?.color ?? 'gray';
 };
 
-const MenuPageRender = ({ initialData }: MenuPageRenderProps) => {
+const RolesPageRender = ({ initialData }: RolesPageRenderProps) => {
   const { setActive, setSection } = useNavbar();
   const router = useRouter();
 
   useEffect(() => {
     setSection('System');
-    setActive('Menu');
-  }, []);
+    setActive('Roles');
+  }, [setActive, setSection]);
 
   const items = [
     { title: '首页', href: '/' },
     { title: '系统' },
-    { title: '菜单管理' },
+    { title: '角色管理' },
   ];
 
   const [searchKeyword, setSearchKeyword] = useState('');
@@ -138,15 +135,18 @@ const MenuPageRender = ({ initialData }: MenuPageRenderProps) => {
     status: '',
   });
 
-  const [data, setData] = useState<MenuNode[]>(
-    (initialData?.lists as MenuNode[]) ?? []
+  const [data, setData] = useState<RoleNode[]>(
+    (initialData?.lists as RoleNode[]) ?? []
   );
   const [page, setPage] = useState(initialData?.page ?? 1);
   const [pageSize] = useState(initialData?.pageSize ?? 10);
   const [count, setCount] = useState(initialData?.count ?? 0);
+  const [totalPage, setTotalPage] = useState(initialData?.totalPage ?? 0);
   const [loading, setLoading] = useState(false);
   const [selection, setSelection] = useState<string[]>([]);
-  const [totalPage, setTotalPage] = useState(initialData?.totalPage ?? 0);
+  const [expandedIds, setExpandedIds] = useState<string[]>([]);
+
+  const [allRoles, setAllRoles] = useState<listAllData>([]);
 
   useEffect(() => {
     const searchParams = new URLSearchParams(window.location.search);
@@ -157,6 +157,19 @@ const MenuPageRender = ({ initialData }: MenuPageRenderProps) => {
     }
     router.push(`?${searchParams.toString()}`, { scroll: false });
   }, [page, router]);
+
+  const loadAllRoles = async () => {
+    try {
+      const response = await roleListAllApi();
+      if (response.code === 0 && response.data) {
+        setAllRoles(response.data);
+      } else {
+        notify(response.message ?? '加载角色列表失败', 'error');
+      }
+    } catch {
+      notify('连接服务失败', 'error');
+    }
+  };
 
   const loadData = async (newPage?: number) => {
     const currentPage = newPage ?? page;
@@ -176,10 +189,10 @@ const MenuPageRender = ({ initialData }: MenuPageRenderProps) => {
           searchParams.status = parseInt(advancedFilters.status, 10);
         }
       }
-      const response = await menuListApi(searchParams);
+      const response = await roleListApi(searchParams);
       if (response.code === 0 && response.data) {
         setPage(currentPage);
-        setData((response.data.lists as MenuNode[]) ?? []);
+        setData((response.data.lists as RoleNode[]) ?? []);
         setTotalPage(response.data.totalPage ?? 0);
         setCount(response.data.count ?? 0);
         setSelection([]);
@@ -221,20 +234,60 @@ const MenuPageRender = ({ initialData }: MenuPageRenderProps) => {
 
   const [addEditAction, setAddEditAction] = useState<'add' | 'edit'>('add');
   const [addEditModalOpened, addEditModalActions] = useDisclosure(false);
-  const [editingMenu, setEditingMenu] = useState<Menu | null>(null);
+  const [editingRole, setEditingRole] = useState<Role | null>(null);
 
   const [viewDetailModalOpened, viewDetailModalActions] = useDisclosure(false);
-  const [viewingMenu, setViewingMenu] = useState<Menu | null>(null);
+  const [viewingRole, setViewingRole] = useState<Role | null>(null);
 
-  const openViewDetailModal = async (menu: Menu) => {
+  const toggleRowSelection = (id: string) =>
+    setSelection((current) =>
+      current.includes(id)
+        ? current.filter((x) => x !== id)
+        : [...current, id]
+    );
+
+  const toggleAll = () => {
+    if (selection.length === data.length) {
+      setSelection([]);
+    } else {
+      setSelection(data.map((item) => item.id));
+    }
+  };
+
+  const toggleExpand = (id: string) =>
+    setExpandedIds((current) =>
+      current.includes(id) ? current.filter((x) => x !== id) : [...current, id]
+    );
+
+  const calculateDisplayRange = () => {
+    const start = (page - 1) * pageSize + 1;
+    const end = Math.min(page * pageSize, count);
+    return `显示 ${start}-${end} 条，共 ${count} 条`;
+  };
+
+  const flattenRolesForSelect = (roles: RoleNode[], level = 0): { value: string; label: string }[] =>
+    roles.flatMap((role) => [
+      {
+        value: role.id,
+        label: `${'— '.repeat(level)}${role.name}`,
+      },
+      ...(role.children ? flattenRolesForSelect(role.children, level + 1) : []),
+    ]);
+
+  const parentOptions = useMemo(() => {
+    if (!allRoles || allRoles.length === 0) return [];
+    return flattenRolesForSelect(allRoles as RoleNode[]);
+  }, [allRoles]);
+
+  const openViewDetailModal = async (role: Role) => {
     setLoading(true);
     try {
-      const response = await getMenu({ id: menu.id });
+      const response = await getRole({ id: role.id });
       if (response.code === 0 && response.data) {
-        setViewingMenu(response.data);
+        setViewingRole(response.data);
         viewDetailModalActions.open();
       } else {
-        notify(response.message ?? '获取菜单详情失败', 'error');
+        notify(response.message ?? '获取角色详情失败', 'error');
       }
     } catch (err) {
       notify(err instanceof Error ? err.message : 'Internal Error', 'error');
@@ -243,29 +296,25 @@ const MenuPageRender = ({ initialData }: MenuPageRenderProps) => {
     }
   };
 
-  const openAddEditModal = ({ action, menu }: OpenAddEditModalParams) => {
+  const openAddEditModal = async ({ action, role }: OpenAddEditModalParams) => {
     setAddEditAction(action);
-    if (action === 'edit' && menu) {
-      setEditingMenu(menu);
+    await loadAllRoles();
+
+    if (action === 'edit' && role) {
+      setEditingRole(role);
       addEditForm.setValues({
-        id: menu.id,
-        name: menu.name,
-        icon: menu.icon,
-        url: menu.url,
-        route: menu.route ?? '',
-        target: menu.target ?? '',
-        sort: menu.sort ?? 0,
-        status: menu.status,
+        id: role.id,
+        name: role.name,
+        parentId: role.parentId || '',
+        sort: role.sort ?? 0,
+        status: role.status ?? 0,
       });
     } else {
-      setEditingMenu(null);
+      setEditingRole(null);
       addEditForm.setValues({
         id: '',
         name: '',
-        icon: '',
-        url: '',
-        route: '',
-        target: '',
+        parentId: '',
         sort: 0,
         status: 0,
       });
@@ -273,13 +322,13 @@ const MenuPageRender = ({ initialData }: MenuPageRenderProps) => {
     addEditModalActions.open();
   };
 
-  const handleDeleteOne = async (item: Menu) => {
+  const handleDeleteOne = async (item: Role) => {
     setLoading(true);
     try {
-      const req: deleteMenuRequest = { ids: [item.id] };
-      const response = await deleteMenu(req);
+      const req: deleteRoleRequest = { ids: [item.id] };
+      const response = await deleteRole(req);
       if (response.code === 0) {
-        notify('菜单删除成功', 'success');
+        notify('角色删除成功', 'success');
         await loadData(page);
       } else {
         notify(response.message ?? '删除失败', 'error');
@@ -295,10 +344,10 @@ const MenuPageRender = ({ initialData }: MenuPageRenderProps) => {
     if (selection.length === 0) return;
     setLoading(true);
     try {
-      const req: deleteMenuRequest = { ids: selection };
-      const response = await deleteMenu(req);
+      const req: deleteRoleRequest = { ids: selection };
+      const response = await deleteRole(req);
       if (response.code === 0) {
-        notify(`成功删除 ${response.data?.count ?? selection.length} 条菜单`, 'success');
+        notify(`成功删除 ${response.data?.count ?? selection.length} 条角色`, 'success');
         await loadData(page);
       } else {
         notify(response.message ?? '删除失败', 'error');
@@ -314,17 +363,12 @@ const MenuPageRender = ({ initialData }: MenuPageRenderProps) => {
     initialValues: {
       id: '',
       name: '',
-      icon: '',
-      url: '',
-      route: '',
-      target: '',
+      parentId: '',
       sort: 0,
       status: 0,
     },
     validate: {
       name: (val) => (!val?.trim() ? '此字段为必填项' : null),
-      icon: (val) => (!val?.trim() ? '此字段为必填项' : null),
-      url: (val) => (!val?.trim() ? '此字段为必填项' : null),
       status: (val) =>
         val === undefined || val === null ? '此字段为必填项' : null,
     },
@@ -334,18 +378,15 @@ const MenuPageRender = ({ initialData }: MenuPageRenderProps) => {
     if (addEditAction === 'add') {
       setLoading(true);
       try {
-        const payload: createMenuRequest = {
+        const payload: createRoleRequest = {
           name: values.name,
-          icon: values.icon,
-          url: values.url,
-          route: values.route || undefined,
-          target: values.target || undefined,
+          parentId: values.parentId || undefined,
           sort: values.sort,
           status: values.status,
         };
-        const response = await createMenu(payload);
+        const response = await createRole(payload);
         if (response.code === 0) {
-          notify('菜单添加成功', 'success');
+          notify('角色添加成功', 'success');
           loadData(page);
           addEditModalActions.close();
         } else {
@@ -356,22 +397,19 @@ const MenuPageRender = ({ initialData }: MenuPageRenderProps) => {
       } finally {
         setLoading(false);
       }
-    } else if (editingMenu) {
+    } else if (editingRole) {
       setLoading(true);
       try {
-        const payload: editMenuRequest = {
+        const payload: editRoleRequest = {
           id: values.id,
           name: values.name,
-          icon: values.icon,
-          url: values.url,
-          route: values.route || undefined,
-          target: values.target || undefined,
+          parentId: values.parentId || undefined,
           sort: values.sort,
           status: values.status,
         };
-        const response = await editMenu(payload);
+        const response = await editRole(payload);
         if (response.code === 0) {
-          notify('菜单更新成功', 'success');
+          notify('角色更新成功', 'success');
           loadData(page);
           addEditModalActions.close();
         } else {
@@ -385,6 +423,116 @@ const MenuPageRender = ({ initialData }: MenuPageRenderProps) => {
     }
     addEditForm.reset();
   };
+
+  const renderRows = () => {
+    const rows: React.ReactNode[] = [];
+
+    const traverse = (role: RoleNode, level: number) => {
+      const hasChildren = !!role.children && role.children.length > 0;
+      const isExpanded = expandedIds.includes(role.id);
+      const selected = selection.includes(role.id);
+
+      rows.push(
+        <Table.Tr
+          key={role.id}
+          className={cx({ [classes.rowSelected]: selected })}
+        >
+          <Table.Td w={40}>
+            <Checkbox
+              checked={selection.includes(role.id)}
+              onChange={() => toggleRowSelection(role.id)}
+            />
+          </Table.Td>
+          <Table.Td>
+            <Group gap="xs">
+              {hasChildren && (
+                <ActionIcon
+                  variant="subtle"
+                  size="sm"
+                  aria-label={isExpanded ? '折叠' : '展开'}
+                  onClick={() => toggleExpand(role.id)}
+                >
+                  {isExpanded ? (
+                    <IconMinus size={14} stroke={1.5} />
+                  ) : (
+                    <IconPlus size={14} stroke={1.5} />
+                  )}
+                </ActionIcon>
+              )}
+              <Text size="sm" fw={level === 0 ? 500 : 400}>
+                {`${'— '.repeat(level)}${role.name}`}
+              </Text>
+            </Group>
+          </Table.Td>
+          <Table.Td>
+            <Text size="sm">{role.sort ?? 0}</Text>
+          </Table.Td>
+          <Table.Td>
+            <Text size="sm" c={getStatusColor(role.status ?? 0)}>
+              {getStatusLabel(role.status ?? 0)}
+            </Text>
+          </Table.Td>
+          <Table.Td>
+            <ActionIcon.Group>
+              <ActionIcon
+                onClick={() => openViewDetailModal(role)}
+                variant="light"
+                size="md"
+                aria-label="查看详情"
+              >
+                <IconEye size={14} stroke={1.5} />
+              </ActionIcon>
+              <ActionIcon
+                onClick={() => openAddEditModal({ action: 'edit', role })}
+                variant="light"
+                size="md"
+                aria-label="编辑"
+              >
+                <IconEdit size={14} stroke={1.5} />
+              </ActionIcon>
+              <DeleteConfirm onConfirm={() => handleDeleteOne(role)} itemName={role.name}>
+                <ActionIcon variant="light" size="md" aria-label="删除">
+                  <IconTrash size={14} stroke={1.5} />
+                </ActionIcon>
+              </DeleteConfirm>
+            </ActionIcon.Group>
+          </Table.Td>
+        </Table.Tr>
+      );
+
+      if (hasChildren && isExpanded) {
+        role.children!.forEach((child) => traverse(child as RoleNode, level + 1));
+      }
+    };
+
+    data.forEach((role) => traverse(role, 0));
+
+    if (rows.length === 0) {
+      return (
+        <Table.Tr>
+          <Table.Td colSpan={5} align="center">
+            <Text c="dimmed">暂无数据</Text>
+          </Table.Td>
+        </Table.Tr>
+      );
+    }
+
+    return rows;
+  };
+
+  const parentNameMap = useMemo(() => {
+    const map = new Map<string, string>();
+    const traverse = (roles: RoleNode[]) => {
+      roles.forEach((r) => {
+        map.set(r.id, r.name);
+        if (r.children && r.children.length > 0) {
+          traverse(r.children as RoleNode[]);
+        }
+      });
+    };
+    traverse((allRoles as RoleNode[]) || []);
+    return map;
+  }, [allRoles]);
 
   return (
     <Box>
@@ -403,62 +551,55 @@ const MenuPageRender = ({ initialData }: MenuPageRenderProps) => {
       </Breadcrumbs>
       <Paper pt="xs" pb="xs">
         <Box mb="md">
-          <Title order={3}>菜单管理</Title>
+          <Title order={3}>角色管理</Title>
           <Text size="sm" c="dimmed">
-            管理侧边栏与前端菜单项。
+            管理系统角色及其层级结构。
           </Text>
         </Box>
         <Divider mb="lg" my="xs" variant="dashed" />
 
-        <Grid>
-          <Grid.Col span={{ base: 12, sm: 9 }} mb="xs">
-            {/* 基础搜索组件 */}
-            <TextInput
-              placeholder="搜索名称等..."
-              value={searchKeyword}
-              onChange={(e) => handleSearchChange(e.target.value)}
-              leftSection={<IconSearch size={16} stroke={1.5} />}
-              rightSection={
-                searchKeyword && (
-                  <ActionIcon
-                    variant="default"
-                    size="sm"
-                    onClick={() => handleSearchChange('')}
-                    aria-label="Clear search"
-                  >
-                    <IconX size={14} stroke={1.5} />
-                  </ActionIcon>
-                )
-              }
-              radius="md"
-            />
-          </Grid.Col>
-          <Grid.Col span={{ base: 12, sm: 3 }} mb="xs">
-            {/* 高级搜索切换按钮 */}
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setAdvancedSearchOpen(!advancedSearchOpen)}
-              leftSection={
-                advancedSearchOpen ? (
-                  <IconChevronUp size={16} />
-                ) : (
-                  <IconChevronDown size={16} />
-                )
-              }
-              fullWidth
-            >
-              {advancedSearchOpen ? '隐藏高级搜索' : '高级搜索'}
-            </Button>
-          </Grid.Col>
-        </Grid>
+        <SimpleGrid cols={{ base: 1, sm: 2 }} mb="xs">
+          <TextInput
+            placeholder="搜索角色名称..."
+            value={searchKeyword}
+            onChange={(e) => handleSearchChange(e.target.value)}
+            leftSection={<IconSearch size={16} stroke={1.5} />}
+            rightSection={
+              searchKeyword && (
+                <ActionIcon
+                  variant="default"
+                  size="sm"
+                  onClick={() => handleSearchChange('')}
+                  aria-label="Clear search"
+                >
+                  <IconX size={14} stroke={1.5} />
+                </ActionIcon>
+              )
+            }
+            radius="md"
+          />
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setAdvancedSearchOpen(!advancedSearchOpen)}
+            leftSection={
+              advancedSearchOpen ? (
+                <IconChevronUp size={16} />
+              ) : (
+                <IconChevronDown size={16} />
+              )
+            }
+          >
+            {advancedSearchOpen ? '隐藏高级搜索' : '高级搜索'}
+          </Button>
+        </SimpleGrid>
 
         <Collapse in={advancedSearchOpen} transitionDuration={200}>
           <Paper p="md" mb="lg" withBorder>
             <Title order={5} mb="md">
               高级筛选
             </Title>
-            <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="md">
+            <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="md">
               <TextInput
                 label="名称"
                 value={advancedFilters.name}
@@ -494,9 +635,9 @@ const MenuPageRender = ({ initialData }: MenuPageRenderProps) => {
                 itemName={
                   selection.length === 1
                     ? data.find((item) => selection.includes(item.id))?.name
-                    : `${selection.length} 条菜单`
+                    : `${selection.length} 条角色`
                 }
-                title="删除选中的菜单"
+                title="删除选中的角色"
               >
                 <Button
                   variant="danger"
@@ -510,31 +651,56 @@ const MenuPageRender = ({ initialData }: MenuPageRenderProps) => {
                 leftSection={<IconPlus size={16} stroke={1.5} />}
                 onClick={() => openAddEditModal({ action: 'add' })}
               >
-                添加菜单
+                添加角色
               </Button>
             </Group>
           </Flex>
         </SimpleGrid>
 
-        <TreeTable
-          data={data}
-          loading={loading}
-          page={page}
-          pageSize={pageSize}
-          totalPage={totalPage}
-          count={count}
-          selection={selection}
-          onSelectionChange={setSelection}
-          onPageChange={handlePageChange}
-          onView={openViewDetailModal}
-          onEdit={(menu) => openAddEditModal({ action: 'edit', menu })}
-          onDelete={handleDeleteOne}
-        />
+        <Box pos="relative">
+          <LoadingOverlay visible={loading} />
+          <ScrollArea>
+            <Table verticalSpacing="xs" highlightOnHover>
+              <Table.Thead>
+                <Table.Tr>
+                  <Table.Th w={40}>
+                    <Checkbox
+                      onChange={toggleAll}
+                      checked={selection.length === data.length && data.length > 0}
+                      indeterminate={
+                        selection.length > 0 && selection.length < data.length
+                      }
+                    />
+                  </Table.Th>
+                  <Table.Th miw={120}>名称</Table.Th>
+                  <Table.Th miw={80}>排序</Table.Th>
+                  <Table.Th miw={80}>状态</Table.Th>
+                  <Table.Th>操作</Table.Th>
+                </Table.Tr>
+              </Table.Thead>
+              <Table.Tbody>{renderRows()}</Table.Tbody>
+            </Table>
+          </ScrollArea>
+          <Flex justify="space-between" align="center" mt="md">
+            <Text size="sm" c="dimmed">
+              {calculateDisplayRange()}
+            </Text>
+            <Pagination
+              total={totalPage || 0}
+              withEdges
+              value={page}
+              size="sm"
+              onChange={handlePageChange}
+              siblings={2}
+              disabled={loading || totalPage <= 1}
+            />
+          </Flex>
+        </Box>
       </Paper>
 
       <Modal
         opened={addEditModalOpened}
-        title={addEditAction === 'add' ? '添加菜单' : '编辑菜单'}
+        title={addEditAction === 'add' ? '添加角色' : '编辑角色'}
         onClose={addEditModalActions.close}
         size="lg"
       >
@@ -547,7 +713,7 @@ const MenuPageRender = ({ initialData }: MenuPageRenderProps) => {
                   required
                   data-autofocus
                   label="名称"
-                  placeholder="输入菜单名称"
+                  placeholder="输入角色名称"
                   value={addEditForm.values.name}
                   onChange={(e) =>
                     addEditForm.setFieldValue('name', e.currentTarget.value)
@@ -555,54 +721,16 @@ const MenuPageRender = ({ initialData }: MenuPageRenderProps) => {
                   error={addEditForm.errors.name}
                   radius="md"
                 />
-                <TextInput
-                  required
-                  label="图标"
-                  placeholder="如 IconHome"
-                  value={addEditForm.values.icon}
-                  onChange={(e) =>
-                    addEditForm.setFieldValue('icon', e.currentTarget.value)
+                <Select
+                  label="上级角色"
+                  placeholder="选择上级角色（可选）"
+                  value={addEditForm.values.parentId || null}
+                  onChange={(v) =>
+                    addEditForm.setFieldValue('parentId', v ?? '')
                   }
-                  error={addEditForm.errors.icon}
-                  radius="md"
-                  rightSection={
-                    addEditForm.values.icon ? (
-                      <DynamicIcon
-                        name={addEditForm.values.icon}
-                        size={18}
-                        stroke={1.5}
-                      />
-                    ) : null
-                  }
-                />
-                <TextInput
-                  required
-                  label="URL"
-                  placeholder="菜单链接"
-                  value={addEditForm.values.url}
-                  onChange={(e) =>
-                    addEditForm.setFieldValue('url', e.currentTarget.value)
-                  }
-                  error={addEditForm.errors.url}
-                  radius="md"
-                />
-                <TextInput
-                  label="路由"
-                  placeholder="路由 path"
-                  value={addEditForm.values.route}
-                  onChange={(e) =>
-                    addEditForm.setFieldValue('route', e.currentTarget.value)
-                  }
-                  radius="md"
-                />
-                <TextInput
-                  label="目标"
-                  placeholder="如 _blank"
-                  value={addEditForm.values.target}
-                  onChange={(e) =>
-                    addEditForm.setFieldValue('target', e.currentTarget.value)
-                  }
-                  radius="md"
+                  data={parentOptions}
+                  clearable
+                  searchable
                 />
                 <NumberInput
                   label="排序"
@@ -642,113 +770,43 @@ const MenuPageRender = ({ initialData }: MenuPageRenderProps) => {
 
       <Modal
         opened={viewDetailModalOpened}
-        title="菜单详情"
+        title="角色详情"
         onClose={viewDetailModalActions.close}
         size="lg"
       >
         <Box pos="relative">
           <LoadingOverlay visible={loading} />
-          {viewingMenu && (
+          {viewingRole && (
             <Stack gap="md">
               <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                 <Box>
                   <Text size="sm" fw={600} mb={5}>
                     名称
                   </Text>
-                  <Text size="sm">{viewingMenu.name ?? '-'}</Text>
+                  <Text size="sm">{viewingRole.name ?? '-'}</Text>
                 </Box>
                 <Box>
                   <Text size="sm" fw={600} mb={5}>
-                    图标
+                    上级角色
                   </Text>
-                  <Group gap="xs">
-                    {viewingMenu.icon && (
-                      <DynamicIcon
-                        name={viewingMenu.icon}
-                        size={18}
-                        stroke={1.5}
-                      />
-                    )}
-                    <Text size="sm">{viewingMenu.icon ?? '-'}</Text>
-                  </Group>
-                </Box>
-                <Box>
-                  <Text size="sm" fw={600} mb={5}>
-                    URL
+                  <Text size="sm">
+                    {viewingRole.parentId
+                      ? parentNameMap.get(viewingRole.parentId) ?? '-'
+                      : '-'}
                   </Text>
-                  <Text size="sm">{viewingMenu.url ?? '-'}</Text>
-                </Box>
-                <Box>
-                  <Text size="sm" fw={600} mb={5}>
-                    路由
-                  </Text>
-                  <Text size="sm">{viewingMenu.route ?? '-'}</Text>
-                </Box>
-                <Box>
-                  <Text size="sm" fw={600} mb={5}>
-                    目标
-                  </Text>
-                  <Text size="sm">{viewingMenu.target ?? '-'}</Text>
                 </Box>
                 <Box>
                   <Text size="sm" fw={600} mb={5}>
                     排序
                   </Text>
-                  <Text size="sm">{viewingMenu.sort ?? '-'}</Text>
+                  <Text size="sm">{viewingRole.sort ?? '-'}</Text>
                 </Box>
                 <Box>
                   <Text size="sm" fw={600} mb={5}>
                     状态
                   </Text>
-                  <Text size="sm" c={getStatusColor(viewingMenu.status)}>
-                    {getStatusLabel(viewingMenu.status)}
-                  </Text>
-                </Box>
-              </SimpleGrid>
-              <Divider my="sm" />
-              <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
-                <Box>
-                  <Text size="sm" fw={600} mb={5}>
-                    创建人
-                  </Text>
-                  <Text size="sm">
-                    {viewingMenu.creator
-                      ? viewingMenu.creator.nickname ||
-                        viewingMenu.creator.username ||
-                        '-'
-                      : '-'}
-                  </Text>
-                </Box>
-                <Box>
-                  <Text size="sm" fw={600} mb={5}>
-                    创建时间
-                  </Text>
-                  <Text size="sm">
-                    {viewingMenu.createdAt
-                      ? formatTimestamp(viewingMenu.createdAt)
-                      : '-'}
-                  </Text>
-                </Box>
-                <Box>
-                  <Text size="sm" fw={600} mb={5}>
-                    更新人
-                  </Text>
-                  <Text size="sm">
-                    {viewingMenu.updater
-                      ? viewingMenu.updater.nickname ||
-                        viewingMenu.updater.username ||
-                        '-'
-                      : '-'}
-                  </Text>
-                </Box>
-                <Box>
-                  <Text size="sm" fw={600} mb={5}>
-                    更新时间
-                  </Text>
-                  <Text size="sm">
-                    {viewingMenu.updatedAt
-                      ? formatTimestamp(viewingMenu.updatedAt)
-                      : '-'}
+                  <Text size="sm" c={getStatusColor(viewingRole.status ?? 0)}>
+                    {getStatusLabel(viewingRole.status ?? 0)}
                   </Text>
                 </Box>
               </SimpleGrid>
@@ -763,4 +821,5 @@ const MenuPageRender = ({ initialData }: MenuPageRenderProps) => {
   );
 };
 
-export default MenuPageRender;
+export default RolesPageRender;
+

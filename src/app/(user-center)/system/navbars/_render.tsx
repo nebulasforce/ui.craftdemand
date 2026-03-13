@@ -853,15 +853,15 @@ const NavbarsPageRender = ({ initialData, labelOptions }: NavbarsProps) => {
             <Stack gap="md">
               <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                 <Box>
-                  <Text size="sm" fw={500} mb={5}>名称</Text>
+                  <Text size="sm" fw={600} mb={5}>名称</Text>
                   <Text size="sm">{viewingNavbar.name || '-'}</Text>
                 </Box>
                 <Box>
-                  <Text size="sm" fw={500} mb={5}>编码</Text>
+                  <Text size="sm" fw={600} mb={5}>编码</Text>
                   <Text size="sm">{viewingNavbar.code || '-'}</Text>
                 </Box>
                 <Box>
-                  <Text size="sm" fw={500} mb={5}>图标</Text>
+                  <Text size="sm" fw={600} mb={5}>图标</Text>
                   <Group gap="xs">
                     {viewingNavbar.icon && (
                       <DynamicIcon name={viewingNavbar.icon} size={18} stroke={1.5} />
@@ -870,25 +870,25 @@ const NavbarsPageRender = ({ initialData, labelOptions }: NavbarsProps) => {
                   </Group>
                 </Box>
                 <Box>
-                  <Text size="sm" fw={500} mb={5}>URL</Text>
+                  <Text size="sm" fw={600} mb={5}>URL</Text>
                   <Text size="sm">{viewingNavbar.url || '-'}</Text>
                 </Box>
                 <Box>
-                  <Text size="sm" fw={500} mb={5}>分组</Text>
+                  <Text size="sm" fw={600} mb={5}>分组</Text>
                   <Text size="sm">{viewingNavbar.section || '-'}</Text>
                 </Box>
                 <Box>
-                  <Text size="sm" fw={500} mb={5}>状态</Text>
+                  <Text size="sm" fw={600} mb={5}>状态</Text>
                   <Text size="sm" c={getStatusColor(viewingNavbar.status)}>
                     {getStatusLabel(viewingNavbar.status)}
                   </Text>
                 </Box>
                 <Box>
-                  <Text size="sm" fw={500} mb={5}>排序</Text>
+                  <Text size="sm" fw={600} mb={5}>排序</Text>
                   <Text size="sm">{viewingNavbar.sort ?? '-'}</Text>
                 </Box>
                 <Box>
-                  <Text size="sm" fw={500} mb={5}>颜色</Text>
+                  <Text size="sm" fw={600} mb={5}>颜色</Text>
                   <Group gap="xs">
                     {viewingNavbar.color && (
                       <Box
@@ -910,25 +910,25 @@ const NavbarsPageRender = ({ initialData, labelOptions }: NavbarsProps) => {
 
               <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                 <Box>
-                  <Text size="sm" fw={500} mb={5}>创建人</Text>
+                  <Text size="sm" fw={600} mb={5}>创建人</Text>
                   <Text size="sm">
                     {viewingNavbar.creator ? (viewingNavbar.creator.nickname || viewingNavbar.creator.username || '-') : '-'}
                   </Text>
                 </Box>
                 <Box>
-                  <Text size="sm" fw={500} mb={5}>创建时间</Text>
+                  <Text size="sm" fw={600} mb={5}>创建时间</Text>
                   <Text size="sm">
                     {viewingNavbar.createdAt ? formatTimestamp(viewingNavbar.createdAt) : '-'}
                   </Text>
                 </Box>
                 <Box>
-                  <Text size="sm" fw={500} mb={5}>更新人</Text>
+                  <Text size="sm" fw={600} mb={5}>更新人</Text>
                   <Text size="sm">
                     {viewingNavbar.updater ? (viewingNavbar.updater.nickname || viewingNavbar.updater.username || '-') : '-'}
                   </Text>
                 </Box>
                 <Box>
-                  <Text size="sm" fw={500} mb={5}>更新时间</Text>
+                  <Text size="sm" fw={600} mb={5}>更新时间</Text>
                   <Text size="sm">
                     {viewingNavbar.updatedAt ? formatTimestamp(viewingNavbar.updatedAt) : '-'}
                   </Text>

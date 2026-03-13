@@ -881,19 +881,19 @@ const HeaderDropdownsPageRender = ({ initialData, groupOptions }: HeaderDropdown
             <Stack gap="md">
               <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                 <Box>
-                  <Text size="sm" fw={500} mb={5}>
+                  <Text size="sm" fw={600} mb={5}>
                     名称
                   </Text>
                   <Text size="sm">{viewingItem.name || '-'}</Text>
                 </Box>
                 <Box>
-                  <Text size="sm" fw={500} mb={5}>
+                  <Text size="sm" fw={600} mb={5}>
                     编码
                   </Text>
                   <Text size="sm">{viewingItem.code || '-'}</Text>
                 </Box>
                 <Box>
-                  <Text size="sm" fw={500} mb={5}>
+                  <Text size="sm" fw={600} mb={5}>
                     图标
                   </Text>
                   <Group gap="xs">
@@ -904,25 +904,25 @@ const HeaderDropdownsPageRender = ({ initialData, groupOptions }: HeaderDropdown
                   </Group>
                 </Box>
                 <Box>
-                  <Text size="sm" fw={500} mb={5}>
+                  <Text size="sm" fw={600} mb={5}>
                     URL
                   </Text>
                   <Text size="sm">{viewingItem.url || '-'}</Text>
                 </Box>
                 <Box>
-                  <Text size="sm" fw={500} mb={5}>
+                  <Text size="sm" fw={600} mb={5}>
                     分组
                   </Text>
                   <Text size="sm">{viewingItem.section || '-'}</Text>
                 </Box>
                 <Box>
-                  <Text size="sm" fw={500} mb={5}>
+                  <Text size="sm" fw={600} mb={5}>
                     排序
                   </Text>
                   <Text size="sm">{viewingItem.sort ?? '-'}</Text>
                 </Box>
                 <Box>
-                  <Text size="sm" fw={500} mb={5}>
+                  <Text size="sm" fw={600} mb={5}>
                     颜色
                   </Text>
                   <Group gap="xs">
@@ -941,13 +941,13 @@ const HeaderDropdownsPageRender = ({ initialData, groupOptions }: HeaderDropdown
                   </Group>
                 </Box>
                 <Box>
-                  <Text size="sm" fw={500} mb={5}>
+                  <Text size="sm" fw={600} mb={5}>
                     事件标识
                   </Text>
                   <Text size="sm">{viewingItem.event || '-'}</Text>
                 </Box>
                 <Box>
-                  <Text size="sm" fw={500} mb={5}>
+                  <Text size="sm" fw={600} mb={5}>
                     快捷键
                   </Text>
                   <Text size="sm">{viewingItem.rightSection || '-'}</Text>
@@ -958,7 +958,7 @@ const HeaderDropdownsPageRender = ({ initialData, groupOptions }: HeaderDropdown
 
               <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                 <Box>
-                  <Text size="sm" fw={500} mb={5}>
+                  <Text size="sm" fw={600} mb={5}>
                     创建人
                   </Text>
                   <Text size="sm">
@@ -970,7 +970,7 @@ const HeaderDropdownsPageRender = ({ initialData, groupOptions }: HeaderDropdown
                   </Text>
                 </Box>
                 <Box>
-                  <Text size="sm" fw={500} mb={5}>
+                  <Text size="sm" fw={600} mb={5}>
                     创建时间
                   </Text>
                   <Text size="sm">
@@ -978,7 +978,7 @@ const HeaderDropdownsPageRender = ({ initialData, groupOptions }: HeaderDropdown
                   </Text>
                 </Box>
                 <Box>
-                  <Text size="sm" fw={500} mb={5}>
+                  <Text size="sm" fw={600} mb={5}>
                     更新人
                   </Text>
                   <Text size="sm">
@@ -990,7 +990,7 @@ const HeaderDropdownsPageRender = ({ initialData, groupOptions }: HeaderDropdown
                   </Text>
                 </Box>
                 <Box>
-                  <Text size="sm" fw={500} mb={5}>
+                  <Text size="sm" fw={600} mb={5}>
                     更新时间
                   </Text>
                   <Text size="sm">

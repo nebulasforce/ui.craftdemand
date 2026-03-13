@@ -937,37 +937,37 @@ const ApiPageRender = ({ initialData, initialModules }: ApiProps) => {
             <Stack gap="md">
               <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                 <Box>
-                  <Text size="sm" fw={500} mb={5}>名称</Text>
+                  <Text size="sm" fw={600} mb={5}>名称</Text>
                   <Text size="sm">{viewingApi.name || '-'}</Text>
                 </Box>
                 <Box>
-                  <Text size="sm" fw={500} mb={5}>模块</Text>
+                  <Text size="sm" fw={600} mb={5}>模块</Text>
                   <Text size="sm">{viewingApi.module || '-'}</Text>
                 </Box>
                 <Box>
-                  <Text size="sm" fw={500} mb={5}>请求方法</Text>
+                  <Text size="sm" fw={600} mb={5}>请求方法</Text>
                   <Badge color={getMethodColor(viewingApi.method)} variant="light" size="sm">
                     {viewingApi.method || '-'}
                   </Badge>
                 </Box>
                 <Box style={{ gridColumn: 'span 2' }}>
-                  <Text size="sm" fw={500} mb={5}>路径</Text>
+                  <Text size="sm" fw={600} mb={5}>路径</Text>
                   <Text size="sm">{viewingApi.path || '-'}</Text>
                 </Box>
                 <Box>
-                  <Text size="sm" fw={500} mb={5}>类型</Text>
+                  <Text size="sm" fw={600} mb={5}>类型</Text>
                   <Badge color={getTypeColor(viewingApi.type)} variant="light" size="sm">
                     {getTypeLabel(viewingApi.type)}
                   </Badge>
                 </Box>
                 <Box>
-                  <Text size="sm" fw={500} mb={5}>状态</Text>
+                  <Text size="sm" fw={600} mb={5}>状态</Text>
                   <Text size="sm" c={getStatusColor(viewingApi.status)}>
                     {getStatusLabel(viewingApi.status)}
                   </Text>
                 </Box>
                 <Box style={{ gridColumn: 'span 2' }}>
-                  <Text size="sm" fw={500} mb={5}>描述</Text>
+                  <Text size="sm" fw={600} mb={5}>描述</Text>
                   <Text size="sm">{viewingApi.description || '-'}</Text>
                 </Box>
               </SimpleGrid>
@@ -976,25 +976,25 @@ const ApiPageRender = ({ initialData, initialModules }: ApiProps) => {
 
               <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                 <Box>
-                  <Text size="sm" fw={500} mb={5}>创建人</Text>
+                  <Text size="sm" fw={600} mb={5}>创建人</Text>
                   <Text size="sm">
                     {viewingApi.creator ? (viewingApi.creator.nickname || viewingApi.creator.username || '-') : '-'}
                   </Text>
                 </Box>
                 <Box>
-                  <Text size="sm" fw={500} mb={5}>创建时间</Text>
+                  <Text size="sm" fw={600} mb={5}>创建时间</Text>
                   <Text size="sm">
                     {viewingApi.createdAt ? formatTimestamp(viewingApi.createdAt) : '-'}
                   </Text>
                 </Box>
                 <Box>
-                  <Text size="sm" fw={500} mb={5}>更新人</Text>
+                  <Text size="sm" fw={600} mb={5}>更新人</Text>
                   <Text size="sm">
                     {viewingApi.updater ? (viewingApi.updater.nickname || viewingApi.updater.username || '-') : '-'}
                   </Text>
                 </Box>
                 <Box>
-                  <Text size="sm" fw={500} mb={5}>更新时间</Text>
+                  <Text size="sm" fw={600} mb={5}>更新时间</Text>
                   <Text size="sm">
                     {viewingApi.updatedAt ? formatTimestamp(viewingApi.updatedAt) : '-'}
                   </Text>
