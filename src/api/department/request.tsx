@@ -2,11 +2,11 @@ import { Pager, Query } from '@/api/common/request';
 
 export interface listRequest extends Query, Pager {}
 
-export interface getRoleRequest extends Query {
+export interface getDepartmentRequest extends Query {
   id: string;
 }
 
-export interface createRoleRequest {
+export interface createDepartmentRequest {
   name: string;
   code?: string;
   parentId?: string;
@@ -14,13 +14,12 @@ export interface createRoleRequest {
   status?: number;
 }
 
-export interface editRoleRequest extends createRoleRequest {
+export interface editDepartmentRequest extends createDepartmentRequest {
   id: string;
 }
 
-export interface deleteRoleRequest {
+export interface deleteDepartmentRequest {
   ids: string[];
 }
 
 export interface listAllRequest extends Query {}
-

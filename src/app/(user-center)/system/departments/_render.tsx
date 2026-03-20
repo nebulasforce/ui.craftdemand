@@ -8,8 +8,6 @@ import {
   IconChevronUp,
   IconEdit,
   IconEye,
-  IconLock,
-  IconMenu2,
   IconMinus,
   IconPlus,
   IconSearch,
@@ -43,36 +41,35 @@ import {
   Text,
   TextInput,
   Title,
-  Tooltip,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useDisclosure } from '@mantine/hooks';
 import {
-  createRole,
-  deleteRole,
-  editRole,
-  getRole,
-  list as roleListApi,
-  listAll as roleListAllApi,
-} from '@/api/role/api';
+  createDepartment,
+  deleteDepartment,
+  editDepartment,
+  getDepartment,
+  list as departmentListApi,
+  listAll as departmentListAllApi,
+} from '@/api/department/api';
 import {
-  createRoleRequest,
-  deleteRoleRequest,
-  editRoleRequest,
-} from '@/api/role/request';
-import { listAllData, listData } from '@/api/role/response';
-import { Role } from '@/api/role/typings';
+  createDepartmentRequest,
+  deleteDepartmentRequest,
+  editDepartmentRequest,
+} from '@/api/department/request';
+import { listAllData, listData } from '@/api/department/response';
+import { Department } from '@/api/department/typings';
 import { DeleteConfirm } from '@/components/DeleteConfirm/DeleteConfirm';
 import { useNavbar } from '@/contexts/NavbarContext/NavbarContext';
 import notify from '@/utils/notify';
 import classes from './style.module.css';
 
-interface RolesPageRenderProps {
+interface DepartmentsPageRenderProps {
   initialData: listData | null;
 }
 
-type RoleNode = Role & {
-  children?: RoleNode[];
+type DepartmentNode = Department & {
+  children?: DepartmentNode[];
 };
 
 interface StatusItem {
@@ -82,7 +79,7 @@ interface StatusItem {
 
 interface OpenAddEditModalParams {
   action: 'add' | 'edit';
-  role?: Role;
+  department?: Department;
 }
 
 interface AdvancedSearchFilters {
@@ -110,19 +107,19 @@ const getStatusColor = (status: number | string) => {
   return statusMap[n]?.color ?? 'gray';
 };
 
-const RolesPageRender = ({ initialData }: RolesPageRenderProps) => {
+const DepartmentsPageRender = ({ initialData }: DepartmentsPageRenderProps) => {
   const { setActive, setSection } = useNavbar();
   const router = useRouter();
 
   useEffect(() => {
     setSection('System');
-    setActive('Roles');
+    setActive('Departments');
   }, [setActive, setSection]);
 
   const items = [
     { title: '首页', href: '/' },
     { title: '系统' },
-    { title: '角色管理' },
+    { title: '部门管理' },
   ];
 
   const [searchKeyword, setSearchKeyword] = useState('');
@@ -139,8 +136,8 @@ const RolesPageRender = ({ initialData }: RolesPageRenderProps) => {
     status: '',
   });
 
-  const [data, setData] = useState<RoleNode[]>(
-    (initialData?.lists as RoleNode[]) ?? []
+  const [data, setData] = useState<DepartmentNode[]>(
+    (initialData?.lists as DepartmentNode[]) ?? []
   );
   const [page, setPage] = useState(initialData?.page ?? 1);
   const [pageSize] = useState(initialData?.pageSize ?? 10);
@@ -150,7 +147,7 @@ const RolesPageRender = ({ initialData }: RolesPageRenderProps) => {
   const [selection, setSelection] = useState<string[]>([]);
   const [expandedIds, setExpandedIds] = useState<string[]>([]);
 
-  const [allRoles, setAllRoles] = useState<listAllData>([]);
+  const [allDepartments, setAllDepartments] = useState<listAllData>([]);
 
   useEffect(() => {
     const searchParams = new URLSearchParams(window.location.search);
@@ -162,13 +159,13 @@ const RolesPageRender = ({ initialData }: RolesPageRenderProps) => {
     router.push(`?${searchParams.toString()}`, { scroll: false });
   }, [page, router]);
 
-  const loadAllRoles = async () => {
+  const loadAllDepartments = async () => {
     try {
-      const response = await roleListAllApi();
+      const response = await departmentListAllApi();
       if (response.code === 0 && response.data) {
-        setAllRoles(response.data);
+        setAllDepartments(response.data);
       } else {
-        notify(response.message ?? '加载角色列表失败', 'error');
+        notify(response.message ?? '加载部门列表失败', 'error');
       }
     } catch {
       notify('连接服务失败', 'error');
@@ -193,10 +190,10 @@ const RolesPageRender = ({ initialData }: RolesPageRenderProps) => {
           searchParams.status = parseInt(advancedFilters.status, 10);
         }
       }
-      const response = await roleListApi(searchParams);
+      const response = await departmentListApi(searchParams);
       if (response.code === 0 && response.data) {
         setPage(currentPage);
-        setData((response.data.lists as RoleNode[]) ?? []);
+        setData((response.data.lists as DepartmentNode[]) ?? []);
         setTotalPage(response.data.totalPage ?? 0);
         setCount(response.data.count ?? 0);
         setSelection([]);
@@ -238,12 +235,10 @@ const RolesPageRender = ({ initialData }: RolesPageRenderProps) => {
 
   const [addEditAction, setAddEditAction] = useState<'add' | 'edit'>('add');
   const [addEditModalOpened, addEditModalActions] = useDisclosure(false);
-  const [editingRole, setEditingRole] = useState<Role | null>(null);
+  const [editingDepartment, setEditingDepartment] = useState<Department | null>(null);
 
   const [viewDetailModalOpened, viewDetailModalActions] = useDisclosure(false);
-  const [viewingRole, setViewingRole] = useState<Role | null>(null);
-
-  const [devModalOpened, devModalActions] = useDisclosure(false);
+  const [viewingDepartment, setViewingDepartment] = useState<Department | null>(null);
 
   const toggleRowSelection = (id: string) =>
     setSelection((current) =>
@@ -271,29 +266,34 @@ const RolesPageRender = ({ initialData }: RolesPageRenderProps) => {
     return `显示 ${start}-${end} 条，共 ${count} 条`;
   };
 
-  const flattenRolesForSelect = (roles: RoleNode[], level = 0): { value: string; label: string }[] =>
-    roles.flatMap((role) => [
+  const flattenDepartmentsForSelect = (
+    departments: DepartmentNode[],
+    level = 0
+  ): { value: string; label: string }[] =>
+    departments.flatMap((dept) => [
       {
-        value: role.id,
-        label: `${'— '.repeat(level)}${role.name}`,
+        value: dept.id,
+        label: `${'— '.repeat(level)}${dept.name}`,
       },
-      ...(role.children ? flattenRolesForSelect(role.children, level + 1) : []),
+      ...(dept.children
+        ? flattenDepartmentsForSelect(dept.children as DepartmentNode[], level + 1)
+        : []),
     ]);
 
   const parentOptions = useMemo(() => {
-    if (!allRoles || allRoles.length === 0) return [];
-    return flattenRolesForSelect(allRoles as RoleNode[]);
-  }, [allRoles]);
+    if (!allDepartments || allDepartments.length === 0) return [];
+    return flattenDepartmentsForSelect(allDepartments as DepartmentNode[]);
+  }, [allDepartments]);
 
-  const openViewDetailModal = async (role: Role) => {
+  const openViewDetailModal = async (department: Department) => {
     setLoading(true);
     try {
-      const response = await getRole({ id: role.id });
+      const response = await getDepartment({ id: department.id });
       if (response.code === 0 && response.data) {
-        setViewingRole(response.data);
+        setViewingDepartment(response.data);
         viewDetailModalActions.open();
       } else {
-        notify(response.message ?? '获取角色详情失败', 'error');
+        notify(response.message ?? '获取部门详情失败', 'error');
       }
     } catch (err) {
       notify(err instanceof Error ? err.message : 'Internal Error', 'error');
@@ -302,22 +302,22 @@ const RolesPageRender = ({ initialData }: RolesPageRenderProps) => {
     }
   };
 
-  const openAddEditModal = async ({ action, role }: OpenAddEditModalParams) => {
+  const openAddEditModal = async ({ action, department }: OpenAddEditModalParams) => {
     setAddEditAction(action);
-    await loadAllRoles();
+    await loadAllDepartments();
 
-    if (action === 'edit' && role) {
-      setEditingRole(role);
+    if (action === 'edit' && department) {
+      setEditingDepartment(department);
       addEditForm.setValues({
-        id: role.id,
-        name: role.name,
-        code: role.code ?? '',
-        parentId: role.parentId || '',
-        sort: role.sort ?? 0,
-        status: role.status ?? 0,
+        id: department.id,
+        name: department.name,
+        code: department.code ?? '',
+        parentId: department.parentId || '',
+        sort: department.sort ?? 0,
+        status: department.status ?? 0,
       });
     } else {
-      setEditingRole(null);
+      setEditingDepartment(null);
       addEditForm.setValues({
         id: '',
         name: '',
@@ -330,13 +330,13 @@ const RolesPageRender = ({ initialData }: RolesPageRenderProps) => {
     addEditModalActions.open();
   };
 
-  const handleDeleteOne = async (item: Role) => {
+  const handleDeleteOne = async (item: Department) => {
     setLoading(true);
     try {
-      const req: deleteRoleRequest = { ids: [item.id] };
-      const response = await deleteRole(req);
+      const req: deleteDepartmentRequest = { ids: [item.id] };
+      const response = await deleteDepartment(req);
       if (response.code === 0) {
-        notify('角色删除成功', 'success');
+        notify('部门删除成功', 'success');
         await loadData(page);
       } else {
         notify(response.message ?? '删除失败', 'error');
@@ -352,16 +352,19 @@ const RolesPageRender = ({ initialData }: RolesPageRenderProps) => {
     if (selection.length === 0) return;
     setLoading(true);
     try {
-      const req: deleteRoleRequest = { ids: selection };
-      const response = await deleteRole(req);
+      const req: deleteDepartmentRequest = { ids: selection };
+      const response = await deleteDepartment(req);
       if (response.code === 0) {
-        notify(`成功删除 ${response.data?.count ?? selection.length} 条角色`, 'success');
+        notify(
+          `成功删除 ${response.data?.count ?? selection.length} 条部门`,
+          'success'
+        );
         await loadData(page);
       } else {
         notify(response.message ?? '删除失败', 'error');
       }
-    } catch (err) {
-      notify(err instanceof Error ? err.message : 'Internal Error', 'error');
+    } catch {
+      notify('连接服务失败', 'error');
     } finally {
       setLoading(false);
     }
@@ -387,16 +390,16 @@ const RolesPageRender = ({ initialData }: RolesPageRenderProps) => {
     if (addEditAction === 'add') {
       setLoading(true);
       try {
-        const payload: createRoleRequest = {
+        const payload: createDepartmentRequest = {
           name: values.name,
           code: values.code || undefined,
           parentId: values.parentId || undefined,
           sort: values.sort,
           status: values.status,
         };
-        const response = await createRole(payload);
+        const response = await createDepartment(payload);
         if (response.code === 0) {
-          notify('角色添加成功', 'success');
+          notify('部门添加成功', 'success');
           loadData(page);
           addEditModalActions.close();
         } else {
@@ -407,10 +410,10 @@ const RolesPageRender = ({ initialData }: RolesPageRenderProps) => {
       } finally {
         setLoading(false);
       }
-    } else if (editingRole) {
+    } else if (editingDepartment) {
       setLoading(true);
       try {
-        const payload: editRoleRequest = {
+        const payload: editDepartmentRequest = {
           id: values.id,
           name: values.name,
           code: values.code || undefined,
@@ -418,9 +421,9 @@ const RolesPageRender = ({ initialData }: RolesPageRenderProps) => {
           sort: values.sort,
           status: values.status,
         };
-        const response = await editRole(payload);
+        const response = await editDepartment(payload);
         if (response.code === 0) {
-          notify('角色更新成功', 'success');
+          notify('部门更新成功', 'success');
           loadData(page);
           addEditModalActions.close();
         } else {
@@ -438,20 +441,20 @@ const RolesPageRender = ({ initialData }: RolesPageRenderProps) => {
   const renderRows = () => {
     const rows: React.ReactNode[] = [];
 
-    const traverse = (role: RoleNode, level: number) => {
-      const hasChildren = !!role.children && role.children.length > 0;
-      const isExpanded = expandedIds.includes(role.id);
-      const selected = selection.includes(role.id);
+    const traverse = (department: DepartmentNode, level: number) => {
+      const hasChildren = !!department.children && department.children.length > 0;
+      const isExpanded = expandedIds.includes(department.id);
+      const selected = selection.includes(department.id);
 
       rows.push(
         <Table.Tr
-          key={role.id}
+          key={department.id}
           className={cx({ [classes.rowSelected]: selected })}
         >
           <Table.Td w={40}>
             <Checkbox
-              checked={selection.includes(role.id)}
-              onChange={() => toggleRowSelection(role.id)}
+              checked={selection.includes(department.id)}
+              onChange={() => toggleRowSelection(department.id)}
             />
           </Table.Td>
           <Table.Td>
@@ -461,7 +464,7 @@ const RolesPageRender = ({ initialData }: RolesPageRenderProps) => {
                   variant="subtle"
                   size="sm"
                   aria-label={isExpanded ? '折叠' : '展开'}
-                  onClick={() => toggleExpand(role.id)}
+                  onClick={() => toggleExpand(department.id)}
                 >
                   {isExpanded ? (
                     <IconMinus size={14} stroke={1.5} />
@@ -471,22 +474,22 @@ const RolesPageRender = ({ initialData }: RolesPageRenderProps) => {
                 </ActionIcon>
               )}
               <Text size="sm" fw={level === 0 ? 500 : 400}>
-                {`${'— '.repeat(level)}${role.name}`}
+                {`${'— '.repeat(level)}${department.name}`}
               </Text>
             </Group>
           </Table.Td>
           <Table.Td>
-            <Text size="sm">{role.code ?? '-'}</Text>
+            <Text size="sm">{department.code ?? '-'}</Text>
           </Table.Td>
           <Table.Td>
-            <Text size="sm" c={getStatusColor(role.status ?? 0)}>
-              {getStatusLabel(role.status ?? 0)}
+            <Text size="sm" c={getStatusColor(department.status ?? 0)}>
+              {getStatusLabel(department.status ?? 0)}
             </Text>
           </Table.Td>
           <Table.Td>
             <ActionIcon.Group>
               <ActionIcon
-                onClick={() => openViewDetailModal(role)}
+                onClick={() => openViewDetailModal(department)}
                 variant="light"
                 size="md"
                 aria-label="查看详情"
@@ -494,34 +497,19 @@ const RolesPageRender = ({ initialData }: RolesPageRenderProps) => {
                 <IconEye size={14} stroke={1.5} />
               </ActionIcon>
               <ActionIcon
-                onClick={() => openAddEditModal({ action: 'edit', role })}
+                onClick={() =>
+                  openAddEditModal({ action: 'edit', department })
+                }
                 variant="light"
                 size="md"
                 aria-label="编辑"
               >
                 <IconEdit size={14} stroke={1.5} />
               </ActionIcon>
-              <Tooltip label="配置菜单" withArrow>
-                <ActionIcon
-                  onClick={() => devModalActions.open()}
-                  variant="light"
-                  size="md"
-                  aria-label="配置菜单"
-                >
-                  <IconMenu2 size={14} stroke={1.5} />
-                </ActionIcon>
-              </Tooltip>
-              <Tooltip label="配置数据权限" withArrow>
-                <ActionIcon
-                  onClick={() => devModalActions.open()}
-                  variant="light"
-                  size="md"
-                  aria-label="配置数据权限"
-                >
-                  <IconLock size={14} stroke={1.5} />
-                </ActionIcon>
-              </Tooltip>
-              <DeleteConfirm onConfirm={() => handleDeleteOne(role)} itemName={role.name}>
+              <DeleteConfirm
+                onConfirm={() => handleDeleteOne(department)}
+                itemName={department.name}
+              >
                 <ActionIcon variant="light" size="md" aria-label="删除">
                   <IconTrash size={14} stroke={1.5} />
                 </ActionIcon>
@@ -532,11 +520,13 @@ const RolesPageRender = ({ initialData }: RolesPageRenderProps) => {
       );
 
       if (hasChildren && isExpanded) {
-        role.children!.forEach((child) => traverse(child as RoleNode, level + 1));
+        department.children!.forEach((child) =>
+          traverse(child as DepartmentNode, level + 1)
+        );
       }
     };
 
-    data.forEach((role) => traverse(role, 0));
+    data.forEach((dept) => traverse(dept, 0));
 
     if (rows.length === 0) {
       return (
@@ -553,17 +543,17 @@ const RolesPageRender = ({ initialData }: RolesPageRenderProps) => {
 
   const parentNameMap = useMemo(() => {
     const map = new Map<string, string>();
-    const traverse = (roles: RoleNode[]) => {
-      roles.forEach((r) => {
-        map.set(r.id, r.name);
-        if (r.children && r.children.length > 0) {
-          traverse(r.children as RoleNode[]);
+    const traverse = (departments: DepartmentNode[]) => {
+      departments.forEach((d) => {
+        map.set(d.id, d.name);
+        if (d.children && d.children.length > 0) {
+          traverse(d.children as DepartmentNode[]);
         }
       });
     };
-    traverse((allRoles as RoleNode[]) || []);
+    traverse((allDepartments as DepartmentNode[]) || []);
     return map;
-  }, [allRoles]);
+  }, [allDepartments]);
 
   return (
     <Box>
@@ -582,16 +572,15 @@ const RolesPageRender = ({ initialData }: RolesPageRenderProps) => {
       </Breadcrumbs>
       <Paper pt="xs" pb="xs">
         <Box mb="md">
-          <Title order={3}>角色管理</Title>
+          <Title order={3}>部门管理</Title>
           <Text size="sm" c="dimmed">
-            管理系统角色及其层级结构。
+            管理部门及其层级结构。
           </Text>
         </Box>
         <Divider mb="lg" my="xs" variant="dashed" />
 
         <Grid>
           <Grid.Col span={{ base: 12, sm: 9 }} mb="xs">
-            {/* 基础搜索组件 */}
             <TextInput
               placeholder="搜索名称等..."
               value={searchKeyword}
@@ -613,7 +602,6 @@ const RolesPageRender = ({ initialData }: RolesPageRenderProps) => {
             />
           </Grid.Col>
           <Grid.Col span={{ base: 12, sm: 3 }} mb="xs">
-            {/* 高级搜索切换按钮 */}
             <Button
               variant="ghost"
               size="sm"
@@ -673,9 +661,9 @@ const RolesPageRender = ({ initialData }: RolesPageRenderProps) => {
                 itemName={
                   selection.length === 1
                     ? data.find((item) => selection.includes(item.id))?.name
-                    : `${selection.length} 条角色`
+                    : `${selection.length} 条部门`
                 }
-                title="删除选中的角色"
+                title="删除选中的部门"
               >
                 <Button
                   variant="danger"
@@ -689,7 +677,7 @@ const RolesPageRender = ({ initialData }: RolesPageRenderProps) => {
                 leftSection={<IconPlus size={16} stroke={1.5} />}
                 onClick={() => openAddEditModal({ action: 'add' })}
               >
-                添加角色
+                添加部门
               </Button>
             </Group>
           </Flex>
@@ -738,7 +726,7 @@ const RolesPageRender = ({ initialData }: RolesPageRenderProps) => {
 
       <Modal
         opened={addEditModalOpened}
-        title={addEditAction === 'add' ? '添加角色' : '编辑角色'}
+        title={addEditAction === 'add' ? '添加部门' : '编辑部门'}
         onClose={addEditModalActions.close}
         size="lg"
       >
@@ -751,7 +739,7 @@ const RolesPageRender = ({ initialData }: RolesPageRenderProps) => {
                   required
                   data-autofocus
                   label="名称"
-                  placeholder="输入角色名称"
+                  placeholder="输入部门名称"
                   value={addEditForm.values.name}
                   onChange={(e) =>
                     addEditForm.setFieldValue('name', e.currentTarget.value)
@@ -761,7 +749,7 @@ const RolesPageRender = ({ initialData }: RolesPageRenderProps) => {
                 />
                 <TextInput
                   label="编码"
-                  placeholder="输入角色编码"
+                  placeholder="输入部门编码"
                   value={addEditForm.values.code}
                   onChange={(e) =>
                     addEditForm.setFieldValue('code', e.currentTarget.value)
@@ -769,8 +757,8 @@ const RolesPageRender = ({ initialData }: RolesPageRenderProps) => {
                   radius="md"
                 />
                 <Select
-                  label="上级角色"
-                  placeholder="选择上级角色（可选）"
+                  label="上级部门"
+                  placeholder="选择上级部门（可选）"
                   value={addEditForm.values.parentId || null}
                   onChange={(v) =>
                     addEditForm.setFieldValue('parentId', v ?? '')
@@ -817,34 +805,34 @@ const RolesPageRender = ({ initialData }: RolesPageRenderProps) => {
 
       <Modal
         opened={viewDetailModalOpened}
-        title="角色详情"
+        title="部门详情"
         onClose={viewDetailModalActions.close}
         size="lg"
       >
         <Box pos="relative">
           <LoadingOverlay visible={loading} />
-          {viewingRole && (
+          {viewingDepartment && (
             <Stack gap="md">
               <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                 <Box>
                   <Text size="sm" fw={600} mb={5}>
                     名称
                   </Text>
-                  <Text size="sm">{viewingRole.name ?? '-'}</Text>
+                  <Text size="sm">{viewingDepartment.name ?? '-'}</Text>
                 </Box>
                 <Box>
                   <Text size="sm" fw={600} mb={5}>
                     编码
                   </Text>
-                  <Text size="sm">{viewingRole.code ?? '-'}</Text>
+                  <Text size="sm">{viewingDepartment.code ?? '-'}</Text>
                 </Box>
                 <Box>
                   <Text size="sm" fw={600} mb={5}>
-                    上级角色
+                    上级部门
                   </Text>
                   <Text size="sm">
-                    {viewingRole.parentId
-                      ? parentNameMap.get(viewingRole.parentId) ?? '-'
+                    {viewingDepartment.parentId
+                      ? parentNameMap.get(viewingDepartment.parentId) ?? '-'
                       : '-'}
                   </Text>
                 </Box>
@@ -852,14 +840,14 @@ const RolesPageRender = ({ initialData }: RolesPageRenderProps) => {
                   <Text size="sm" fw={600} mb={5}>
                     排序
                   </Text>
-                  <Text size="sm">{viewingRole.sort ?? '-'}</Text>
+                  <Text size="sm">{viewingDepartment.sort ?? '-'}</Text>
                 </Box>
                 <Box>
                   <Text size="sm" fw={600} mb={5}>
                     状态
                   </Text>
-                  <Text size="sm" c={getStatusColor(viewingRole.status ?? 0)}>
-                    {getStatusLabel(viewingRole.status ?? 0)}
+                  <Text size="sm" c={getStatusColor(viewingDepartment.status ?? 0)}>
+                    {getStatusLabel(viewingDepartment.status ?? 0)}
                   </Text>
                 </Box>
               </SimpleGrid>
@@ -870,21 +858,8 @@ const RolesPageRender = ({ initialData }: RolesPageRenderProps) => {
           )}
         </Box>
       </Modal>
-
-      <Modal
-        opened={devModalOpened}
-        title="提示"
-        onClose={devModalActions.close}
-        centered
-      >
-        <Text size="sm">功能正在开发中</Text>
-        <Flex justify="flex-end" mt="md">
-          <Button onClick={devModalActions.close}>确定</Button>
-        </Flex>
-      </Modal>
     </Box>
   );
 };
 
-export default RolesPageRender;
-
+export default DepartmentsPageRender;
