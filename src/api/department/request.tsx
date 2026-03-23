@@ -9,6 +9,8 @@ export interface getDepartmentRequest extends Query {
 export interface createDepartmentRequest {
   name: string;
   code?: string;
+  /** 负责人账号 ID */
+  managerId?: string;
   parentId?: string;
   sort?: number;
   status?: number;

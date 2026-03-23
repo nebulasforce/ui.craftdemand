@@ -1,3 +1,9 @@
+/** 账号 id + 用户名（用于下拉等轻量场景，如 GET /account/names） */
+export interface AccountName {
+  id: string | number;
+  username?: string;
+}
+
 export interface Account {
   id: string; // id
   username: string; // 用户名

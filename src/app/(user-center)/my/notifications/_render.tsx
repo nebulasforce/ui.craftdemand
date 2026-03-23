@@ -57,6 +57,19 @@ interface AdvancedSearchFilters {
   status: string;
 }
 
+/** 表头排序键 → 后端列表接口实际字段名（与接口返回 readStatus / publishTime 一致） */
+const MY_INBOX_SORT_FIELD_TO_API: Record<string, string> = {
+  status: 'readStatus',
+  createdAt: 'publishTime',
+};
+
+function resolveSortFieldForApi(activeTab: string, sortKey: string): string {
+  if (activeTab === 'system' || activeTab === 'custom') {
+    return MY_INBOX_SORT_FIELD_TO_API[sortKey] ?? sortKey;
+  }
+  return sortKey;
+}
+
 const NotificationsPageRender = ({ initialCustomMessageData, initialSystemMessageData, initialSentMessageData, initialTab = 'system' }: NotificationsProps) => {
   const { setActive, setSection } = useNavbar();
   const router = useRouter();
@@ -255,9 +268,9 @@ const NotificationsPageRender = ({ initialCustomMessageData, initialSystemMessag
         });
       }
 
-      // 添加排序参数
+      // 添加排序参数（传后端字段名，如 readStatus、publishTime）
       if (sortField) {
-        searchParams.sortField = sortField;
+        searchParams.sortField = resolveSortFieldForApi(activeTab, sortField);
         searchParams.sortOrder = sortOrder;
       }
 

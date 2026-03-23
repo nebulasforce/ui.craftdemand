@@ -1,6 +1,6 @@
 import { Options } from '@/api/common/request';
 import { listRequest, listAllAccountRequest, createAccountRequest, deleteAccountRequest, editAccountRequest, getAccountRequest, resetAccountPasswordRequest } from '@/api/account/request';
-import { listResponse, listAllAccountResponse, createAccountResponse, deleteAccountResponse, editAccountResponse, getAccountResponse, resetAccountPasswordResponse } from '@/api/account/response';
+import { listResponse, listAllAccountResponse, listAccountNamesResponse, createAccountResponse, deleteAccountResponse, editAccountResponse, getAccountResponse, resetAccountPasswordResponse } from '@/api/account/response';
 import request from '@/utils/request';
 
 // list 获取账号列表
@@ -25,6 +25,18 @@ export async function listAllAccount(req?: listAllAccountRequest, options?: Opti
       'Content-Type': 'application/json',
     },
     params: req || {},
+    ...(options || {}),
+  });
+}
+
+// listAccountNames 获取账号 id + 用户名列表（用于下拉等）
+export async function listAccountNames(options?: Options) {
+  return request<listAccountNamesResponse>({
+    url: '/api/v1/account/names',
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
     ...(options || {}),
   });
 }

@@ -44,6 +44,8 @@ import {
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useDisclosure } from '@mantine/hooks';
+import { listAccountNames } from '@/api/account/api';
+import { AccountName } from '@/api/account/typings';
 import {
   createDepartment,
   deleteDepartment,
@@ -148,6 +150,32 @@ const DepartmentsPageRender = ({ initialData }: DepartmentsPageRenderProps) => {
   const [expandedIds, setExpandedIds] = useState<string[]>([]);
 
   const [allDepartments, setAllDepartments] = useState<listAllData>([]);
+  /** 负责人下拉数据（仅打开新增/编辑弹窗时请求 GET /account/names） */
+  const [accountNames, setAccountNames] = useState<AccountName[]>([]);
+
+  const loadAccountNames = async () => {
+    try {
+      const response = await listAccountNames();
+      if (response.code === 0 && response.data) {
+        const raw = response.data;
+        const list = Array.isArray(raw) ? raw : [];
+        setAccountNames(
+          list.filter(
+            (x): x is AccountName =>
+              x != null &&
+              typeof x === 'object' &&
+              'id' in x &&
+              (x as AccountName).id != null &&
+              String((x as AccountName).id).trim() !== ''
+          )
+        );
+      } else {
+        notify(response.message ?? '加载负责人列表失败', 'error');
+      }
+    } catch {
+      notify('加载负责人列表失败', 'error');
+    }
+  };
 
   useEffect(() => {
     const searchParams = new URLSearchParams(window.location.search);
@@ -270,20 +298,59 @@ const DepartmentsPageRender = ({ initialData }: DepartmentsPageRenderProps) => {
     departments: DepartmentNode[],
     level = 0
   ): { value: string; label: string }[] =>
-    departments.flatMap((dept) => [
-      {
-        value: dept.id,
-        label: `${'— '.repeat(level)}${dept.name}`,
-      },
-      ...(dept.children
-        ? flattenDepartmentsForSelect(dept.children as DepartmentNode[], level + 1)
-        : []),
-    ]);
+    departments.flatMap((dept) => {
+      const id = dept?.id != null ? String(dept.id).trim() : '';
+      if (!id) return [];
+      const name = dept.name ?? '';
+      return [
+        {
+          value: id,
+          label: `${'— '.repeat(level)}${name}`,
+        },
+        ...(dept.children
+          ? flattenDepartmentsForSelect(dept.children as DepartmentNode[], level + 1)
+          : []),
+      ];
+    });
 
   const parentOptions = useMemo(() => {
     if (!allDepartments || allDepartments.length === 0) return [];
     return flattenDepartmentsForSelect(allDepartments as DepartmentNode[]);
   }, [allDepartments]);
+
+  const managerAccountOptions = useMemo(() => {
+    const seen = new Set<string>();
+    return accountNames.reduce<{ value: string; label: string }[]>((acc, a) => {
+      if (a == null) return acc;
+      const rawId = a.id;
+      const id =
+        rawId != null && String(rawId).trim() !== ''
+          ? String(rawId)
+          : '';
+      if (!id || seen.has(id)) return acc;
+      seen.add(id);
+      const username = (a.username ?? '').trim() || id;
+      acc.push({ value: id, label: username });
+      return acc;
+    }, []);
+  }, [accountNames]);
+
+  const managerLabelByAccountId = useMemo(() => {
+    const map = new Map<string, string>();
+    managerAccountOptions.forEach(({ value, label }) => {
+      map.set(value, label);
+    });
+    return map;
+  }, [managerAccountOptions]);
+
+  const getManagerDisplayLabel = (d: Department) => {
+    if (d.managerName?.trim()) return d.managerName;
+    if (d.managerId != null && String(d.managerId).trim() !== '') {
+      const key = String(d.managerId);
+      return managerLabelByAccountId.get(key) ?? '-';
+    }
+    return '-';
+  };
 
   const openViewDetailModal = async (department: Department) => {
     setLoading(true);
@@ -304,14 +371,20 @@ const DepartmentsPageRender = ({ initialData }: DepartmentsPageRenderProps) => {
 
   const openAddEditModal = async ({ action, department }: OpenAddEditModalParams) => {
     setAddEditAction(action);
-    await loadAllDepartments();
+    await Promise.all([loadAllDepartments(), loadAccountNames()]);
 
     if (action === 'edit' && department) {
       setEditingDepartment(department);
+      const rawManager = department.managerId;
+      const managerIdStr =
+        rawManager != null && String(rawManager).trim() !== ''
+          ? String(rawManager)
+          : '';
       addEditForm.setValues({
         id: department.id,
         name: department.name,
         code: department.code ?? '',
+        managerId: managerIdStr,
         parentId: department.parentId || '',
         sort: department.sort ?? 0,
         status: department.status ?? 0,
@@ -322,6 +395,7 @@ const DepartmentsPageRender = ({ initialData }: DepartmentsPageRenderProps) => {
         id: '',
         name: '',
         code: '',
+        managerId: '',
         parentId: '',
         sort: 0,
         status: 0,
@@ -375,6 +449,7 @@ const DepartmentsPageRender = ({ initialData }: DepartmentsPageRenderProps) => {
       id: '',
       name: '',
       code: '',
+      managerId: '',
       parentId: '',
       sort: 0,
       status: 0,
@@ -386,6 +461,27 @@ const DepartmentsPageRender = ({ initialData }: DepartmentsPageRenderProps) => {
     },
   });
 
+  /** 当前负责人若不在账号列表中（已删账号等），补一条选项避免 Select 报错 */
+  const managerSelectData = useMemo(() => {
+    const opts = [...managerAccountOptions];
+    const extraId = addEditForm.values.managerId?.trim();
+    if (extraId && !opts.some((o) => o.value === extraId)) {
+      const sameManager =
+        String(editingDepartment?.managerId ?? '') === extraId;
+      const fallbackLabel =
+        sameManager && editingDepartment?.managerName?.trim()
+          ? editingDepartment.managerName.trim()
+          : `账号 ${extraId}`;
+      opts.unshift({ value: extraId, label: fallbackLabel });
+    }
+    return opts;
+  }, [
+    managerAccountOptions,
+    addEditForm.values.managerId,
+    editingDepartment?.managerId,
+    editingDepartment?.managerName,
+  ]);
+
   const handleAddEditSubmit = async (values: typeof addEditForm.values) => {
     if (addEditAction === 'add') {
       setLoading(true);
@@ -393,6 +489,7 @@ const DepartmentsPageRender = ({ initialData }: DepartmentsPageRenderProps) => {
         const payload: createDepartmentRequest = {
           name: values.name,
           code: values.code || undefined,
+          managerId: values.managerId || undefined,
           parentId: values.parentId || undefined,
           sort: values.sort,
           status: values.status,
@@ -417,6 +514,7 @@ const DepartmentsPageRender = ({ initialData }: DepartmentsPageRenderProps) => {
           id: values.id,
           name: values.name,
           code: values.code || undefined,
+          managerId: values.managerId || undefined,
           parentId: values.parentId || undefined,
           sort: values.sort,
           status: values.status,
@@ -482,6 +580,11 @@ const DepartmentsPageRender = ({ initialData }: DepartmentsPageRenderProps) => {
             <Text size="sm">{department.code ?? '-'}</Text>
           </Table.Td>
           <Table.Td>
+            <Text size="sm" lineClamp={2}>
+              {getManagerDisplayLabel(department)}
+            </Text>
+          </Table.Td>
+          <Table.Td>
             <Text size="sm" c={getStatusColor(department.status ?? 0)}>
               {getStatusLabel(department.status ?? 0)}
             </Text>
@@ -531,7 +634,7 @@ const DepartmentsPageRender = ({ initialData }: DepartmentsPageRenderProps) => {
     if (rows.length === 0) {
       return (
         <Table.Tr>
-          <Table.Td colSpan={5} align="center">
+          <Table.Td colSpan={6} align="center">
             <Text c="dimmed">暂无数据</Text>
           </Table.Td>
         </Table.Tr>
@@ -700,6 +803,7 @@ const DepartmentsPageRender = ({ initialData }: DepartmentsPageRenderProps) => {
                   </Table.Th>
                   <Table.Th miw={120}>名称</Table.Th>
                   <Table.Th miw={100}>编码</Table.Th>
+                  <Table.Th miw={140}>负责人</Table.Th>
                   <Table.Th miw={80}>状态</Table.Th>
                   <Table.Th>操作</Table.Th>
                 </Table.Tr>
@@ -755,6 +859,17 @@ const DepartmentsPageRender = ({ initialData }: DepartmentsPageRenderProps) => {
                     addEditForm.setFieldValue('code', e.currentTarget.value)
                   }
                   radius="md"
+                />
+                <Select
+                  label="部门负责人"
+                  placeholder="选择部门负责人（可选）"
+                  value={addEditForm.values.managerId?.trim() || null}
+                  onChange={(v) =>
+                    addEditForm.setFieldValue('managerId', v ?? '')
+                  }
+                  data={managerSelectData}
+                  clearable
+                  searchable
                 />
                 <Select
                   label="上级部门"
@@ -825,6 +940,12 @@ const DepartmentsPageRender = ({ initialData }: DepartmentsPageRenderProps) => {
                     编码
                   </Text>
                   <Text size="sm">{viewingDepartment.code ?? '-'}</Text>
+                </Box>
+                <Box>
+                  <Text size="sm" fw={600} mb={5}>
+                    负责人
+                  </Text>
+                  <Text size="sm">{getManagerDisplayLabel(viewingDepartment)}</Text>
                 </Box>
                 <Box>
                   <Text size="sm" fw={600} mb={5}>
