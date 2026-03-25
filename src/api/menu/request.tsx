@@ -15,6 +15,7 @@ export interface createMenuRequest {
   route?: string;
   target?: string;
   sort?: number;
+  type?: number;
   parentId?: string;
   status?: number;
 }
@@ -27,6 +28,7 @@ export interface editMenuRequest {
   route?: string;
   target?: string;
   sort?: number;
+  type?: number;
   parentId?: string;
   status?: number;
 }

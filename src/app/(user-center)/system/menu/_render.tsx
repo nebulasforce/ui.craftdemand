@@ -49,6 +49,7 @@ import {
   deleteMenu,
   editMenu,
   getMenu,
+  listMenuTypes,
   list as menuListApi,
 } from '@/api/menu/api';
 import {
@@ -88,6 +89,8 @@ interface AdvancedSearchFilters {
   name: string;
   status: string;
 }
+
+type MenuTypeMap = Record<string, string>;
 
 const statusMap: { [key: number]: StatusItem } = {
   0: { label: '启用', color: 'green' },
@@ -147,6 +150,31 @@ const MenuPageRender = ({ initialData }: MenuPageRenderProps) => {
   const [loading, setLoading] = useState(false);
   const [selection, setSelection] = useState<string[]>([]);
   const [totalPage, setTotalPage] = useState(initialData?.totalPage ?? 0);
+  const [menuTypeMap, setMenuTypeMap] = useState<MenuTypeMap>({});
+
+  const menuTypeOptions = Object.entries(menuTypeMap).map(([value, label]) => ({
+    value,
+    label,
+  }));
+
+  const getMenuTypeLabel = (type: number | string | undefined) => {
+    if (type === undefined || type === null || type === '') return '-';
+    const key = typeof type === 'string' ? type : type.toString();
+    return menuTypeMap[key] ?? key;
+  };
+
+  const loadMenuTypes = async () => {
+    try {
+      const response = await listMenuTypes();
+      if (response.code === 0 && response.data) {
+        setMenuTypeMap(response.data);
+      } else {
+        notify(response.message ?? '加载菜单类型失败', 'error');
+      }
+    } catch {
+      notify('加载菜单类型失败', 'error');
+    }
+  };
 
   useEffect(() => {
     const searchParams = new URLSearchParams(window.location.search);
@@ -157,6 +185,10 @@ const MenuPageRender = ({ initialData }: MenuPageRenderProps) => {
     }
     router.push(`?${searchParams.toString()}`, { scroll: false });
   }, [page, router]);
+
+  useEffect(() => {
+    loadMenuTypes();
+  }, []);
 
   const loadData = async (newPage?: number) => {
     const currentPage = newPage ?? page;
@@ -255,6 +287,7 @@ const MenuPageRender = ({ initialData }: MenuPageRenderProps) => {
         route: menu.route ?? '',
         target: menu.target ?? '',
         sort: menu.sort ?? 0,
+        type: menu.type ?? 0,
         status: menu.status,
       });
     } else {
@@ -267,6 +300,7 @@ const MenuPageRender = ({ initialData }: MenuPageRenderProps) => {
         route: '',
         target: '',
         sort: 0,
+        type: 0,
         status: 0,
       });
     }
@@ -319,6 +353,7 @@ const MenuPageRender = ({ initialData }: MenuPageRenderProps) => {
       route: '',
       target: '',
       sort: 0,
+      type: 0,
       status: 0,
     },
     validate: {
@@ -341,6 +376,7 @@ const MenuPageRender = ({ initialData }: MenuPageRenderProps) => {
           route: values.route || undefined,
           target: values.target || undefined,
           sort: values.sort,
+          type: values.type,
           status: values.status,
         };
         const response = await createMenu(payload);
@@ -367,6 +403,7 @@ const MenuPageRender = ({ initialData }: MenuPageRenderProps) => {
           route: values.route || undefined,
           target: values.target || undefined,
           sort: values.sort,
+          type: values.type,
           status: values.status,
         };
         const response = await editMenu(payload);
@@ -384,6 +421,10 @@ const MenuPageRender = ({ initialData }: MenuPageRenderProps) => {
       }
     }
     addEditForm.reset();
+  };
+
+  const handleConfigApi = () => {
+    notify('功能正在开发中', 'info');
   };
 
   return (
@@ -529,6 +570,8 @@ const MenuPageRender = ({ initialData }: MenuPageRenderProps) => {
           onView={openViewDetailModal}
           onEdit={(menu) => openAddEditModal({ action: 'edit', menu })}
           onDelete={handleDeleteOne}
+          onConfigApi={handleConfigApi}
+          getMenuTypeLabel={getMenuTypeLabel}
         />
       </Paper>
 
@@ -618,6 +661,16 @@ const MenuPageRender = ({ initialData }: MenuPageRenderProps) => {
                 />
                 <Select
                   required
+                  label="类型"
+                  value={addEditForm.values.type.toString()}
+                  onChange={(v) =>
+                    addEditForm.setFieldValue('type', parseInt(v ?? '0', 10))
+                  }
+                  data={menuTypeOptions}
+                  placeholder="请选择类型"
+                />
+                <Select
+                  required
                   label="状态"
                   value={addEditForm.values.status.toString()}
                   onChange={(v) =>
@@ -695,6 +748,12 @@ const MenuPageRender = ({ initialData }: MenuPageRenderProps) => {
                     排序
                   </Text>
                   <Text size="sm">{viewingMenu.sort ?? '-'}</Text>
+                </Box>
+                <Box>
+                  <Text size="sm" fw={600} mb={5}>
+                    类型
+                  </Text>
+                  <Text size="sm">{getMenuTypeLabel(viewingMenu.type)}</Text>
                 </Box>
                 <Box>
                   <Text size="sm" fw={600} mb={5}>

@@ -11,6 +11,10 @@ export interface listFrontData {
 
 export interface listFrontResponse extends Response<listFrontData> {}
 
+export interface menuTypeMapData {
+  [key: string]: string;
+}
+
 export interface listData extends Pagination<Menu> {}
 
 export interface listResponse extends Response<listData> {}
@@ -36,3 +40,5 @@ export interface deleteMenuData extends Result {
 }
 
 export interface deleteMenuResponse extends Response<deleteMenuData> {}
+
+export interface listMenuTypesResponse extends Response<menuTypeMapData> {}

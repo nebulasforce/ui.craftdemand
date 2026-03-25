@@ -15,6 +15,7 @@ import {
   Tooltip,
 } from '@mantine/core';
 import {
+  IconApi,
   IconEdit,
   IconEye,
   IconMinus,
@@ -64,6 +65,8 @@ export interface TreeTableProps {
   onView: (menu: MenuNode) => void;
   onEdit: (menu: MenuNode) => void;
   onDelete: (menu: MenuNode) => void;
+  onConfigApi: (menu: MenuNode) => void;
+  getMenuTypeLabel?: (type: number | string | undefined) => string;
 }
 
 export const TreeTable = ({
@@ -79,6 +82,8 @@ export const TreeTable = ({
   onView,
   onEdit,
   onDelete,
+  onConfigApi,
+  getMenuTypeLabel,
 }: TreeTableProps) => {
   const [expandedIds, setExpandedIds] = useState<string[]>([]);
 
@@ -278,6 +283,9 @@ export const TreeTable = ({
             <Text size="sm">{item.sort ?? 0}</Text>
           </Table.Td>
           <Table.Td>
+            <Text size="sm">{getMenuTypeLabel?.(item.type) ?? '-'}</Text>
+          </Table.Td>
+          <Table.Td>
             <Text size="sm" c={getStatusColor(item.status)}>
               {getStatusLabel(item.status)}
             </Text>
@@ -300,6 +308,16 @@ export const TreeTable = ({
               >
                 <IconEdit size={14} stroke={1.5} />
               </ActionIcon>
+              <Tooltip label="配置接口" withArrow>
+                <ActionIcon
+                  onClick={() => onConfigApi(item)}
+                  variant="light"
+                  size="md"
+                  aria-label="配置接口"
+                >
+                  <IconApi size={14} stroke={1.5} />
+                </ActionIcon>
+              </Tooltip>
               <DeleteConfirm onConfirm={() => onDelete(item)} itemName={item.name}>
                 <ActionIcon variant="light" size="md" aria-label="删除">
                   <IconTrash size={14} stroke={1.5} />
@@ -358,6 +376,9 @@ export const TreeTable = ({
                 <Text size="sm">{child.sort ?? 0}</Text>
               </Table.Td>
               <Table.Td>
+                <Text size="sm">{getMenuTypeLabel?.(child.type) ?? '-'}</Text>
+              </Table.Td>
+              <Table.Td>
                 <Text size="sm" c={getStatusColor(child.status)}>
                   {getStatusLabel(child.status)}
                 </Text>
@@ -380,6 +401,16 @@ export const TreeTable = ({
                   >
                     <IconEdit size={14} stroke={1.5} />
                   </ActionIcon>
+                  <Tooltip label="配置接口" withArrow>
+                    <ActionIcon
+                      onClick={() => onConfigApi(child)}
+                      variant="light"
+                      size="md"
+                      aria-label="配置接口"
+                    >
+                      <IconApi size={14} stroke={1.5} />
+                    </ActionIcon>
+                  </Tooltip>
                   <DeleteConfirm
                     onConfirm={() => onDelete(child)}
                     itemName={child.name}
@@ -422,6 +453,7 @@ export const TreeTable = ({
                 <Table.Th miw={100}>路由</Table.Th>
                 <Table.Th miw={80}>目标</Table.Th>
                 <Table.Th miw={60}>排序</Table.Th>
+                <Table.Th miw={100}>类型</Table.Th>
                 <Table.Th miw={80}>状态</Table.Th>
                 <Table.Th>操作</Table.Th>
               </Table.Tr>
@@ -431,7 +463,7 @@ export const TreeTable = ({
                 renderRowsWithActions()
               ) : (
                 <Table.Tr>
-                  <Table.Td colSpan={9} align="center">
+                  <Table.Td colSpan={10} align="center">
                     <Text c="dimmed">暂无数据</Text>
                   </Table.Td>
                 </Table.Tr>

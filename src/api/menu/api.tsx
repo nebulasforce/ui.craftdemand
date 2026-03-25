@@ -14,6 +14,7 @@ import {
   createMenuResponse,
   editMenuResponse,
   deleteMenuResponse,
+  listMenuTypesResponse,
 } from '@/api/menu/response';
 import request from '@/utils/request';
 
@@ -79,6 +80,16 @@ export async function deleteMenu(req?: deleteMenuRequest, options?: Options) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     data: req || {},
+    ...(options || {}),
+  });
+}
+
+// listMenuTypes 获取菜单类型映射
+export async function listMenuTypes(options?: Options) {
+  return request<listMenuTypesResponse>({
+    url: '/api/v1/menu/types',
+    method: 'GET',
+    headers: { 'Content-Type': 'application/json' },
     ...(options || {}),
   });
 }

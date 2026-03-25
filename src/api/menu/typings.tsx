@@ -15,6 +15,7 @@ export interface MenuSummary {
   route: string;
   target: string;
   sort: number;
+  type?: number;
   children?: MenuSummary[];
 }
 
@@ -27,6 +28,7 @@ export interface Menu {
   route?: string;
   target?: string;
   sort: number;
+  type?: number;
   parentId?: string;
   status: number;
   creator?: Creator;

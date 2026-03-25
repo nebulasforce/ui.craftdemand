@@ -20,6 +20,7 @@ import React from 'react';
 
 import appConfig from "../../../../config/app.config"
 import { HeaderMegaMenu } from '@/components/HeaderMegaMenu/HeaderMegaMenu';
+import { listGroupData as HeadDropdownListGroupData } from '@/api/headDropdown/response';
 
 import { AuthProvider } from '@/contexts/AuthContext/AuthContext';
 
@@ -28,7 +29,7 @@ export const metadata= appConfig.metadata
 
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode; }>) {
-
+  const defaultHeadDropdownData: HeadDropdownListGroupData = {};
 
   return (
     <html lang="en" {...mantineHtmlProps}>
@@ -41,7 +42,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
             <AuthProvider>
               <AppShell header={{ height: 60 }} padding="md">
                 <AppShellHeader>
-                  <HeaderMegaMenu  />
+                  <HeaderMegaMenu user={null} headerDropdownData={defaultHeadDropdownData} />
                 </AppShellHeader>
                 <AppShellMain>
                   {children}
