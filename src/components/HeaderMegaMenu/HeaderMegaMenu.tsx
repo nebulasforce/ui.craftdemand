@@ -30,9 +30,7 @@ import {
   ThemeIcon,
   UnstyledButton,
   useMantineTheme,
-  ActionIcon,
 } from '@mantine/core';
-import { IconLayoutSidebarLeftCollapse, IconLayoutSidebarLeftExpand } from '@tabler/icons-react';
 import { useDisclosure } from '@mantine/hooks';
 import { User } from '@/api/my/typings';
 import { listGroupData as HeadDropdownListGroupData } from '@/api/headDropdown/response';
@@ -76,12 +74,10 @@ const mockdata = [
 
 interface HeaderMegaMenuProps {
   user: User | null;
-  navbarCollapsed?: boolean;
-  onNavbarToggle?: () => void;
   headerDropdownData: HeadDropdownListGroupData;
 }
 
-export function HeaderMegaMenu({ user, navbarCollapsed = false, onNavbarToggle, headerDropdownData }: HeaderMegaMenuProps) {
+export function HeaderMegaMenu({ user, headerDropdownData }: HeaderMegaMenuProps) {
   const [drawerOpened, { toggle: toggleDrawer, close: closeDrawer }] = useDisclosure(false);
   const [linksOpened, { toggle: toggleLinks }] = useDisclosure(false);
   const theme = useMantineTheme();
@@ -121,24 +117,9 @@ export function HeaderMegaMenu({ user, navbarCollapsed = false, onNavbarToggle, 
         <Group justify="space-between" h="100%">
           <Group gap="xs" align="center">
             <Logo text="CraftDemand" size={30} src="/avatar.png" showTrademark />
-            {onNavbarToggle && (
-              <ActionIcon
-                variant="transparent"
-                onClick={onNavbarToggle}
-                size="lg"
-                aria-label={navbarCollapsed ? 'Open sidebar' : 'Close sidebar'}
-                visibleFrom="sm"
-              >
-                {navbarCollapsed ? (
-                  <IconLayoutSidebarLeftExpand size={20} />
-                ) : (
-                  <IconLayoutSidebarLeftCollapse size={20} />
-                )}
-              </ActionIcon>
-            )}
           </Group>
 
-          <Group h="100%" gap={0} visibleFrom="sm" ml={onNavbarToggle ? "md" : "calc(var(--mantine-spacing-md) + 2.75rem)"} pos="relative">
+          <Group h="100%" gap={0} visibleFrom="sm" ml="md" pos="relative">
             <Link href="/" passHref className={classes.link}>
               Home
             </Link>

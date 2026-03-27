@@ -9,6 +9,7 @@ import { listGroupData as NavbarListGroupData } from '@/api/navbar/response';
 import { listGroupData as HeadDropdownListGroupData } from '@/api/headDropdown/response';
 import { HeaderMegaMenu } from '@/components/HeaderMegaMenu/HeaderMegaMenu';
 import { NavbarSegmented } from '@/components/NavbarSegmented/NavbarSegmented';
+import { SidebarHoverToggle } from '@/components/SidebarHoverToggle/SidebarHoverToggle';
 import { NavbarProvider } from '@/contexts/NavbarContext/NavbarContext';
 import { useAuth } from '@/contexts/AuthContext/AuthContext';
 
@@ -49,15 +50,12 @@ export function AppShellWrapper({ navbarData, headerDropdownData, children, user
           collapsed: { mobile: !mobileOpened, desktop: !desktopOpened },
         }}
         padding="md"
+        style={{ position: 'relative' }}
       >
         <AppShellHeader>
-          <HeaderMegaMenu
-            user={user}
-            headerDropdownData={headerDropdownData}
-            navbarCollapsed={!desktopOpened}
-            onNavbarToggle={toggleDesktop}
-          />
+          <HeaderMegaMenu user={user} headerDropdownData={headerDropdownData} />
         </AppShellHeader>
+        <SidebarHoverToggle collapsed={!desktopOpened} onToggle={toggleDesktop} />
         <AppShellNavbar>
           <NavbarSegmented data={navbarData} collapsed={!desktopOpened} />
         </AppShellNavbar>
