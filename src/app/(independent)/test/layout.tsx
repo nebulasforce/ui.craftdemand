@@ -22,8 +22,6 @@ import appConfig from "../../../../config/app.config"
 import { HeaderMegaMenu } from '@/components/HeaderMegaMenu/HeaderMegaMenu';
 import { listGroupData as HeadDropdownListGroupData } from '@/api/headDropdown/response';
 
-import { AuthProvider } from '@/contexts/AuthContext/AuthContext';
-
 
 export const metadata= appConfig.metadata
 
@@ -34,22 +32,20 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="en" {...mantineHtmlProps}>
       <head>
-        <ColorSchemeScript />
+        <ColorSchemeScript defaultColorScheme="dark" />
       </head>
       <body className="antialiased">
-          <MantineProvider theme={theme}>
+          <MantineProvider theme={theme} defaultColorScheme="dark">
             <Notifications position="top-center" />
-            <AuthProvider>
-              <AppShell header={{ height: 60 }} padding="md">
-                <AppShellHeader>
-                  <HeaderMegaMenu user={null} headerDropdownData={defaultHeadDropdownData} />
-                </AppShellHeader>
-                <AppShellMain>
-                  {children}
-                </AppShellMain>
-                <FooterLinks />
-              </AppShell>
-            </AuthProvider>
+            <AppShell header={{ height: 60 }} padding="md">
+              <AppShellHeader>
+                <HeaderMegaMenu user={null} headerDropdownData={defaultHeadDropdownData} />
+              </AppShellHeader>
+              <AppShellMain>
+                {children}
+              </AppShellMain>
+              <FooterLinks />
+            </AppShell>
           </MantineProvider>
       </body>
     </html>

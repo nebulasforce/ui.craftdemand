@@ -56,6 +56,14 @@ export interface HeaderDropdownProps {
   initialData?: listGroupData;
 }
 
+const hasMenuData = (menuData?: listGroupData): boolean => {
+  if (!menuData) {
+    return false;
+  }
+
+  return Object.values(menuData).some((items) => Array.isArray(items) && items.length > 0);
+};
+
 
 // 转换函数：将逗号分隔的按键字符串转为<Kbd>组件组合
 const convertKeysToKbd = (keysString?: string): ReactNode => {
@@ -77,7 +85,7 @@ const convertKeysToKbd = (keysString?: string): ReactNode => {
 
 export function HeaderDropdown({ user, initialData }: HeaderDropdownProps) {
   const [data, setData] = useState<listGroupData | undefined>(initialData);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!hasMenuData(initialData));
   const [drawerOpened, setDrawerOpened] = useState(false);
   const theme = useMantineTheme();
   
@@ -111,19 +119,36 @@ export function HeaderDropdown({ user, initialData }: HeaderDropdownProps) {
   const { logout, isAuthenticated } = useAuth();
 
   useEffect(() => {
+    // 当服务端重新提供了有效数据时，同步到客户端状态
+    if (hasMenuData(initialData)) {
+      setData(initialData);
+      setLoading(false);
+    }
+  }, [initialData]);
+
+  useEffect(() => {
     if (!isAuthenticated) {
+      setLoading(false);
+      setData(undefined);
       return;
     }
 
-    // 若已经通过 SSR 提供了数据，则跳过首轮请求
-    if (data) {
+    // 有有效菜单数据时不重复请求；空对象 {} 视为无数据，继续补拉
+    if (hasMenuData(data)) {
       setLoading(false);
       return;
     }
 
+    let cancelled = false;
+    setLoading(true);
     fetchData().then(() => {
-      setLoading(false);
+      if (!cancelled) {
+        setLoading(false);
+      }
     });
+    return () => {
+      cancelled = true;
+    };
   }, [isAuthenticated, data]);
 
   // 图标映射表

@@ -20,10 +20,10 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html lang="en" {...mantineHtmlProps} suppressHydrationWarning>
     <head>
       <title />
-      <ColorSchemeScript />
+      <ColorSchemeScript defaultColorScheme="dark" />
     </head>
     <body className="antialiased" suppressHydrationWarning>
-    <MantineProvider theme={theme}>
+    <MantineProvider theme={theme} defaultColorScheme="dark">
         {/*<NavigationProgress />*/}
         <Notifications position="top-center" />
         {/* 添加路由监听器 */}

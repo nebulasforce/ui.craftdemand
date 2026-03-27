@@ -258,6 +258,9 @@ const MenuPageRender = ({ initialData }: MenuPageRenderProps) => {
   const [viewDetailModalOpened, viewDetailModalActions] = useDisclosure(false);
   const [viewingMenu, setViewingMenu] = useState<Menu | null>(null);
 
+  // 与“角色管理”保持一致：配置接口未实现时给出弹窗提示
+  const [devModalOpened, devModalActions] = useDisclosure(false);
+
   const openViewDetailModal = async (menu: Menu) => {
     setLoading(true);
     try {
@@ -424,7 +427,7 @@ const MenuPageRender = ({ initialData }: MenuPageRenderProps) => {
   };
 
   const handleConfigApi = () => {
-    notify('功能正在开发中', 'info');
+    devModalActions.open();
   };
 
   return (
@@ -817,6 +820,18 @@ const MenuPageRender = ({ initialData }: MenuPageRenderProps) => {
             </Stack>
           )}
         </Box>
+      </Modal>
+
+      <Modal
+        opened={devModalOpened}
+        title="提示"
+        onClose={devModalActions.close}
+        centered
+      >
+        <Text size="sm">功能正在开发中</Text>
+        <Flex justify="flex-end" mt="md">
+          <Button onClick={devModalActions.close}>确定</Button>
+        </Flex>
       </Modal>
     </Box>
   );
