@@ -6,8 +6,10 @@ import { useRouter } from 'next/navigation';
 import {
   IconChevronDown,
   IconChevronUp,
+  IconCode,
   IconEdit,
   IconEye,
+  IconApi,
   IconPlus,
   IconSearch,
   IconTrash,
@@ -685,12 +687,52 @@ const MenuPageRender = ({ initialData }: MenuPageRenderProps) => {
           selection={selection}
           onSelectionChange={setSelection}
           onPageChange={handlePageChange}
-          onView={openViewDetailModal}
-          onEdit={(menu) => openAddEditModal({ action: 'edit', menu })}
-          onDelete={handleDeleteOne}
-          onSetCode={openSetCodeModal}
-          onConfigApi={openBindApiModal}
           getMenuTypeLabel={getMenuTypeLabel}
+          renderActions={(menu) => (
+            <ActionIcon.Group>
+              <ActionIcon
+                onClick={() => openViewDetailModal(menu)}
+                variant="light"
+                size="md"
+                aria-label="查看详情"
+              >
+                <IconEye size={14} stroke={1.5} />
+              </ActionIcon>
+              <ActionIcon
+                onClick={() => openAddEditModal({ action: 'edit', menu })}
+                variant="light"
+                size="md"
+                aria-label="编辑"
+              >
+                <IconEdit size={14} stroke={1.5} />
+              </ActionIcon>
+              <Tooltip label="设置权限码" withArrow>
+                <ActionIcon
+                  onClick={() => openSetCodeModal(menu)}
+                  variant="light"
+                  size="md"
+                  aria-label="设置权限码"
+                >
+                  <IconCode size={14} stroke={1.5} />
+                </ActionIcon>
+              </Tooltip>
+              <Tooltip label="配置接口" withArrow>
+                <ActionIcon
+                  onClick={() => openBindApiModal(menu)}
+                  variant="light"
+                  size="md"
+                  aria-label="配置接口"
+                >
+                  <IconApi size={14} stroke={1.5} />
+                </ActionIcon>
+              </Tooltip>
+              <DeleteConfirm onConfirm={() => handleDeleteOne(menu)} itemName={menu.name}>
+                <ActionIcon variant="light" size="md" aria-label="删除">
+                  <IconTrash size={14} stroke={1.5} />
+                </ActionIcon>
+              </DeleteConfirm>
+            </ActionIcon.Group>
+          )}
         />
       </Paper>
 

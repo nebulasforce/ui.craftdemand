@@ -14,18 +14,9 @@ import {
   Text,
   Tooltip,
 } from '@mantine/core';
-import {
-  IconApi,
-  IconCode,
-  IconEdit,
-  IconEye,
-  IconMinus,
-  IconPlus,
-  IconTrash,
-} from '@tabler/icons-react';
+import { IconMinus, IconPlus } from '@tabler/icons-react';
 import { Menu } from '@/api/menu/typings';
 import { DynamicIcon } from '@/components/DynamicIcon';
-import { DeleteConfirm } from '@/components/DeleteConfirm/DeleteConfirm';
 import classes from './TreeTable.module.css';
 
 type MenuNode = Menu & {
@@ -63,12 +54,8 @@ export interface TreeTableProps {
   selection: string[];
   onSelectionChange: (ids: string[]) => void;
   onPageChange: (page: number) => void;
-  onView: (menu: MenuNode) => void;
-  onEdit: (menu: MenuNode) => void;
-  onDelete: (menu: MenuNode) => void;
-  onSetCode: (menu: MenuNode) => void;
-  onConfigApi: (menu: MenuNode) => void;
   getMenuTypeLabel?: (type: number | string | undefined) => string;
+  renderActions?: (menu: MenuNode) => React.ReactNode;
 }
 
 export const TreeTable = ({
@@ -81,12 +68,8 @@ export const TreeTable = ({
   selection,
   onSelectionChange,
   onPageChange,
-  onView,
-  onEdit,
-  onDelete,
-  onSetCode,
-  onConfigApi,
   getMenuTypeLabel,
+  renderActions,
 }: TreeTableProps) => {
   const [expandedIds, setExpandedIds] = useState<string[]>([]);
 
@@ -116,121 +99,17 @@ export const TreeTable = ({
     return `显示 ${start}-${end} 条，共 ${count} 条`;
   };
 
-  const renderRow = (
-    item: MenuNode,
-    options?: { level?: number; isLastChild?: boolean }
-  ) => {
-    const level = options?.level ?? 0;
-    const isParent = level === 0;
-    const hasChildren = !!item.children && item.children.length > 0;
-    const selected = selection.includes(item.id);
-    const isExpanded = expandedIds.includes(item.id);
-
-    return (
-      <Table.Tr key={item.id} className={cx({ [classes.rowSelected]: selected })}>
-        <Table.Td w={40}>
-          <Checkbox
-            checked={selection.includes(item.id)}
-            onChange={() => toggleRowSelection(item.id)}
-          />
-        </Table.Td>
-        <Table.Td>
-          <Group gap="xs" pl={level * 16}>
-            {isParent && hasChildren && (
-              <ActionIcon
-                variant="subtle"
-                size="sm"
-                aria-label={isExpanded ? '折叠' : '展开'}
-                onClick={() => toggleExpand(item.id)}
-              >
-                {isExpanded ? (
-                  <IconMinus size={14} stroke={1.5} />
-                ) : (
-                  <IconPlus size={14} stroke={1.5} />
-                )}
-              </ActionIcon>
-            )}
-            {!isParent && (
-              <IconMinus size={14} stroke={1.5} />
-            )}
-            <Text size="sm" fw={isParent ? 500 : 400}>
-              {item.name}
-            </Text>
-          </Group>
-        </Table.Td>
-        <Table.Td>
-          <Tooltip label={item.icon} withArrow>
-            <Group gap="xs">
-              <DynamicIcon name={item.icon} size={18} stroke={1.5} />
-              <Text size="sm" c="dimmed">
-                {item.icon}
-              </Text>
-            </Group>
-          </Tooltip>
-        </Table.Td>
-        <Table.Td>
-          <Text size="sm" lineClamp={1}>
-            {item.url || '-'}
-          </Text>
-        </Table.Td>
-        <Table.Td>
-          <Text size="sm" lineClamp={1}>
-            {item.route ?? '-'}
-          </Text>
-        </Table.Td>
-        <Table.Td>
-          <Text size="sm">{item.target ?? '-'}</Text>
-        </Table.Td>
-        <Table.Td>
-          <Text size="sm">{item.sort ?? 0}</Text>
-        </Table.Td>
-        <Table.Td>
-          <Text size="sm" c={getStatusColor(item.status)}>
-            {getStatusLabel(item.status)}
-          </Text>
-        </Table.Td>
-        <Table.Td>
-          <ActionIcon.Group>
-            <ActionIcon
-              onClick={() => onView(item)}
-              variant="light"
-              size="md"
-              aria-label="查看详情"
-            >
-              <IconEye size={14} stroke={1.5} />
-            </ActionIcon>
-            <ActionIcon
-              onClick={() => onEdit(item)}
-              variant="light"
-              size="md"
-              aria-label="编辑"
-            >
-              <IconEdit size={14} stroke={1.5} />
-            </ActionIcon>
-            <DeleteConfirm onConfirm={() => onDelete(item)} itemName={item.name}>
-              <ActionIcon variant="light" size="md" aria-label="删除">
-                <IconTrash size={14} stroke={1.5} />
-              </ActionIcon>
-            </DeleteConfirm>
-          </ActionIcon.Group>
-        </Table.Td>
-      </Table.Tr>
-    );
-  };
-
-  // 实际操作列需要完整的按钮，这里单独处理，避免在上面重复逻辑
-  const renderRowsWithActions = () => {
+  const renderRows = () => {
     const rows: React.ReactNode[] = [];
 
     data.forEach((item) => {
-      const parentSelected = selection.includes(item.id);
       const isExpanded = expandedIds.includes(item.id);
       const hasChildren = !!item.children && item.children.length > 0;
 
       rows.push(
         <Table.Tr
           key={item.id}
-          className={cx({ [classes.rowSelected]: parentSelected })}
+          className={cx({ [classes.rowSelected]: selection.includes(item.id) })}
         >
           <Table.Td w={40}>
             <Checkbox
@@ -294,61 +173,17 @@ export const TreeTable = ({
             </Text>
           </Table.Td>
           <Table.Td>
-            <ActionIcon.Group>
-              <ActionIcon
-                onClick={() => onView(item)}
-                variant="light"
-                size="md"
-                aria-label="查看详情"
-              >
-                <IconEye size={14} stroke={1.5} />
-              </ActionIcon>
-              <ActionIcon
-                onClick={() => onEdit(item)}
-                variant="light"
-                size="md"
-                aria-label="编辑"
-              >
-                <IconEdit size={14} stroke={1.5} />
-              </ActionIcon>
-              <Tooltip label="设置 Code" withArrow>
-                <ActionIcon
-                  onClick={() => onSetCode(item)}
-                  variant="light"
-                  size="md"
-                  aria-label="设置 Code"
-                >
-                  <IconCode size={14} stroke={1.5} />
-                </ActionIcon>
-              </Tooltip>
-              <Tooltip label="配置接口" withArrow>
-                <ActionIcon
-                  onClick={() => onConfigApi(item)}
-                  variant="light"
-                  size="md"
-                  aria-label="配置接口"
-                >
-                  <IconApi size={14} stroke={1.5} />
-                </ActionIcon>
-              </Tooltip>
-              <DeleteConfirm onConfirm={() => onDelete(item)} itemName={item.name}>
-                <ActionIcon variant="light" size="md" aria-label="删除">
-                  <IconTrash size={14} stroke={1.5} />
-                </ActionIcon>
-              </DeleteConfirm>
-            </ActionIcon.Group>
+            {renderActions?.(item) ?? null}
           </Table.Td>
         </Table.Tr>
       );
 
       if (hasChildren && isExpanded) {
         item.children!.forEach((child) => {
-          const selected = selection.includes(child.id);
-
           rows.push(
             <Table.Tr
               key={child.id}
-              className={cx({ [classes.rowSelected]: selected })}
+              className={cx({ [classes.rowSelected]: selection.includes(child.id) })}
             >
               <Table.Td w={40}>
                 <Checkbox
@@ -397,52 +232,7 @@ export const TreeTable = ({
                 </Text>
               </Table.Td>
               <Table.Td>
-                <ActionIcon.Group>
-                  <ActionIcon
-                    onClick={() => onView(child)}
-                    variant="light"
-                    size="md"
-                    aria-label="查看详情"
-                  >
-                    <IconEye size={14} stroke={1.5} />
-                  </ActionIcon>
-                  <ActionIcon
-                    onClick={() => onEdit(child)}
-                    variant="light"
-                    size="md"
-                    aria-label="编辑"
-                  >
-                    <IconEdit size={14} stroke={1.5} />
-                  </ActionIcon>
-                  <Tooltip label="设置权限码" withArrow>
-                    <ActionIcon
-                      onClick={() => onSetCode(child)}
-                      variant="light"
-                      size="md"
-                      aria-label="设置权限码"
-                    >
-                      <IconCode size={14} stroke={1.5} />
-                    </ActionIcon>
-                  </Tooltip>
-                  <Tooltip label="配置接口" withArrow>
-                    <ActionIcon
-                      onClick={() => onConfigApi(child)}
-                      variant="light"
-                      size="md"
-                      aria-label="配置接口"
-                    >
-                      <IconApi size={14} stroke={1.5} />
-                    </ActionIcon>
-                  </Tooltip>
-                  <DeleteConfirm
-                    onConfirm={() => onDelete(child)}
-                    itemName={child.name}
-                  >
-                    <ActionIcon variant="light" size="md" aria-label="删除">
-                      <IconTrash size={14} stroke={1.5} />
-                    </ActionIcon>
-                  </DeleteConfirm>
-                </ActionIcon.Group>
+                {renderActions?.(child) ?? null}
               </Table.Td>
             </Table.Tr>
           );
@@ -483,7 +273,7 @@ export const TreeTable = ({
             </Table.Thead>
             <Table.Tbody>
               {data.length > 0 ? (
-                renderRowsWithActions()
+                renderRows()
               ) : (
                 <Table.Tr>
                   <Table.Td colSpan={10} align="center">
