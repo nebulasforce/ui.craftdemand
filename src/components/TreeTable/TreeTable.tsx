@@ -16,6 +16,7 @@ import {
 } from '@mantine/core';
 import {
   IconApi,
+  IconCode,
   IconEdit,
   IconEye,
   IconMinus,
@@ -65,6 +66,7 @@ export interface TreeTableProps {
   onView: (menu: MenuNode) => void;
   onEdit: (menu: MenuNode) => void;
   onDelete: (menu: MenuNode) => void;
+  onSetCode: (menu: MenuNode) => void;
   onConfigApi: (menu: MenuNode) => void;
   getMenuTypeLabel?: (type: number | string | undefined) => string;
 }
@@ -82,6 +84,7 @@ export const TreeTable = ({
   onView,
   onEdit,
   onDelete,
+  onSetCode,
   onConfigApi,
   getMenuTypeLabel,
 }: TreeTableProps) => {
@@ -308,6 +311,16 @@ export const TreeTable = ({
               >
                 <IconEdit size={14} stroke={1.5} />
               </ActionIcon>
+              <Tooltip label="设置 Code" withArrow>
+                <ActionIcon
+                  onClick={() => onSetCode(item)}
+                  variant="light"
+                  size="md"
+                  aria-label="设置 Code"
+                >
+                  <IconCode size={14} stroke={1.5} />
+                </ActionIcon>
+              </Tooltip>
               <Tooltip label="配置接口" withArrow>
                 <ActionIcon
                   onClick={() => onConfigApi(item)}
@@ -401,6 +414,16 @@ export const TreeTable = ({
                   >
                     <IconEdit size={14} stroke={1.5} />
                   </ActionIcon>
+                  <Tooltip label="设置权限码" withArrow>
+                    <ActionIcon
+                      onClick={() => onSetCode(child)}
+                      variant="light"
+                      size="md"
+                      aria-label="设置权限码"
+                    >
+                      <IconCode size={14} stroke={1.5} />
+                    </ActionIcon>
+                  </Tooltip>
                   <Tooltip label="配置接口" withArrow>
                     <ActionIcon
                       onClick={() => onConfigApi(child)}

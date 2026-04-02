@@ -36,3 +36,13 @@ export interface editMenuRequest {
 export interface deleteMenuRequest {
   ids: string[];
 }
+
+export interface setMenuCodeRequest {
+  id: string;
+  code: string;
+}
+
+export interface bindMenuApisRequest {
+  id: string;
+  apiIds: string[];
+}

@@ -42,3 +42,16 @@ export interface deleteMenuData extends Result {
 export interface deleteMenuResponse extends Response<deleteMenuData> {}
 
 export interface listMenuTypesResponse extends Response<menuTypeMapData> {}
+
+export interface setMenuCodeData extends Result {
+  id?: string;
+}
+
+export interface setMenuCodeResponse extends Response<setMenuCodeData> {}
+
+export interface bindMenuApisData extends Result {
+  menuId?: string;
+  apiIds?: string[];
+}
+
+export interface bindMenuApisResponse extends Response<bindMenuApisData> {}

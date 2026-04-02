@@ -6,6 +6,8 @@ import {
   createMenuRequest,
   editMenuRequest,
   deleteMenuRequest,
+  setMenuCodeRequest,
+  bindMenuApisRequest,
 } from '@/api/menu/request';
 import {
   listFrontResponse,
@@ -15,6 +17,8 @@ import {
   editMenuResponse,
   deleteMenuResponse,
   listMenuTypesResponse,
+  setMenuCodeResponse,
+  bindMenuApisResponse,
 } from '@/api/menu/response';
 import request from '@/utils/request';
 
@@ -90,6 +94,30 @@ export async function listMenuTypes(options?: Options) {
     url: '/api/v1/menu/types',
     method: 'GET',
     headers: { 'Content-Type': 'application/json' },
+    ...(options || {}),
+  });
+}
+
+// setMenuCode 设置菜单权限展示码
+export async function setMenuCode(req?: setMenuCodeRequest, options?: Options) {
+  const { id, ...body } = req || { id: '', code: '' };
+  return request<setMenuCodeResponse>({
+    url: `/api/v1/menu/${id}/code`,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    data: { code: body.code },
+    ...(options || {}),
+  });
+}
+
+// bindMenuApis 绑定菜单与接口
+export async function bindMenuApis(req?: bindMenuApisRequest, options?: Options) {
+  const { id, apiIds } = req || { id: '', apiIds: [] };
+  return request<bindMenuApisResponse>({
+    url: `/api/v1/menu/${id}/apis`,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    data: { apiIds: apiIds ?? [] },
     ...(options || {}),
   });
 }

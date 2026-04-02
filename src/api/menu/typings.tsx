@@ -31,6 +31,10 @@ export interface Menu {
   type?: number;
   parentId?: string;
   status: number;
+  /** 前端展示权限码 */
+  code?: string;
+  /** 已绑定的接口 ID（详情等接口可能返回） */
+  apiIds?: string[];
   creator?: Creator;
   createdAt?: number;
   updater?: Updater;

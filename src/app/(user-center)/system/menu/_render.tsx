@@ -44,13 +44,16 @@ import {
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useDisclosure } from '@mantine/hooks';
+import { listAll as listAllApis } from '@/api/api/api';
 import {
+  bindMenuApis,
   createMenu,
   deleteMenu,
   editMenu,
   getMenu,
   listMenuTypes,
   list as menuListApi,
+  setMenuCode,
 } from '@/api/menu/api';
 import {
   createMenuRequest,
@@ -59,6 +62,7 @@ import {
 } from '@/api/menu/request';
 import { listData } from '@/api/menu/response';
 import { Menu } from '@/api/menu/typings';
+import { ApiTransferBox, ApiTransferItem } from '@/components/ApiTransferBox/ApiTransferBox';
 import { DeleteConfirm } from '@/components/DeleteConfirm/DeleteConfirm';
 import { DynamicIcon } from '@/components/DynamicIcon';
 import { useNavbar } from '@/contexts/NavbarContext/NavbarContext';
@@ -258,8 +262,13 @@ const MenuPageRender = ({ initialData }: MenuPageRenderProps) => {
   const [viewDetailModalOpened, viewDetailModalActions] = useDisclosure(false);
   const [viewingMenu, setViewingMenu] = useState<Menu | null>(null);
 
-  // 与“角色管理”保持一致：配置接口未实现时给出弹窗提示
-  const [devModalOpened, devModalActions] = useDisclosure(false);
+  const [codeModalOpened, codeModalActions] = useDisclosure(false);
+  const [menuForCode, setMenuForCode] = useState<Menu | null>(null);
+
+  const [bindApiModalOpened, bindApiModalActions] = useDisclosure(false);
+  const [menuForBindApi, setMenuForBindApi] = useState<Menu | null>(null);
+  const [bindApiTransferItems, setBindApiTransferItems] = useState<ApiTransferItem[]>([]);
+  const [bindApiIds, setBindApiIds] = useState<string[]>([]);
 
   const openViewDetailModal = async (menu: Menu) => {
     setLoading(true);
@@ -426,8 +435,114 @@ const MenuPageRender = ({ initialData }: MenuPageRenderProps) => {
     addEditForm.reset();
   };
 
-  const handleConfigApi = () => {
-    devModalActions.open();
+  const codeForm = useForm({
+    initialValues: { code: '' },
+  });
+
+  const openSetCodeModal = async (menu: Menu) => {
+    setLoading(true);
+    try {
+      const response = await getMenu({ id: menu.id });
+      if (response.code === 0 && response.data) {
+        setMenuForCode(response.data);
+        codeForm.setValues({ code: response.data.code ?? '' });
+        codeModalActions.open();
+      } else {
+        notify(response.message ?? '获取菜单详情失败', 'error');
+      }
+    } catch (err) {
+      notify(err instanceof Error ? err.message : 'Internal Error', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSubmitMenuCode = codeForm.onSubmit(async (values) => {
+    if (!menuForCode) return;
+    setLoading(true);
+    try {
+      const response = await setMenuCode({
+        id: menuForCode.id,
+        code: values.code.trim(),
+      });
+      if (response.code === 0) {
+        notify('权限码已保存', 'success');
+        codeModalActions.close();
+        setMenuForCode(null);
+        codeForm.reset();
+        await loadData(page);
+      } else {
+        notify(response.message ?? '保存失败', 'error');
+      }
+    } catch (err) {
+      notify(err instanceof Error ? err.message : 'Internal Error', 'error');
+    } finally {
+      setLoading(false);
+    }
+  });
+
+  const openBindApiModal = async (menu: Menu) => {
+    setLoading(true);
+    try {
+      const [menuRes, apiRes] = await Promise.all([
+        getMenu({ id: menu.id }),
+        listAllApis({}),
+      ]);
+      if (menuRes.code !== 0 || !menuRes.data) {
+        notify(menuRes.message ?? '获取菜单详情失败', 'error');
+        return;
+      }
+      if (apiRes.code !== 0 || !apiRes.data) {
+        notify(apiRes.message ?? '加载接口列表失败', 'error');
+        return;
+      }
+      setMenuForBindApi(menuRes.data);
+      const fromList = apiRes.data.map((a) => ({
+        id: a.id,
+        title: a.name?.trim() ? a.name : `${a.method} ${a.path}`,
+        subtitle: `${a.method} ${a.path}`,
+      }));
+      const knownIds = new Set(fromList.map((i) => i.id));
+      const boundIds = menuRes.data.apiIds ?? [];
+      const orphanIds = boundIds.filter((id) => !knownIds.has(id));
+      const orphanItems: ApiTransferItem[] = orphanIds.map((id) => ({
+        id,
+        title: id,
+        subtitle: '当前全量列表中未包含，仍可按原样保存',
+      }));
+      setBindApiIds(boundIds);
+      setBindApiTransferItems([...fromList, ...orphanItems]);
+      bindApiModalActions.open();
+    } catch (err) {
+      notify(err instanceof Error ? err.message : 'Internal Error', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSubmitBindApis = async () => {
+    if (!menuForBindApi) return;
+    setLoading(true);
+    try {
+      const response = await bindMenuApis({
+        id: menuForBindApi.id,
+        apiIds: bindApiIds,
+      });
+      if (response.code === 0) {
+        notify('接口绑定已保存', 'success');
+        bindApiModalActions.close();
+        setMenuForBindApi(null);
+        setBindApiIds([]);
+        setBindApiTransferItems([]);
+        await loadData(page);
+      } else {
+        notify(response.message ?? '保存失败', 'error');
+      }
+    } catch (err) {
+      notify(err instanceof Error ? err.message : 'Internal Error', 'error');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -573,7 +688,8 @@ const MenuPageRender = ({ initialData }: MenuPageRenderProps) => {
           onView={openViewDetailModal}
           onEdit={(menu) => openAddEditModal({ action: 'edit', menu })}
           onDelete={handleDeleteOne}
-          onConfigApi={handleConfigApi}
+          onSetCode={openSetCodeModal}
+          onConfigApi={openBindApiModal}
           getMenuTypeLabel={getMenuTypeLabel}
         />
       </Paper>
@@ -823,15 +939,91 @@ const MenuPageRender = ({ initialData }: MenuPageRenderProps) => {
       </Modal>
 
       <Modal
-        opened={devModalOpened}
-        title="提示"
-        onClose={devModalActions.close}
-        centered
+        opened={codeModalOpened}
+        title="设置权限码"
+        onClose={() => {
+          codeModalActions.close();
+          setMenuForCode(null);
+          codeForm.reset();
+        }}
+        size="md"
       >
-        <Text size="sm">功能正在开发中</Text>
-        <Flex justify="flex-end" mt="md">
-          <Button onClick={devModalActions.close}>确定</Button>
-        </Flex>
+        <Box pos="relative">
+          <LoadingOverlay visible={loading} />
+          <form onSubmit={handleSubmitMenuCode}>
+            <TextInput
+              label="权限码"
+              placeholder="如 MENU_USER_LIST"
+              value={codeForm.values.code}
+              onChange={(e) =>
+                codeForm.setFieldValue('code', e.currentTarget.value)
+              }
+              error={codeForm.errors.code}
+              radius="md"
+              mb="lg"
+            />
+            <Flex justify="flex-end" gap="sm">
+              <Button
+                variant="default"
+                type="button"
+                onClick={() => {
+                  codeModalActions.close();
+                  setMenuForCode(null);
+                  codeForm.reset();
+                }}
+              >
+                取消
+              </Button>
+              <Button type="submit" disabled={loading}>
+                保存
+              </Button>
+            </Flex>
+          </form>
+        </Box>
+      </Modal>
+
+      <Modal
+        opened={bindApiModalOpened}
+        title="绑定接口"
+        onClose={() => {
+          bindApiModalActions.close();
+          setMenuForBindApi(null);
+          setBindApiIds([]);
+          setBindApiTransferItems([]);
+        }}
+        size="xl"
+      >
+        <Box pos="relative">
+          <LoadingOverlay visible={loading} />
+          {menuForBindApi && (
+            <Stack gap="md">
+              <ApiTransferBox
+                items={bindApiTransferItems}
+                value={bindApiIds}
+                onChange={setBindApiIds}
+                loading={loading}
+                leftTitle="可选接口"
+                rightTitle="已绑定"
+              />
+              <Flex justify="flex-end" gap="sm" mt="md">
+                <Button
+                  variant="default"
+                  onClick={() => {
+                    bindApiModalActions.close();
+                    setMenuForBindApi(null);
+                    setBindApiIds([]);
+                    setBindApiTransferItems([]);
+                  }}
+                >
+                  取消
+                </Button>
+                <Button onClick={handleSubmitBindApis} disabled={loading}>
+                  保存
+                </Button>
+              </Flex>
+            </Stack>
+          )}
+        </Box>
       </Modal>
     </Box>
   );
